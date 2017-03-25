@@ -22,7 +22,6 @@ Imports:
     igraph,
     gplots,
     heatmaply,
-    HSMMSingleCell,
     STRINGdb,
     monocle,
     scde
