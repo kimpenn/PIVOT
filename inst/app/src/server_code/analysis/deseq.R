@@ -1,0 +1,344 @@
+# Copyright (c) 2015,2016, Qin Zhu and Junhyong Kim, University of Pennsylvania.
+# All Rights Reserved.
+#
+# You may not use this file except in compliance with the Kim Lab License
+# located at
+#
+#     http://kim.bio.upenn.edu/software/LICENSE
+#
+# Unless required by applicable law or agreed to in writing, this
+# software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+# CONDITIONS OF ANY KIND, either express or implied.  See the License
+# for the specific language governing permissions and limitations
+# under the License.
+
+
+
+output$deseq_ui <- renderUI({
+    if(is.null(r_data$meta) || ncol(r_data$meta) < 2){
+        return(
+            list(
+                tags$li("This module requires design information input.")
+            )
+        )
+    }
+
+    list(
+        enhanced_box(
+            width = 12,
+            title = "DESeq2 Differential Expression Analysis",
+            id = "deseq_results",
+            status = "primary",
+            solidHeader = T,
+            collapsible = T,
+            reportable = T,
+            get_html = T,
+            register_analysis= T,
+            tags$div(tags$b("General Settings:"), class = "param_setting_title"),
+            fluidRow(
+                pivot_deGroupBy_UI("deseq", r_data$meta, width = 12, method = "deseq", model = c("condition", "condition_batch", "timecourse1"))
+            ),
+
+            uiOutput("perform_deseq_ui")
+        ),
+        uiOutput("deseq_results_box"),
+        enhanced_box(
+            width = 12,
+            title = NULL,
+            status = "primary",
+            tags$div(tags$b("MA Plot:"), class = "param_setting_title"),
+            plotOutput("deseq_ma_plt", height = "600px")
+        ),
+        enhanced_box(
+            width = 12,
+            title = NULL,
+            status = "primary",
+            solidHeader = F,
+            uiOutput("deseq_gene_plot_ui")
+        ),
+        box(
+            width = 12,
+            title = "Citation",
+            status = "primary",
+            tags$ol(
+                tags$li("Michael I Love, Wolfgang Huber and Simon Anders (2014): Moderated estimation of fold change and dispersion for RNA-Seq data with DESeq2. Genome Biology.", class = "citation")
+            )
+        )
+    )
+
+})
+
+deseqModel <- callModule(pivot_deGroupBy, "deseq", r_data = r_data)
+
+output$perform_deseq_ui <- renderUI({
+    req(deseqModel())
+    # examine if required deseq_sanity check are passed
+    method_ui <- selectInput("deseq_test_method", "Test Method", choices = list("Wald" = "Wald", "LRT" = "LRT"), selected = "Wald")
+    if(deseqModel()$design %in% c("timecourse1", "timecourse2")) {
+        method_ui <- selectInput("deseq_test_method", "Test Method", choices = list("LRT" = "LRT"))
+    }
+    list(
+        fluidRow(
+            column(4, method_ui),
+            column(8,
+                   uiOutput("deseq_test_explain")
+            )
+        ),
+        actionButton("perform_deseq", "Perform DE Analysis", class = "btn-info btn_leftAlign")
+    )
+})
+
+output$deseq_test_explain <- renderUI({
+    req(input$deseq_test_method)
+    if(input$deseq_test_method == "Wald") {
+        list(
+            tags$b("Wald test for the GLM coefficients: "),
+            tags$li("This function tests for significance of coefficients in a Negative Binomial GLM."),
+            tags$li("Note: This is the default test for DESeq.")
+        )
+    } else if(input$deseq_test_method == "LRT") {
+        list(
+            tags$b("Likelihood ratio test (chi-squared test) for GLMs: "),
+            tags$li("This function tests for significance of change in deviance between a full and reduced model."),
+            tags$li("Note: Useful for testing multiple terms at once, conceptually similar to ANOVA.")
+            )
+    } else {
+        return()
+    }
+})
+
+observeEvent(input$perform_deseq, {
+    req(r_data$meta, deseqModel(), input$deseq_test_method, ncol(r_data$meta) >= 2)
+
+    # Clear previous results if exist
+    if(!is.null(r_data$dds)) {
+        r_data$dds <- NULL
+        r_data$deseq_params <- NULL
+        r_data$deseq_group <- NULL
+        r_data$deseq_results <- NULL
+    }
+
+    withProgress(message = 'Processing...', value = 0.5, {
+        error_I <- 0
+        # Perform size factor re-estimation if necessary
+        tryCatch({
+            samplesAll <- data.frame(row.names=colnames(r_data$raw), celltype=rep("nt",length(colnames(r_data$raw))))
+            dds <- DESeq2::DESeqDataSetFromMatrix(countData = r_data$raw, colData=samplesAll, design = ~ 1) # Design here does not matter, overwrite later
+
+            # If the data was normalized by DESeq modified, use the new size factor estimation
+            if(r_data$norm_param$method == "Modified_DESeq") {
+                DESeq2::sizeFactors(dds) <- r_data$norm_param$sizeFactor$size_factor
+            } else {
+                # If the data was not normalized by DESeq modified, re-estimate size factors using deseq2
+                dds <- DESeq2::estimateSizeFactors(dds)
+            }
+        },
+        error = function(e){
+            error_I <<- 1
+        }
+        )
+
+        if(error_I) {
+            session$sendCustomMessage(type = "showalert", "DESeq failed.")
+            return()
+        }
+        groups <- r_data$meta[, deseqModel()$group_cate]
+        SummarizedExperiment::colData(dds)$group <- factor(groups, levels = unique(groups)) # update dds with group info
+        if(deseqModel()$design == "condition_batch") {
+            batches = r_data$meta[,deseqModel()$batch_cate]
+            SummarizedExperiment::colData(dds)$batch <- factor(batches, levels = unique(batches))
+        } else if(deseqModel()$design == "timecourse1") {
+            timecourse = r_data$meta[,deseqModel()$time_cate]
+            SummarizedExperiment::colData(dds)$timecourse <- factor(timecourse, levels = unique(timecourse))
+        }
+        BiocGenerics::design(dds) <- deseqModel()$model$full
+        if(input$deseq_test_method == "Wald") {
+            r_data$dds <- DESeq2::DESeq(dds)
+        } else if(input$deseq_test_method == "LRT") {
+            r_data$dds <- DESeq2::DESeq(dds, test = "LRT", reduced = deseqModel()$model$reduced)
+        }
+
+        r_data$deseq_params <- list(design = deseqModel()$design, test = input$deseq_test_method, condition = deseqModel()$group_cate, batch = deseqModel()$batch_cate, timecourse = deseqModel()$time_cate)
+    })
+})
+
+output$deseq_results_box <- renderUI({
+    req(r_data$meta, ncol(r_data$meta) >= 2, r_data$dds, r_data$deseq_params)
+
+    groups = unique(as.character(r_data$meta[,r_data$deseq_params$condition]))
+    names(groups) = groups
+
+    deseq_group_ui <- list(
+        if(r_data$deseq_params$test != "LRT") {
+            fluidRow(
+                column(4, tags$br(),tags$b("Pairwise comparison:")),
+                column(3, selectInput("deseq_group1", "Group 1", choices = as.list(groups), selected = groups[[1]])),
+                column(1, tags$b("vs")),
+                column(3, selectInput("deseq_group2", "Group 2", choices = as.list(groups), selected = groups[[2]]))
+            )
+        } else {
+            options<-DESeq2::resultsNames(r_data$dds)[-1]
+            names(options) <- options
+            list(
+                fluidRow(
+                    column(4, selectInput("deseq_pval_type", "P value type", choices = list("LRT" = "LRT", "Wald" = "Wald"), selected = "LRT")),
+                    column(8,
+                           selectInput("deseq_result_name", "Choose comparison/individual points",
+                                       choices = as.list(options))
+                    )
+                )
+            )
+
+        }
+
+    )
+
+    if(!is.null(r_data$batch)) {
+        deseq_batch_ui <- checkboxInput("deseq_batch_yes", "Control Batch Effects", value = F)
+    } else {
+        deseq_batch_ui <- NULL
+    }
+
+    enhanced_box(
+        width = 12,
+        title = NULL,
+        status = "primary",
+        solidHeader = T,
+        tags$div(tags$b("Results Table:"), class = "param_setting_title"),
+        deseq_group_ui,
+        fluidRow(
+            column(4,
+                   uiOutput("deseq_test_method_text")
+            ),
+            column(4, numericInput("deseq_alpha", "FDR cutoff", value = 0.1, min = 0, max = 0.5, step = 0.001)),
+            column(4, checkboxInput("deseq_cuttbl", "Only show significant genes", value = F))
+        ),
+        DT::dataTableOutput("deseq_result_tbl"),
+        uiOutput("download_deseq_result_ui"),
+        hr(),
+        uiOutput("deseq_sig_genes")
+    )
+})
+
+output$deseq_sig_genes <- renderUI({
+    req(r_data$deseq_results)
+    sm <- capture.output(DESeq2::summary.DESeqResults(r_data$deseq_results))
+    list(
+        tags$h4("Summary"),
+        tags$li(paste0("Total number of significant genes: ", sum(r_data$deseq_results$padj < input$deseq_alpha, na.rm = T), ".")),
+        tags$li(sm[4]),
+        tags$li(sm[5]),
+        tags$li(sm[6]),
+        tags$li(paste(sm[7], sm[8]))
+    )
+})
+
+output$deseq_test_method_text <- renderUI({
+    req(r_data$deseq_results)
+    if(r_data$deseq_params$test == "Wald") {
+        test_text1 <- r_data$deseq_results@elementMetadata$description[4]
+        test_text2 <- "Note: The Wald p-value will be different for different pairwise comparisons / individual points."
+    } else {
+        test_text1 <- r_data$deseq_results@elementMetadata$description[4]
+        test_text2 <- "Note: The LRT p-value does not depend on the group choice."
+    }
+    return(
+        list(
+            tags$li(test_text1),
+            tags$li(test_text2)
+        )
+    )
+})
+
+output$download_deseq_result_ui <- renderUI({
+    req(r_data$deseq_results)
+    tbl<-as.data.frame(r_data$deseq_results)
+    if(nrow(tbl) == 0) return()
+    download_deseq_result_ui <- downloadButton("download_deseq_result","Download", class = "btn btn-success")
+})
+
+observe({
+    req(r_data$meta, r_data$dds, r_data$deseq_params, ncol(r_data$meta) >= 2)
+
+    if(r_data$deseq_params$test == "LRT") {
+        req(input$deseq_pval_type, input$deseq_result_name)
+    } else {
+        req(input$deseq_group1, input$deseq_group1 != input$deseq_group2)
+    }
+    withProgress(message = 'Processing...', value = 0.5, {
+        if(r_data$deseq_params$test == "LRT") {
+            #assign("dds",r_data$dds, env = .GlobalEnv)
+            #assign("deseq_param", r_data$deseq_params, env = .GlobalEnv)
+            res1 <- DESeq2::results(r_data$dds, test = input$deseq_pval_type,
+                                    name = input$deseq_result_name,
+                                    alpha = input$deseq_alpha)
+        } else {
+            res1 <- DESeq2::results(r_data$dds, contrast = c("group", input$deseq_group1, input$deseq_group2), alpha = input$deseq_alpha)
+        }
+
+        resOrdered <- res1[order(res1$padj),]
+        r_data$deseq_group <- c(input$deseq_group1, input$deseq_group2)
+        if(input$deseq_cuttbl) {
+            r_data$deseq_results <- BiocGenerics::subset(resOrdered, padj <= input$deseq_alpha)
+        } else {
+            r_data$deseq_results <- resOrdered
+        }
+    })
+})
+
+output$deseq_result_tbl <- DT::renderDataTable({
+    req(r_data$deseq_results)
+    tbl<-as.data.frame(r_data$deseq_results)
+    if(nrow(tbl) == 0) return()
+    DT::datatable(tbl, selection = 'single', options = list(scrollX = TRUE, scrollY = "250px", searching=T, order = list(list(6, 'asc')) , orderClasses = T))
+})
+
+output$download_deseq_result <- downloadHandler(
+    filename = function() {
+        "deseq_results.csv"
+    },
+    content = function(file) {
+        write.csv(as.data.frame(r_data$deseq_results), file)
+    }
+)
+
+output$deseq_ma_plt <- renderPlot({
+    if(is.null(r_data$deseq_results)) return()
+    BiocGenerics::plotMA(r_data$deseq_results, main="DESeq2", ylim=c(-2,2))
+})
+
+output$deseq_gene_plot_ui <- renderUI({
+    req(r_data$deseq_params)
+    if(r_data$deseq_params$test == "LRT") {
+        pivot_featurePlot_UI("deseq_gene_plt", meta = r_data$meta) # We do not allow plotting for paired comparison while using LRT. (Since it's ANOVA like)
+    } else {
+        pivot_featurePlot_UI("deseq_gene_plt", meta = r_data$meta, ids = 1) # ids = 1 indicate we are going to input ids in the caller.
+    }
+})
+
+observe({
+    req(r_data$deseq_results)
+    s = input$deseq_result_tbl_row_last_clicked
+    tbl<-as.data.frame(r_data$deseq_results)
+
+    if (length(s)) {
+        selected_gene <- rownames(tbl[s, , drop = FALSE])
+    } else {
+        return()
+    }
+
+    d <- as.data.frame(t(r_data$df[selected_gene,])) %>% tibble::rownames_to_column()
+    colnames(d) <- c("sample", "expression_level")
+
+    if(r_data$deseq_params$test == "LRT") {
+        samples = NULL
+    } else {
+        req(input$deseq_group1, input$deseq_group2)
+        samples = r_data$meta[,1][which(r_data$meta[,r_data$deseq_params$condition] %in% c(input$deseq_group1, input$deseq_group2))]
+    }
+
+    callModule(pivot_featurePlot, "deseq_gene_plt", meta = r_data$meta, df = d, gene = selected_gene, ids = samples)
+})
+
+
+

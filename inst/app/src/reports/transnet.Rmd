@@ -1,0 +1,56 @@
+
+# TF Centered Gene Network Analysis with DE Results
+
+## Differential Expression Results for Network Analysis
+
+```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 10, fig.height = 10}
+if(is.null(r_data$tf_de_tbl_vis)) {
+    return()
+} else {
+    DT::datatable(r_data$tf_de_tbl_vis, selection = 'single', options = list(scrollX = TRUE, scrollY = "300px", searching=T))
+}
+```
+
+
+## Network Visualization of DE Genes
+
+```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 10, fig.height = 10}
+if(!is.null( r_data$tf_tbl_net)) {
+    tbl_nets <-  r_data$tf_tbl_net
+
+    if(input$tf_net_add_label) {
+        igraph::plot.igraph(tbl_nets, layout = get(input$tf_net_layout))
+        legend("bottom", c(paste("Upregulated in Group1"), paste("Upregulated in Group2")), # Double check the direction
+        pch = 16, # gives the legend appropriate symbols (lines)
+        pt.cex = 2,
+        horiz = T, x.intersp = 2,
+        col=c("blue","red"),
+        bty = "n") # gives the legend lines the correct color and width
+    } else {
+        igraph::plot.igraph(tbl_nets, vertex.label=NA, layout = get(input$tf_net_layout))
+    }
+}
+    
+```
+
+
+## Network Based Transcription Factor Scoring and Ranking
+
+### Top Ranked TFs in Group 1
+
+```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 10, fig.height = 10}
+    if(!is.null(r_data$tf_tbl1)) {
+        DT::datatable(r_data$tf_tbl1, selection = 'single', options = list(scrollX = TRUE, scrollY = "350px", searching=T, lengthMenu = c(20,50,100)))
+    }
+
+```
+
+### Top Ranked TFs in Group 2
+
+```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 10, fig.height = 10}
+    if(!is.null(r_data$tf_tbl2)) {
+        DT::datatable(r_data$tf_tbl2, selection = 'single', options = list(scrollX = TRUE, scrollY = "350px", searching=T, lengthMenu = c(20,50,100)))
+    }
+```
+
+

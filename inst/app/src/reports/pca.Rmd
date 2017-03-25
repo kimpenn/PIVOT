@@ -1,0 +1,65 @@
+
+# Principal Component Analysis (PCA)
+
+## PCA Summary
+
+```{r echo = FALSE, warning=FALSE, message = FALSE}
+if(is.null(r_data$pca)) return ()
+    DT::datatable(summary(r_data$pca)$importance, options = list(scrollX = TRUE, scrollY = "210px", searching=F))
+```
+
+### Scree Plot
+
+```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 6}
+if(is.null(r_data$pca)) return()
+    pca_var <- data.frame(pcomp=1:length(r_data$pca$sdev), variances=r_data$pca$sdev^2)
+    pca_var$variance_explained <- pca_var$variances / sum(pca_var$variances) * 100
+    pca_var$cumulative_variance_explained <- cumsum(pca_var$variance_explained)
+    pca_var %>% plotly::plot_ly(x = ~pcomp, y = ~variance_explained, type = "bar")
+```
+
+## PCA Loading
+
+```{r echo = FALSE, warning=FALSE, message = FALSE}
+if(is.null(r_data$pca)) return ()
+    DT::datatable(r_data$pca$rotation, options = list(scrollX = TRUE, scrollY = "210px"))
+```
+
+## PCA Projection
+
+```{r echo = FALSE, warning=FALSE, message = FALSE}
+if (is.null(r_data$pca)) return()
+    DT::datatable(t(r_data$pca$x), options = list(scrollX = TRUE, scrollY = "210px", searching=T))
+```
+    
+## PCA Projection Plots
+
+```{r echo = FALSE, warning=FALSE, message = FALSE}
+    rsList <- callModule(pivot_dataScale, "pca", r_data)
+    pca_data <- rsList$df
+    error_I <- 0
+
+    r_data$pca <- prcomp(t(pca_data), scale. = as.logical(input$pca_scale))
+
+    pca_minfo<-callModule(pivot_colorBy, "pca", meta = r_data$meta)
+    pca_plots <- callModule(pivot_dimScatter, "pca", type = "pca", obj = r_data$pca, minfo = pca_minfo)
+```
+
+### 1D Projection
+
+```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 6}
+    pca_plots$plot1d
+```
+
+### 2D Projection
+
+```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 6}
+    pca_plots$plot2d
+```
+
+### 3D Projection
+
+```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 6}
+    pca_plots$plot3d
+```
+

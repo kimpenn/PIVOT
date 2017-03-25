@@ -1,0 +1,91 @@
+
+# Feature Heatmap
+
+```{r echo = FALSE, warning=FALSE, message = FALSE}
+# Preprocessing
+hmList <- reactive({
+    rsList <- callModule(pivot_dataScaleRange, "ft_hmap", r_data)
+})
+
+# sample clustering result
+hm_sp_dend <- reactive({
+    if(is.null(hmList()$df) || is.null(input$hm_sp_order_type) || is.null(input$hm_sp_dist_method)) return()
+    if(input$hm_sp_order_type == 'hc') {
+        if(input$hm_sp_dist_method == 'corr') {
+            as.dist(1 - cor(hmList()$df, method = input$hm_sp_cor_method)) %>% hclust(method = input$hm_sp_agglo_method) %>% as.dendrogram()
+        } else {
+            t(hmList()$df) %>% dist(method = input$hm_sp_dist_method) %>% hclust(method = input$hm_sp_agglo_method) %>% as.dendrogram()
+        }
+    } else {
+        return(FALSE)
+    }
+
+})
+
+hm_ft_dend <- reactive({
+    if(is.null(hmList()$df) || is.null(input$hm_ft_order_type) || is.null(input$hm_ft_dist_method)) return()
+    if(input$hm_ft_order_type == 'hc') {
+        if(input$hm_ft_dist_method == 'corr1') {
+            as.dist(1 - cor(t(hmList()$df), method = input$hm_ft_cor_method)) %>% hclust(method = input$hm_ft_agglo_method) %>% as.dendrogram()
+        } else if(input$hm_ft_dist_method == 'corr2') {
+            as.dist(1 - abs(cor(t(hmList()$df), method = input$hm_ft_cor_method))) %>% hclust(method = input$hm_ft_agglo_method) %>% as.dendrogram()
+        } else {
+            hmList()$df %>% dist(method = input$hm_ft_dist_method) %>% hclust(method = input$hm_ft_agglo_method) %>% as.dendrogram()
+        }
+    } else {
+        return(FALSE)
+    }
+
+})
+```
+
+```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 10, fig.height = 10}
+
+if(input$hmap_package == 'gplots'){ # heatmap.2
+    if(is.null(hmList()$df) || is.null(hm_sp_dend()) || is.null(hm_ft_dend())) return ()
+    if(input$hm_sp_order_type == 'hc' && input$hm_ft_order_type == 'hc') {
+        dend1 <- 'both'
+    } else if(input$hm_sp_order_type == 'hc' && input$hm_ft_order_type != 'hc') {
+        dend1 <- 'column'
+    } else if(input$hm_sp_order_type != 'hc' && input$hm_ft_order_type == 'hc') {
+        dend1 <- 'row'
+    } else {
+        dend1 <- 'none'
+    }
+
+    rsList <- callModule(pivot_colorBy, "hmap", meta = r_data$meta)
+
+    if(!is.null(rsList$meta)) {
+        group <- rsList$meta[,1]
+        group_color<-rsList$meta_color[,1]
+        legend_col <- unique(group_color)
+        names(legend_col) <- unique(group)
+        gplots::heatmap.2(as.matrix(hmList()$df), scale="none", Rowv = hm_ft_dend(), Colv = hm_sp_dend(), dendrogram=dend1, trace="none", col=get_heatmap_color(input$hmap_hmcolor),
+                          key.par=list(cex.axis=0.7), key.title=NA, key.xlab="  ", key.ylab=NA, keysize=.7, density.info="density", revC=T, cexCol = 1.2, margins=c(10,15),
+                          ColSideColors = group_color)
+        legend("topright", legend = unique(group), bty="n", fill = legend_col, text.col = legend_col, border=FALSE, y.intersp = 1.2, cex = 0.9)
+    } else {
+        gplots::heatmap.2(as.matrix(hmList()$df), scale="none", Rowv = hm_ft_dend(), Colv = hm_sp_dend(), dendrogram=dend1, trace="none", col=get_heatmap_color(input$hmap_hmcolor),
+                          key.par=list(cex.axis=0.7), key.title=NA, key.xlab="  ", key.ylab=NA, keysize=.7, density.info="density", revC=T, cexCol = 1.2, margins=c(8,6))
+    }
+} else {
+    if(is.null(hmList()$df) || is.null(hm_sp_dend()) || is.null(hm_ft_dend())) return ()
+    if(input$hm_sp_order_type == 'hc' && input$hm_ft_order_type == 'hc') {
+        dend1 <- 'both'
+    } else if(input$hm_sp_order_type == 'hc' && input$hm_ft_order_type != 'hc') {
+        dend1 <- 'column'
+    } else if(input$hm_sp_order_type != 'hc' && input$hm_ft_order_type == 'hc') {
+        dend1 <- 'row'
+    } else {
+        dend1 <- 'none'
+    }
+
+    # Sadly current version of heatmaply does not support column side coloring... advantage compared to d3heatmap is speed...
+    hmap<-heatmaply::heatmapr(as.matrix(hmList()$df), scale="none", Rowv = hm_ft_dend(), Colv = hm_sp_dend(), dendrogram=dend1,
+                              revC=T)
+    heatmaply::heatmaply(hmap, colors=get_heatmap_color(input$hmap_hmcolor))
+}
+
+
+```
+

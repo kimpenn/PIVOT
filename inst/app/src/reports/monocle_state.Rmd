@@ -1,0 +1,71 @@
+
+# Monocle Cell State Ordering/Unsupervised Clustering
+
+## Dispersion plot highlighting ordering genes
+
+```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 6}
+
+ if(is.null(r_data$cellset)) return()
+    if(is.null(r_data$cellset@dispFitInfo[["blind"]])) return()
+    plot_ordering_genes(r_data$cellset)
+
+```
+
+
+## Ordering/Clustering Results
+
+```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 6}
+
+if(is.null(r_data$cellset) || is.null(pData(r_data$cellset)$State)) {
+    return()
+} else {
+    tbl <- pData(r_data$cellset)
+    tbl <- tbl[, which(!colnames(tbl) %in% c("sample", "Size_factor"))]
+    DT::datatable(tbl, options = list(
+                      scrollY = "500px", scrollX = T, lengthMenu = c(20, 50, 100)
+                  )
+    )
+}
+
+```
+
+*`r paste("Compare", input$mn_compare_from, "to", input$mn_compare_to)`
+
+```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 6}
+    if(is.null(r_data$cellset) || is.null(input$mn_compare_from) || is.null(input$mn_compare_to) || input$mn_compare_to == "") {
+        return()
+    } else {
+        tbl <- table(pData(r_data$cellset)[[input$mn_compare_from]], pData(r_data$cellset)[[input$mn_compare_to]])
+        DT::datatable(as.data.frame.matrix(tbl))
+    }
+```
+
+```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 6}
+    if(is.null(r_data$cellset) || is.null(input$mn_compare_from) || is.null(input$mn_compare_to) || input$mn_compare_to == "") {
+        return()
+    } else {
+plot(as.factor(pData(r_data$cellset)[[input$mn_compare_from]]), as.factor(pData(r_data$cellset)[[input$mn_compare_to]]), xlab=input$mn_compare_from, ylab = input$mn_compare_to)
+    }
+```
+
+## Cell Trajectory Plot
+
+```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 6}
+if(is.null(r_data$cellset) || is.null(pData(r_data$cellset)$State) || is.null(input$monocle_state_plt_color)) {
+    return()
+} else { 
+     tree1 = ifelse(input$monocle_state_show %in% c("tree", "both"), T, F)
+    mst1 = ifelse(input$monocle_state_show %in% c("mst", "both"), T, F)
+
+    tbl<- data.frame(gene_for_ordering = fData(r_data$cellset)$gene_short_name[which(fData(r_data$cellset)$use_for_ordering == TRUE)])
+
+    s = input$monocle_state_gene_tbl_row_last_clicked
+    if(length(s))  {
+        s <- as.character(tbl$gene_for_ordering[s])
+        plot_cell_trajectory(r_data$cellset,  color_by = input$monocle_state_plt_color, show_tree = tree1, show_backbone = mst1, markers = s)
+    } else {
+        plot_cell_trajectory(r_data$cellset,  color_by = input$monocle_state_plt_color, show_tree = tree1, show_backbone = mst1, markers = NULL)
+    }
+}
+```
+

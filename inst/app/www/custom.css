@@ -1,0 +1,321 @@
+/* Custom output format*/
+.shiny-output-error-myErrorClass1{
+    font-size: 1em;
+    color: purple;
+    font: bold;
+}
+
+/* Mathjax formula format */
+.MathJax_Display {
+    text-align: left !important;
+}
+
+/* Custom tabBox style */
+
+/* custom text format */
+
+.control-head{
+  font-size:15px;
+  font-weight: 600;
+  font-family:sans-serif;
+}
+
+.table-cap {
+  text-align: center;
+  font-size:medium;
+  padding-top:15px;
+}
+
+.citation {
+  font-style:oblique;
+}
+
+.param_setting_title {
+  font-size:15px;
+  font-weight: 600;
+  font-family:sans-serif;
+  padding: 5px 5px 12px 10px;
+  background-image: -webkit-linear-gradient(#91a9cb, #ffffff);
+}
+
+/* custom button text color*/
+.btn-success {
+	color:#fff;
+	font-weight: 600;
+}
+
+.btn-info {
+	color:#fff;
+	font-weight: 600;
+}
+
+.btn-primary {
+	color:#fff;
+	font-weight: 600;
+}
+
+.btn-danger {
+	color:#fff;
+	font-weight: 600;
+}
+
+.btn-warning {
+	color:#fff;
+	font-weight: 600;
+}
+
+.btn-link {
+  border-color:#f4f4f4;
+  color:#337ab7;
+}
+
+.btn-return {
+  background-color:#605ca8;
+  color:#fff;
+  font-weight: 600;
+}
+
+.btn-help {
+    background: rgba(255,255,255, 0.0);
+    border-color:rgba(255,255,255, 0.0);
+}
+
+/* custom control button */
+
+.text-return {
+	color:#605ca8;
+}
+
+/* custom sidebar width*/
+.col-sm-10 {
+    width: 100%;
+}
+
+/* Popover Header */
+.popover-title {
+    font-size: 18px;
+    text-align:center;
+}
+
+/* Popover Body */
+.popover-content {
+    padding: 25px;
+}
+
+/* Popover Arrow */
+.arrow {
+    border-right-color: red !important;
+}
+
+.sidebar-button {
+    margin-left:15px;
+    margin-right:15px;
+    margin-bottom:10px;
+    margin-top:10px;
+}
+
+/* custom button */
+.btn_white{
+    background-color: white;
+    color: rgb(68, 68, 68);
+    border-color: rgb(221, 221, 221);
+}
+
+.btn_no_border{
+    background-color: white;
+    color: rgb(68, 68, 68);
+    border-color: white;
+    outline:none;
+    border: 0;
+}
+
+.btn_rightAlign{
+	float:right;
+	margin: 6px;
+}
+
+.btn_leftAlign{
+	float:left;
+	margin: 6px;
+}
+
+/* custom well */
+.well {
+  padding: 5px;
+  margin-bottom: 6px;
+}
+
+.well_sidebar {
+  padding: 2px;
+  margin: 0px;
+	background-color: rgb(169, 88, 97);
+}
+
+.well_sidebar2 {
+  padding: 2px;
+  margin: 0px;
+  background-color: rgb(0, 102, 102);
+}
+
+/* custom box visual */
+.box.box-solid.box-custom1>.box-header {
+  color:#fff;
+  background:#666666
+}
+
+.box.box-solid.box-custom1{
+border-bottom-color:#666666;
+border-left-color:#666666;
+border-right-color:#666666;
+border-top-color:#666666;
+}
+
+.box.box-solid.box-custom2>.box-header {
+  color:#fff;
+  background:#63328c;
+}
+
+.box.box-solid.box-custom2{
+border-bottom-color:#63328c;
+border-left-color:#63328c;
+border-right-color:#63328c;
+border-top-color:#63328c;
+}
+
+.box.box-solid.box-custom3>.box-header {
+  color:#fff;
+  background:#1f603d;
+}
+
+.box.box-solid.box-custom3{
+border-bottom-color:#1f603d;
+border-left-color:#1f603d;
+border-right-color:#1f603d;
+border-top-color:#1f603d;
+}
+
+.box.box-solid.box-custom4>.box-header {
+  color:#fff;
+  background:#008ab5;
+}
+
+.box.box-solid.box-custom4{
+border-bottom-color:#008ab5;
+border-left-color:#008ab5;
+border-right-color:#008ab5;
+border-top-color:#008ab5;
+}
+
+.box.box-solid.box-custom5>.box-header {
+  color:#fff;
+  background:#7c0057;
+}
+
+.box.box-solid.box-custom5{
+border-bottom-color:#7c0057;
+border-left-color:#7c0057;
+border-right-color:#7c0057;
+border-top-color:#7c0057;
+}
+
+/* Kim lab footer class*/
+.kimlab_footer{
+	height:195px;
+	width: 100%;
+  padding: 3em 0;
+  background-color: #4b4b4b;
+  color: #fff;
+  display: block;
+  box-sizing: border-box;
+  background-position: 0% 0%;
+    position: fixed;
+    bottom: 0pt;
+}
+
+.kimlab_container{
+	width: 90%;
+	position: relative;
+	margin-right: auto;
+  margin-left: auto;
+  padding-left: 15px;
+  padding-right: 15px;
+    box-sizing: border-box;
+	display: block;
+}
+
+.kim_footer-3{
+  float: left;
+  width: 33.33333%;
+  padding: 0 2em;
+  box-sizing: border-box;
+  display: block;
+}
+
+.kim_footer-logo {
+  width: 60%;
+  height: auto;
+  margin-bottom: 2em;
+}
+
+.kimlab_footer strong {
+  font-weight: 600;
+}
+/* line 375, ../sass/style.scss */
+.kimlab_footer p,
+.kimlab_footer address {
+  font-weight: 300;
+  font-size: 1em;
+  line-height: 1.5em;
+}
+/* line 382, ../sass/style.scss */
+.kimlab_footer address {
+  line-height: 1.65em;
+}
+
+.kim_h1{
+  margin: 0;
+  font-size: 5.4em;
+  text-transform: uppercase;
+  letter-spacing: 5px;
+  color: white;
+}
+
+.kim_h1:hover{
+  color: #cac5bb;
+}
+.kim_h2{
+  position: relative;
+  font-size: 1.5em;
+  font-weight: 400;
+}
+
+/* This is for the shinydashboard theme */
+
+.main-header .logo {
+  font-family: "Georgia", Times, "Times New Roman", serif;
+  font-weight: bold;
+  font-size: 24px;
+}
+
+
+.main-header .logo:hover {
+	font-size: 12px;
+	width: 350px;
+	line-height: 23px;
+}
+
+.main-header .logo:hover ~ .navbar-static-top{
+	margin-left: 350px;
+}
+
+.main-header .logo:hover::after{
+	content: ': Platform for Interactive analysis and Visualization Of Transcriptomics data';
+}
+
+
+
+
+
+
+
+

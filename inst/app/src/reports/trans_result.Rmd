@@ -1,0 +1,20 @@
+
+## Network Based Transcription Factor Scoring and Ranking
+
+### Top Ranked TFs in Group 1
+
+```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 10, fig.height = 10}
+    if(!is.null(r_data$tf_tbl1)) {
+        DT::datatable(r_data$tf_tbl1, selection = 'single', options = list(scrollX = TRUE, scrollY = "350px", searching=T, lengthMenu = c(20,50,100)))
+    }
+
+```
+
+### Top Ranked TFs in Group 2
+
+```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 10, fig.height = 10}
+    if(!is.null(r_data$tf_tbl2)) {
+        DT::datatable(r_data$tf_tbl2, selection = 'single', options = list(scrollX = TRUE, scrollY = "350px", searching=T, lengthMenu = c(20,50,100)))
+    }
+```
+

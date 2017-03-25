@@ -1,0 +1,18 @@
+
+# Pairwise Correlations Scatterplot
+
+## Group `r input$pair_corr_group`
+
+```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 10, fig.height = 10}
+    if(is.null(input$pair_corr_group)) {
+        ids <- colnames(r_data$raw)
+        groups <- rep("samples", ncol(r_data$raw))
+    } else {
+        ids <- r_data$sample_name[which(r_data$pair_cor$group == input$pair_corr_group)]
+        groups <- r_data$pair_cor$group
+    }
+
+    scde_pair_plot(r_data$raw, groups, r_data$pair_cor$cfm, ids)
+        
+```
+

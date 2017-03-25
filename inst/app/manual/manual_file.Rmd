@@ -1,0 +1,304 @@
+---
+title: "PIVOT User Manual"
+author: "Junhyong Kim Lab, University of Pennsylvania"
+date: "Dec 9th, 2015"
+output:
+  html_vignette:
+    number_sections: yes
+    toc: yes
+  pdf_document:
+    number_sections: yes
+    toc: yes
+---
+
+# Data Management
+
+## File Input
+
+* The input file format can be a set of count files in a folder (choose "directory"), or a single file containing all counts (choose "counts table").
+
+* If your data has already been processed by DESeq or other methods, please specify "none" in the normalization method. If DESeq failed on your data, one possibility is that you have low counts samples, which leads to all the genes contain at least one 0 in the counts matrix. You can either find out and remove these samples, or choose the "modified DESeq" normalization method. 
+
+    ![alt text](figures/file_in.png)
+    
+* If you specifies `directory`, then the next step is to choose which files you want to upload.
+    + You can type key words in the filter to quickly select those files you are interested in.
+    
+    ![alt text](figures/file_filter.png)
+    
+* If you choose to upload a `single file` containing the raw counts table, you need to make sure that the data table are organized as follows:
+
+    + *Sample names are column names (first row) and gene names are row names (first column).*
+
+    + *No NA value is allowed.*
+    
+    + *Illegal R strings (e.g., sample-A(2)) are not allowed to be used as names.*
+
+    + *The file must be a csv/txt file.*
+    
+    ![alt text](figures/single_upload.png)
+
+* Before submitting data, please check the threshold. The program will first filter input counts based on row means or row sums, and then apply normalization. By default features with zero count will be filtered out.
+
+    ![alt text](figures/threshold.png)
+
+## Design Information
+
+* The design infomation are used for sample point coloring and differential expression analysis. The group information can be conditions (treated, control), cell types or other metafeatures that the user is interested in testing. The batch infomation are used for control of batch effects in differential expression analysis.
+
+* You can add group and/or batch info manually or using a **`design-info`** file. A design-info file should contain one 'Sample' column, and one 'Group' column and/or one 'Batch' column (column names must be 'Sample', 'Group', 'Batch', case-sensitive). You can make a design-info file in the manual mode, and download it for later use.
+
+* Most modules allow you to color the samples with the design info.
+
+    ![alt text](figures/sample_color.png)
+
+* You can press ![alt text](figures/change_gp_color.png) to try different color sets!
+
+
+## Gene Filtering
+
+* Filtration allows you to remove genes with too low or too high counts, or only perform analysis on a set of marker genes. The former requires the use of the expression filter, and the latter can be done using the marker feature filter.
+     
+    ![alt text](figures/filter_type.png)
+    
+* Filter can be either positive (selecting the genes that satisfy the condition) or negative (delete the genes). 
+
+    ![alt text](figures/filter_pos_neg.png)
+    
+* Keep filtering the dataset means that the effect of filtration is additive. This mode is useful if you want to apply multiple criteria, e.g., first filter with marker features, then remove low count features, and finally remove features that's not expressed in a certain proportion of your samples. If this option is unchecked, you are always filtering the input dataset.
+
+* Filter with renormalization means that after filtration, DESeq normalization will be re-performed on the filtered raw count dataset.
+
+* The count range filter can be base on either raw counts or normalized counts. You can either input the range manually or use the slider.
+
+    ![alt text](figures/feature_filter.png)
+
+* You can provide a marker feature list to get a marker feature expression dataset.
+    
+    + The marker features should appear as the first column in your file.
+    
+    + Please note that some of the genes in your marker list may not be found in the dataset, because they may have already been removed due to 0 expression in all your samples.
+
+* Applying ![alt text](figures/undo_filter.png) will return the data to the unfiltered state. Note that if you have performed subsetting prior to filtering, you will get a subsetted dataset with a non-zero expression feature set.
+
+## Data Subsetting
+
+* Subsetter allows you to choose a subset of samples for analysis.
+
+* You can choose whether or not the subset should be renormalized with DESeq.
+
+    ![alt text](figures/subset0.png)
+
+* An implicit filtration will occur to get nonzero count genes for the subset. This procedure prevents some downstream analysis from breaking on 0s.
+
+# Analysis Modules
+
+## Data Scale
+
+* For most analysis modules, you can choose one of the four data scales: 
+
+    + `counts (normalized)` : DESeq normalized counts; 
+    
+    + `Log10` : log10 (normalized_counts + 1). Plus one to include zeros;
+    
+    + `Standardized` : Standardization (calculate Z-scores) is performed on the DESeq normalized counts;
+    
+    + `Log10 & Standardized` : Standardization (calculate Z-scores) is performed on log10(normalized_counts + 1), assuming log-normal distribution.
+    
+* For each individual analysis, please choose the most proper data scale. Some modules have fixed data scale choice (e.g., raw counts input for DESeq differential analysis) so this option is not available.
+
+## Data Table
+
+* You can download data table with different data scales and ordering. If your original data is multiple counts files in a folder, you can also download the combined raw count table or normalized table for single file input. 
+    
+    ![alt text](figures/data_table.png)
+    
+* The `relative frequency` of a gene is defined as its raw count divided by the total counts of the sample.
+    
+## Basic Data Statistics
+
+* This module contains simple statistics of your data, including some useful plots and table for quality control.
+     
+## ERCC 
+
+* If your data contains ERCC spike-in, PIVOT will plot the ERCC read distribution and the estimated molecules based 
+the standard table (<a href = "https://tools.thermofisher.com/content/sfs/manuals/cms_095046.txt">https://tools.thermofisher.com/content/sfs/manuals/cms_095046.txt</a>).
+
+* The default parameter is 0.9 µL ERCC with 1:4000000 dilution added per sample. The user will need to adjust the parameters according to the protocol used. 
+    
+    ![alt text](figures/ercc_info.png)
+    
+## Differential Expression Analysis
+
+### DESeq Differential Expression Analysis
+
+* This module is a graphical interface for the DESeq2 package (<a href="https://bioconductor.org/packages/release/bioc/html/DESeq2.html">https://bioconductor.org/packages/release/bioc/html/DESeq2.html</a>). Because DESeq requires raw counts input, if the input file is a normalized counts table, this analysis will not be available.
+
+### SCDE
+
+* This module is a graphical interface for the SCDE package (<a href="http://hms-dbmi.github.io/scde/diffexp.html">http://hms-dbmi.github.io/scde/diffexp.html</a>). 
+
+* The SCDE error modeling must be performed first before you can use other SCDE analysis. For large dataset the modeling process can be very slow. You can monitor the progress in the background R session.
+
+* You can use SCDE distance for hierarchical clustering and minimum-spanning-tree generation. There are three types of adjustment method you can choose: direct drop-out, reciprocal weighting and mode relative weighting. For details of these methods please check the SCDE website. Once a distance has been computed, it is loaded into PIVOT to be used in other modules.
+
+    ![alt text](figures/scde_distance.png)
+    
+### Mann-Whitney Test
+
+* Also known as wilcoxon rank sum test. The null hypothesis is that the distributions of the gene expression in the two groups has no difference and the alternative is that they differ by some non-zero location shift.
+
+* You can choose the P adjustment method. The default method is Bonferroni correction.
+
+### Monocle Differential Expression Analysis
+
+* This module is a graphical interface for the Monocle package (<a href="http://cole-trapnell-lab.github.io/monocle-release/">http://cole-trapnell-lab.github.io/monocle-release/</a>).
+
+* This analysis is most proper for groups that represent the progress of a biological process, such as time of cell collection, cell state or media change. For details of this analysis please check the monocle paper and website.
+
+## Monocle Cell State Ordering
+
+* Currently you can only use less than 1000 features for cell state ordering. It is recommended that you use a marker feature list, the top genes ranked by overdispersion or the significant differentially expressed genes for ordering.
+
+* If you have provided group information, the comparison between monocle assigned state and your group will be available.
+    
+* You can click the gene list to view the expression level of the selected gene plotted on the graph or as a function of pseudotime.
+
+## Correlation Analysis
+
+* You can generate pairwise scatterplot if you have less than 50 samples. This module will fail if you have too many samples.
+
+* The sample correlation heatmap provides a more intuitive way of visualizing the correlation between your samples. If you specifies color by group, a color bar will be added to the heatmap to show the group info. You can only use the correlation distance for hierarchical clustering in a correlation heatmap. 
+
+## Feature Heatmap
+
+* You can rank features by fano factor, variance or mean expression. You are not allowed to use standardized data for ranking because all feature will have the same mean (0) and variance (1). However, if you want to plot in standardized scale, you can choose rank by "Row order". 
+    ![alt text](figures/hm_gene_rank.png)
+
+* The ranking of the heatmap is used for choosing the top ranked features to be plotted in the heatmap. You can use the slider to choose the features to be plotted. By default if the number of features is greater than 500, only the top 500 features will be plotted. Using the manual input, you can choose any rank range other than the top 500. The only limit is that you can only plot 1000 features at a time.
+
+    ![alt text](figures/hmap_range.png)
+
+* By default, the order of the samples (columns) and features (rows) shown in the heatmap will be determined by hierarchical clustering. Alternatively, if "Do not cluster sample/feature" is specifed, the samples/features will be ordered by the rank. If the user also specifies "rank by row order", then the heatmap order will be exactly the same as the input row/column order.
+
+    ![alt text](figures/hm_order.png)
+
+* d3heatmap package allows zoom in (click and drag) and zoom out (double click).
+
+* Press ![alt text](figures/change_hm_color.png) to try different colors!
+
+## Dimension Reduction
+
+### PCA
+
+* You can look at any principal component. Percentage shown on each axis is the percent variance explained by that principal component.
+    
+    ![alt text](figures/PC_choose.png)
+    
+### T-SNE
+
+* 1D, 2D and 3D T-SNE are results of 3 different t-SNE processes (dims = 1, 2 or 3).
+
+* According to http://lvdmaaten.github.io/tsne/, 
+    
+    *"Perplexity is a measure for information that is defined as 2 to the power of the Shannon entropy. The perplexity of a fair die with k sides is equal to k. In t-SNE, the perplexity may be viewed as a knob that sets the number of effective nearest neighbors. It is comparable with the number of nearest neighbors k that is employed in many manifold learners."*
+    
+    ![alt text](figures/tsne.png)
+    
+## Classification
+
+* This module is a graphical interface for the caret package (<a href="http://topepo.github.io/caret/index.html">http://topepo.github.io/caret/index.html</a>). Currently it allows the user to choose almost all classification models listed in (<a href="http://topepo.github.io/caret/modelList.html"> http://topepo.github.io/caret/modelList.html</a>). 
+
+* Some methods may require new packages to be installed. In such cases, the background R session will ask you to install it. Choose yes if you want to proceed.
+
+    ![alt text](figures/caret_install.png)
+    
+* Users are expected to have the knowledge of which model is most suitable for their data. The details of these models can be found in the caret website.
+    
+* Many methods contains built-in feature selection. For those having explicit coefficients for the features, the feature coefficient table will be available for download.
+
+* You can specify the cross-validation parameters to be used in the training.
+
+    ![alt text](figures/caret_cv.png)
+    
+* For methods containing internal feature selection and explicit feature coefficients, the information will be available in the "Feature Coefficient" table.
+
+* The trained model can be used as a classifier for new data, or be used for the testing of the model. For example, if you train the classifier using data of group A and group B, and then perform testing on group A-t and group B-t. Then samples in group A-t and B-t will be classified as group A or group B, so that you can tell how well the model is performing. Alternatively, you can use the model to classify the unknow samples in e.g. group C.
+
+    
+# Report Module
+
+* The code has been pre-written for you -- you only need to add it. Please always run the module before you add it to report, because PIVOT requires the module has a last state to capture all the parameters. 
+
+    ![alt text](figures/report0.png)
+    
+* The report code is based on R-markdown v2 (http://rmarkdown.rstudio.com/). You can add comments, change titles or modify the code (not recommended) according to the syntax.
+
+# System Control
+
+* The system control menu is located at the top right corner. Users can use this panel to save the program state, launch new session or go to data management panels.
+
+    ![alt text](figures/sys_control.png)
+
+## Program State Saving and Loading
+
+* You can save the program state as an R data object. In this way you can make sure that you won't lose your analysis progress, and you can share the state with others.
+
+* To load the saved state, go to File panel and choose PIVOT state in input file type. The session will auto refresh and immediately switch to the loaded state when the state uploading is complete. 
+
+    ![alt text](figures/load_state.png)
+    
+* Please note that although every analysis result will be kept in the state, PIVOT is not able to return the parameter choices to the ones you chose when the analysis was performed. In other words, the results and plots shown in the loaded state will stay the same, but the new parameter UI will return to the defaults. 
+
+* Each time you exit, PIVOT will automatically save the state into the background R session. If you don't close the R session, or save the workspace image before exiting R, the next time you launch PIVOT it will automatically load the state for you.
+
+* To clear the state, click ![alt text](figures/clear_session.png).
+
+## Launch New Session
+
+* Clicking the ![alt text](figures/new_session.png) button will launch new PIVOT session for you. In this way you can do different things in different sessions. There is a limitation for this: because R is single-thread, you can only perform one analysis at a time. While R is busy computing in one session, the other sessions will have to wait in a queue. 
+
+* If you really want to simultaneously perform multiple analysis in multiple sessions, currently the only way is to open multiple copies of R, and launch PIVOT using the command "pivot()" in each R session.
+
+# Other Useful Information
+
+## Gene Expression Plot
+
+* In all differential expression analysis modules, you can click the result table to view the expression plot of individual genes.
+
+    ![alt text](figures/gene_plot.png)
+
+## Size of the Plot
+
+* You can change the width of most plots by resizing the window.
+
+* You can resize ggvis plots by using the bottom right triangle, and download the plot by clicking the cog icon on top right.
+
+    ![alt text](figures/ggvis.png)
+    
+## Citation Infomation
+
+* The citation and licensing information can be found at the bottom of each module.
+
+    ![alt text](figures/citation.png)
+
+    
+## Built-in Help Infomation
+
+* You can find ![alt text](figures/help_icon.png) in many places in PIVOT. You can click it to view the relavant information of the module.
+
+* Many parameter inputs has tooltips containing the relavant info.
+
+    ![alt text](figures/tool_tip.png)
+    
+    
+<br><br>
+    
+    
+
+
+
+
+    
+
+

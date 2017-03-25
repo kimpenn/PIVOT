@@ -1,0 +1,90 @@
+
+# Community Detection with Minimum Spanning Tree
+
+**Distance measure:** `r input$mst_dist_method`
+
+**Community Detection Algorithm:** `r input$com_algorithm`
+
+**Walktrap Steps:** `r input$com_wt_step`
+
+```{r echo = FALSE, warning=FALSE, message = FALSE}
+mst_graph <- reactive({
+    rsList <- callModule(pivot_dataScale, "mst_scale", r_data, ercc_iso = FALSE)
+    mst_data <- rsList$df
+    if(input$mst_dist_method == 'euclidean') {
+        dist_mtx <- t(mst_data) %>% dist() %>% as.matrix()
+    } else if(input$mst_dist_method == 'correlation') {
+        dist_mtx <- 1 - cor(mst_data, method = input$mst_cor_method)
+    } else if(input$mst_dist_method == 'scde') {
+        if(is.null(input$mst_scde_dist_method)) return()
+        if(is.null(r_data$scde_ddo) && is.null(r_data$scde_rw) && is.null(r_data$scde_mrw)) {
+            session$sendCustomMessage(type = "showalert", "Please compute the SCDE-adjusted distance you want to use in SCDE module first.")
+            #updateTabItems(session, "tabs", "scde")
+            return()
+        }
+        if(input$mst_scde_dist_method == "ddo") {
+            if(is.null(r_data$scde_ddo)) {
+                session$sendCustomMessage(type = "showalert", "Please compute Direct drop-out adjusted distance in SCDE module first.")
+                #updateTabItems(session, "tabs", "scde")
+                return()
+            } else {
+                dist_mtx <-r_data$scde_ddo %>% as.matrix()
+            }
+        } else if(input$mst_scde_dist_method == "rw") {
+            if(is.null(r_data$scde_rw)) {
+                session$sendCustomMessage(type = "showalert", "Please compute Reciprocal weighting adjusted distance in SCDE module first.")
+                #updateTabItems(session, "tabs", "scde")
+                return()
+            } else {
+                dist_mtx <-r_data$scde_rw %>% as.matrix()
+            }
+        } else if(input$mst_scde_dist_method == "mrw") {
+            if(is.null(r_data$scde_mrw)) {
+                session$sendCustomMessage(type = "showalert", "Please compute Mode-relative weighting adjusted distance in SCDE module first.")
+                #updateTabItems(session, "tabs", "scde")
+                return()
+            } else {
+                dist_mtx <-r_data$scde_mrw %>% as.matrix()
+            }
+        }
+    }
+
+    cList <- callModule(pivot_colorBy, "community", meta = r_data$meta)
+    rsList<-generate_mst(dist_mtx, method = input$com_algorithm, color_list = cList, step = input$com_wt_step)
+    r_data$meta$community <- paste0("community_",as.character(igraph::membership(rsList$community)))
+    return(rsList) # Return the graph for plotting
+})
+```
+
+```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 6}
+if(input$mst_package == "igraph") {
+if(is.null(mst_graph())) return()
+    mst0 <- mst_graph()$g
+    label <- NA
+    if(input$mst_lbl) {
+        label <- V(mst0)$label
+    }
+
+    if(!is.null(input$color_com) && input$color_com) {
+        igraph::plot.igraph(mst0, vertex.label=label, vertex.size=input$vertex_size, mark.groups = mst_graph()$community)
+    } else {
+        igraph::plot.igraph(mst0, vertex.label=label, vertex.size=input$vertex_size)
+    }
+    legend("topright", legend = unique(V(mst0)$group),  bty="n", fill = unique(V(mst0)$color), text.col = unique(V(mst0)$color), border = FALSE)
+    } else if(input$mst_package == "networkD3"){
+        if(is.null(mst_graph())) return()
+    mst0 <- mst_graph()$g
+    d3_g1<-networkD3::igraph_to_networkD3(mst0, group = V(mst0)$group)
+    d3_g1$nodes$size <- rep(input$vertex_size, length(r_data$sample_name))
+    ColourScale <- paste0('d3.scale.ordinal().domain([\"',
+                          paste0(unique(as.character(d3_g1$nodes$group)), collapse = "\",\""),
+                          '\"]).range([\"',
+                          paste0(unique(as.character(V(mst0)$color)), collapse = "\",\""),
+                          '\"]);')
+    networkD3::forceNetwork(Links = d3_g1$links, Nodes = d3_g1$nodes, Source = "source", Target = "target",
+                            NodeID = "name", Nodesize = "size", Group = "group", legend = T,
+                            radiusCalculation = "Math.sqrt(d.nodesize) * 2",
+                            opacity = .8, zoom = T,  colourScale = networkD3::JS(ColourScale))
+    }
+   
+```

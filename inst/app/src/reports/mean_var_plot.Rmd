@@ -1,0 +1,26 @@
+
+
+# Variably Expressed Genes 
+
+```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 10, fig.height = 8}
+if(is.null(r_data$meanvar)) return()
+    DT::datatable(r_data$meanvar$var.tbl, rownames= FALSE, options = list(
+        scrollX = T, scrollY = "400px", lengthMenu = c(20, 50, 100)
+    ))
+```
+
+# Mean Variability Plot
+
+```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 10, fig.height = 8}
+    tmp<-meanVarPlot(log10(r_data$df+1),
+                                   y.cutoff = input$meanvar_y_cutoff1, y.high.cutoff = input$meanvar_y_cutoff2,
+                                   x.low.cutoff = input$meanvar_x_cutoff1, x.high.cutoff = input$meanvar_x_cutoff2,
+                                   fxn.x = function(x){return(log(mean(exp(x) - 1) + 1))},
+                                   fxn.y = function(x){return(log(var(exp(x) - 1)/mean(exp(x) - 1)))},
+                                   num.bin = input$meanvar_bins)
+    rm(tmp)
+```
+
+> Rahul Satija (2015). Seurat: Seurat : R toolkit for single cell genomics. R package version 1.2.1. http://www.satijalab.org/seurat.
+
+

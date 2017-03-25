@@ -1,0 +1,40 @@
+
+# Data Table
+
+```{r echo = FALSE, warning=FALSE, message = FALSE}
+rs_table <- reactive({
+    rsList <- callModule(pivot_dataScale, "table_scale", r_data, order_by = input$tbl_order)
+    #assign("rList", rsList, env = .GlobalEnv)
+})
+```
+
+**Scale:** `r rs_table()$scale`
+
+**Order:** `r rs_table()$order`
+
+```{r echo = FALSE, warning=FALSE, message = FALSE}
+# Normalized Data
+DT::datatable(rs_table()$df, selection = 'single', options = list(scrollX = TRUE, scrollY = "600px", lengthMenu = c(20, 50, 100)))
+```
+
+
+## Expression Plot
+
+```{r echo = FALSE, warning=FALSE, message = FALSE}
+    s = input$data_tbl_row_last_clicked
+    tbl<-as.data.frame(rs_table()$df)
+
+    if (length(s)) {
+        selected_gene <- rownames(tbl[s, , drop = FALSE])
+        d <- as.data.frame(t(tbl[selected_gene,])) %>% tibble::rownames_to_column()
+        colnames(d) <- c("sample", "expression_level")
+        callModule(pivot_featurePlot, "data_tbl_plt", meta = r_data$meta, df = d, gene = selected_gene)
+    } else {
+        return()
+    }
+```
+
+
+
+
+

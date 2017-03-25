@@ -1,0 +1,111 @@
+
+# Hierarchical Clustering
+
+**Distance measure**: `r input$hc_dist_method`
+
+**Agglomeration method**: `r input$hc_agglo_method`
+
+```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 6}
+# distance measure
+hclust0 <- reactive({
+    rsList <- callModule(pivot_dataScale, "hc_scale", r_data, ercc_iso = FALSE)
+    hc_data <- rsList$df
+    if(!(input$hc_dist_method %in% c('scde', 'corr'))) {
+        t(hc_data) %>% dist(method = input$hc_dist_method) %>% hclust(method = input$hc_agglo_method)
+    } else if(input$hc_dist_method == 'corr') {
+        as.dist(1 - cor(hc_data, method = input$hclust_cor_method)) %>% hclust(method = input$hc_agglo_method)
+    } else if(input$hc_dist_method == 'scde') {
+        if(is.null(input$hclust_scde_dist_method)) return()
+        if(is.null(r_data$scde_ddo) && is.null(r_data$scde_rw) && is.null(r_data$scde_mrw)) {
+            return()
+        }
+        if(input$hclust_scde_dist_method == "ddo") {
+            if(is.null(r_data$scde_ddo)) {
+                return()
+            } else {
+                r_data$scde_ddo %>% hclust(method = input$hc_agglo_method)
+            }
+        } else if(input$hclust_scde_dist_method == "rw") {
+            if(is.null(r_data$scde_rw)) {
+                return()
+            } else {
+                r_data$scde_rw %>% hclust(method = input$hc_agglo_method)
+            }
+        } else if(input$hclust_scde_dist_method == "mrw") {
+            if(is.null(r_data$scde_mrw)) {
+                session$sendCustomMessage(type = "showalert", "Please compute Mode-relative weighting adjusted distance in SCDE module first.")
+                updateTabItems(session, "tabs", "scde")
+                return()
+            } else {
+                r_data$scde_mrw %>% hclust(method = input$hc_agglo_method)
+            }
+        }
+    }
+})
+
+    if(input$hclust_package != "networkD3") {
+par(mar=c(8, 8, 8, 8), cex = 1, xpd=TRUE)
+
+    if(is.null(hclust0())) return ()
+    hc0 <- hclust0()
+    # get max height of the tree, this will be used to adjust the group bar height
+    max_height <- max(hc0$height)
+    hc1 <- hc0 %>% as.dendrogram()
+
+    rsList <- callModule(pivot_colorBy, "hclust", meta = r_data$meta)
+    if(is.null(rsList$meta)) {
+        plot(hc1)
+    } else {
+        # extract meta data
+        meta <- rsList$meta
+        meta_color <- rsList$meta_color
+
+        if (length(rsList$group_by) == 1) {
+            #assign("hc1", hc1, env= .GlobalEnv)
+            selected_color <- as.character(meta_color[,1])
+            dendextend::labels_colors(hc1) <- selected_color[order.dendrogram(hc1)]
+            plot(hc1)
+            dendextend::colored_bars(colors = meta_color, dend = hc1, rowLabels = rsList$group_by)
+            legend("topright", inset = c(-0.1,0), legend = unique(meta[,1]),  bty="n",
+                   title = colnames(meta)[1], title.col = "black", cex = 1,
+                   fill = unique(selected_color), text.col = unique(selected_color), border = FALSE)
+        } else if (length(rsList$group_by) <= 5){
+            plot(hc1)
+            dendextend::colored_bars(colors = meta_color, dend = hc1, rowLabels = rsList$group_by)
+            inset_h = 0
+            for(i in 1: length(rsList$group_by)) {
+                legend("topright", inset = c(-0.1, inset_h), legend = unique(meta[,i]),
+                       title = colnames(meta)[i], title.col = "black", cex = 1, bty="n",
+                       fill = unique(as.character(meta_color[,i])), text.col = unique(as.character(meta_color[,i])), border = F)
+                inset_h = inset_h + 0.15 +0.057 * length(unique(meta[,i]))
+            }
+        } else {
+            session$sendCustomMessage(type = "showalert", "Unable to plot more than 5 categories.")
+            return()
+        }
+    }
+    } else {
+        if(is.null(hclust0())) return ()
+    Root <- hclust0()
+
+    rsList <- callModule(pivot_colorBy, "hclust", meta = r_data$meta)
+    if(is.null(rsList$meta)) {
+        networkD3::dendroNetwork(Root, fontSize = 15, treeOrientation = input$hc_dd_ori, linkColour = 'navyblue', nodeColour = 'grey', textOpacity = 1, opacity = 1, zoom = T, linkType = input$hc_dd_link_type)
+    } else {
+        # extract meta data
+        meta <- rsList$meta
+        meta_color <- rsList$meta_color
+
+        if (length(rsList$group_by) == 1) {
+            #assign("hc1", hc1, env= .GlobalEnv)
+            selected_color <- as.character(meta_color[,1])
+        } else {
+            return(NULL)
+        }
+        networkD3::dendroNetwork(Root, fontSize = 15, textColour = selected_color, treeOrientation = input$hc_dd_ori, linkColour = 'navyblue', nodeColour = 'grey', textOpacity = 1, opacity = 1,  zoom = T, linkType = input$hc_dd_link_type)
+    }
+    }
+```
+
+
+

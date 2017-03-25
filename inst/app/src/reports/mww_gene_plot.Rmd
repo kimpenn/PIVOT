@@ -1,0 +1,36 @@
+
+# MWW Gene Expression Plot: `r r_data$mww_gene`
+
+## Test Result
+
+**`r paste("Mann–Whitney U test Results of", r_data$mww_group[1], "vs", r_data$mww_group[2])`**
+
+```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 10, fig.height = 8}
+    if(is.null(r_data$mww_gene)) return()
+    
+    if(is.null(input$mww_gene_plt_type) || input$mww_gene_plt_type == "group") {
+        v1<-r_data$df[r_data$mww_gene,]
+        d<-data.frame(t(v1), group = as.character(r_data$group))
+        colnames(d) <- c("expression_level", "group")
+        
+        if(!is.null(input$mww_gene_plt_all) && input$mww_gene_plt_all) {
+        } else {
+            if(r_data$mww_group[2] != "combined_rest") {
+                d <- subset(d, group %in% c(r_data$mww_group[1], r_data$mww_group[2]))
+            }
+        }
+        
+        feature_super_plot(d, r_data$mww_gene, plot_group = "group",  style = input$mww_gene_plt_style, legend_pos = "top")
+        
+    } else if(input$mww_gene_plt_type == "batch") {
+        v1<-r_data$df[r_data$mww_gene,]
+        d<-data.frame(t(v1), group = as.character(r_data$batch))
+        colnames(d) <- c("expression_level", "batch")
+
+        feature_super_plot(d, r_data$mww_gene, plot_group = "batch", style = input$mww_gene_plt_style, legend_pos = "top")
+    }
+    
+```
+
+
+    

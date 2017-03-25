@@ -1,0 +1,115 @@
+
+# SCDE
+
+## Error Modeling
+
+### Model Fit
+
+```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 6}
+    if(is.null(r_data$scde_ifm)) return()
+    DT::datatable(r_data$scde_ifm,options = list(scrollX = TRUE, scrollY = "250px", searching=F, order = list(list(5, 'asc')) , orderClasses = T))
+```
+
+```{r echo = FALSE, warning=FALSE, message = FALSE}
+   if(nrow(r_data$scde_invalid) == 0){
+        valid_msg1 <- "Fits for all your cells are valid."
+   } else {
+        valid_msg1 <- paste("Fits for", paste(rownames(r_data$scde_invalid), collapse = ', '), "are abnormal, and these samples will be removed from SCDE analysis. (Please note that these samples are also removed from the above table)")
+    }
+        
+    print(valid_msg1)
+```
+
+### Probability of Transcript-detection Failures
+
+```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 6}
+if(is.null(r_data$scde_ifm)) return()
+    # get failure probabilities on the expresison range
+    o.fail.curves <- scde::scde.failure.probability(r_data$scde_ifm,magnitudes=log((10^r_data$scde_prior$x)-1))
+    par(mfrow=c(1,1),mar = c(3.5,3.5,0.5,0.5), mgp = c(2.0,0.65,0), cex = 1);
+
+    plot(c(),c(),xlim=range(r_data$scde_prior$x),ylim=c(0,1),xlab="expression magnitude (log10)",ylab="drop-out probability")
+
+    sp <- colnames(o.fail.curves)
+    nSamples <- length(sp)
+    colorMin = 1
+    colorMax = nSamples
+    # colorRamp produces custom palettes, using values between 0-1
+    colorFunction = colorRamp(c("black", "blue", "red"))
+    zMin = colorMin
+    zMax = colorMax
+    zDiff = zMax - zMin
+    z = zMin:zMax
+    zScaled = (z - zMin) / zDiff
+    # Apply colorRamp
+    zMatrix = colorFunction(zScaled)
+    # switch to hexadecimal representation and sort to be consistent with colorFactor.
+    zColors = sort(rgb(zMatrix[,1], zMatrix[,2], zMatrix[,3], maxColorValue=255))
+
+    # create an empty character vector that will be used to store the line colors. This is necessary to color the legend.
+    colorsUsed = character(nSamples)
+
+    for(i in 1:nSamples) {
+        # using the sample name means the column order in colorFactorSorted file doesn't have to match the order in the counts file
+        sample = sp[i]
+        color = zColors[i]
+        colorsUsed[i] = color
+        lines(x=r_data$scde_prior$x,y=o.fail.curves[,sample], type="l", lty=i, lwd=1.5, cex=1, col=color)
+    }
+    legend("topright", legend=sp, col=colorsUsed, lty=1:nSamples, lwd=1.8, cex=0.8)
+```
+
+
+## SCDE DE Result
+
+### `r paste("Differential Expression Test Results of", unique(r_data$scde_group)[1], "vs", unique(r_data$scde_group)[2])`
+
+```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 6}
+if(is.null(r_data$scde_results)) {
+    return()
+} else {
+     DT::datatable(r_data$scde_results, selection = 'single', options = list(scrollX = TRUE, scrollY = "210px", searching=T, order = list(list(8, 'asc')), orderClasses = T))
+}
+```
+
+```{r echo = FALSE, warning=FALSE, message = FALSE}
+if(is.null(r_data$scde_ediff)) {
+    return()
+} else {
+    if(!is.null(r_data$scde_batch)) { # If batch correction applied, it returns a list containing 3 dataframes rather than a single dataframe
+        req(input$scde_batch_ediff_choice)
+        tbl <- r_data$scde_ediff[[input$scde_batch_ediff_choice]]
+    } else {
+        tbl <-r_data$scde_ediff
+    }
+    tbl <- tbl %>% tibble::rownames_to_column("feature") %>% dplyr::mutate(p.values = 2*pnorm(abs(tbl$Z),lower.tail=F)) %>% dplyr::mutate(p.values.adj = 2*pnorm(abs(tbl$cZ),lower.tail=F))
+    if(input$scde_cuttbl) {
+        tbl <- subset(tbl, p.values.adj <= input$scde_alpha)
+    }
+    rownames(tbl) <- tbl$feature
+    tbl <- tbl %>% dplyr::select(-feature)
+    r_data$scde_results <- tbl
+    tags$li(paste0("Total number of significant genes: ", sum(tbl$p.values.adj < input$scde_alpha, na.rm = T), "."))
+}
+```
+
+
+
+## SCDE Gene Plot: `r r_data$scde_gene`
+
+
+```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 10, fig.height = 8}
+    if(is.null(r_data$scde_gene) || is.na(r_data$scde_gene)) {
+        return()
+    } else {
+        batch_show <- r_data$scde_batch # If no batch_info, this will be NULL. if batch info, then if the user choose batch.effect or batch.adjusted, show batch, otherwise set to NULL
+
+    if(!is.null(r_data$scde_batch) && !is.null(input$scde_batch_ediff_choice) && (input$scde_batch_ediff_choice == 'results')) {
+        batch_show <- NULL
+    }
+
+    scde::scde.test.gene.expression.difference(r_data$scde_gene, models = r_data$scde_ifm[r_data$scde_sample,], groups = r_data$scde_group, batch = batch_show, counts = r_data$raw, prior = r_data$scde_prior)
+    }
+```
+
+

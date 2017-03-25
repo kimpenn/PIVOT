@@ -1,0 +1,67 @@
+
+# Monocle Gene Expression Pattern
+
+## Expression Plot
+
+```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 6}
+if(is.null(r_data$cellset) || is.null(pData(r_data$cellset)$State) || is.null(input$monocle_glist_type) || is.null(input$monocle_time_plt_color)) {
+    return()
+} else {
+    s = input$monocle_genelist_tbl_rows_selected
+
+    if(input$monocle_glist_type == "de") {
+        req(r_data$monocle_results)
+        tbl <- subset(r_data$monocle_results, qval <= 0.1) %>% tibble::rownames_to_column("gene")%>% dplyr::select(gene, pval, qval)
+    } else {
+        tbl<- data.frame(gene_for_ordering = fData(r_data$cellset)$gene_short_name[which(fData(r_data$cellset)$use_for_ordering == TRUE)])
+    }
+
+
+    if (length(s)) {
+        selected_gene <- tbl[s, 1]
+    } else {
+        return()
+    }
+
+    cds_subset <- r_data$cellset[selected_gene, ]
+    if(input$monocle_gene_plt_type == "time") {
+        plot_genes_in_pseudotime(cds_subset, color_by = input$monocle_time_plt_color, cell_size = 3, ncol = 2)
+    } else if(input$monocle_gene_plt_type == "jitter") {
+        if(is.null(input$monocle_time_plt_group)) {
+            return()
+        } else {
+            plot_genes_jitter(cds_subset, plot_trend = T, grouping = input$monocle_time_plt_group, color_by = input$monocle_time_plt_color, cell_size = 3, ncol = 2)
+        }
+    }
+}
+
+```
+
+## Clustering genes by pseudotemporal expression pattern
+
+### Gene Clustering Result
+
+```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 6}
+if(is.null(r_data$monocle_clusters)) {
+    return()
+} else {
+    tbl <- r_data$monocle_clusters$tbl
+    DT::datatable(tbl,
+                  options = list(
+                      scrollX = F, scrollY = "400px", lengthMenu = c(20, 50, 100)
+                  )
+    )
+}
+```
+
+### Gene Clustering Heatmap
+
+```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 8}
+    if(is.null(r_data$monocle_clusters)) return()
+    ph_res <- r_data$monocle_clusters$hmap
+    grid::grid.rect(gp = grid::gpar("fill", col = NA))
+    grid::grid.draw(ph_res$gtable)
+```
+
+
+

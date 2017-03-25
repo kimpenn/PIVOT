@@ -1,0 +1,75 @@
+
+# K-means Clustering
+
+## Clustering results
+
+```{r echo = FALSE, warning=FALSE, message = FALSE}
+# k-means
+km1 <- reactive({
+    req(input$km_centers)
+    req(input$km_nstart)
+    set.seed(input$kmeans_seed)
+    rsList <- callModule(pivot_dataScale, "kmeans", r_data)
+    kmeans_data <- rsList$df
+    kmeans(t(kmeans_data), centers = input$km_centers, nstart = input$km_nstart)
+})
+```
+
+
+```{r echo = FALSE, warning=FALSE, message = FALSE}
+km_assign_tbl <- reactive({
+    req(km1())
+    gList <- callModule(pivot_colorBy, "kmeans", meta = r_data$meta)
+
+    if(is.null(gList$meta) || length(unique(gList$meta[,1])) == 0)
+    {
+        tbl <- data.frame(km1()$cluster)
+        colnames(tbl) <- c("assigned_cluster")
+    } else {
+        actual_group <- gList$meta[,1]
+        names(actual_group) <- r_data$sample_name
+        tbl <- data.frame(actual_group)
+        tbl$assigned_cluster <- km1()$cluster
+    }
+    tbl
+})
+
+DT::datatable(km_assign_tbl(), options = list(scrollX = TRUE, scrollY = "400px", lengthMenu = c(20, 50, 100)))
+
+```
+
+## Confusion Matrix
+
+```{r echo = FALSE, warning=FALSE, message = FALSE}
+    gList <- callModule(pivot_colorBy, "kmeans", meta = r_data$meta)
+
+    if(is.null(gList$meta) || length(unique(gList$meta[,1])) < 2)
+    {
+        tbl <- as.data.frame(table(km1()$cluster))
+        colnames(tbl) <- c("Group", "Number of samples assigned")
+        DT::datatable(tbl, options = list(paging = FALSE, searching = FALSE))
+    } else {
+        sample_gp <- gList$meta[,1]
+        names(sample_gp) <- r_data$sample_name
+        tbl <- as.data.frame.matrix(table(km1()$cluster, sample_gp))
+        colnam <- names(tbl)
+        names(tbl) <- sapply(colnam, function(x) paste("Is", x))
+        rownam <- rownames(tbl)
+        rownames(tbl) <- sapply(rownam, function(x) paste("Allocated to cluster", x))
+        DT::datatable(tbl, options = list(paging = FALSE, searching = FALSE))
+    }
+```
+
+```{r echo = FALSE, warning=FALSE, message = FALSE}
+    gList <- callModule(pivot_colorBy, "kmeans", meta = r_data$meta)
+
+    if(is.null(gList$meta) || length(unique(gList$meta[,1])) < 2)
+    {
+        return()
+    } else {
+        sample_gp <- gList$meta[,1]
+        names(sample_gp) <- r_data$sample_name
+        tbl <- as.data.frame.matrix(table(km1()$cluster, sample_gp))
+        plot(as.factor(sample_gp), as.factor(km1()$cluster), xlab="Group", ylab = "Cluster")
+    }
+```

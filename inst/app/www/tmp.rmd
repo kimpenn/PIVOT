@@ -1,0 +1,65 @@
+---
+title: ''
+author: ''
+date: '2017-03-24'
+output:
+  html_document:
+    toc: true
+    number_sections: true
+    theme: default
+---
+
+
+# Monocle Cell State Ordering/Unsupervised Clustering
+
+## Dispersion plot highlighting ordering genes
+
+```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 6}
+
+ if(is.null(r_data$cellset)) return()
+    if(is.null(r_data$cellset@dispFitInfo[["blind"]])) return()
+    plot_ordering_genes(r_data$cellset)
+
+```
+
+
+## Ordering/Clustering Results
+
+```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 6}
+
+if(is.null(r_data$cellset) || is.null(pData(r_data$cellset)$State)) {
+    return()
+} else {
+    tbl <- pData(r_data$cellset)
+    tbl <- tbl[, which(!colnames(tbl) %in% c("sample", "Size_factor"))]
+    DT::datatable(tbl, options = list(
+                      scrollY = "500px", scrollX = T, lengthMenu = c(20, 50, 100)
+                  )
+    )
+}
+
+```
+
+*`r paste("Compare", input$mn_compare_from, "to", input$mn_compare_to)`
+
+```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 6}
+    if(is.null(r_data$cellset) || is.null(input$mn_compare_from) || is.null(input$mn_compare_to) || input$mn_compare_to == "") {
+        return()
+    } else {
+        tbl <- table(pData(r_data$cellset)[[input$mn_compare_from]], pData(r_data$cellset)[[input$mn_compare_to]])
+        DT::datatable(as.data.frame.matrix(tbl))
+    }
+```
+
+```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 6}
+    if(is.null(r_data$cellset) || is.null(input$mn_compare_from) || is.null(input$mn_compare_to) || input$mn_compare_to == "") {
+        return()
+    } else {
+plot(as.factor(pData(r_data$cellset)[[input$mn_compare_from]]), as.factor(pData(r_data$cellset)[[input$mn_compare_to]]), xlab=input$mn_compare_from, ylab = input$mn_compare_to)
+    }
+```
+
+
+
+
+

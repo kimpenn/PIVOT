@@ -1,0 +1,7 @@
+
+# Rank Frequency
+
+```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 10, fig.height = 8}
+    if(is.null(r_data$df)) return ()
+    rank_freq(r_data$df, input$rf_logX, input$rf_logY)
+```

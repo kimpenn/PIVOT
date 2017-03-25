@@ -1,0 +1,25 @@
+Package: PIVOT.analysis
+Type: Package
+Title: PIVOT.analysis: Basic analysis module of PIVOT
+Version: 1.0.0
+Author: Qin Zhu
+Maintainer: Qin Zhu <qinzhu@outlook.com>
+Description: Basic analysis module of PIVOT.
+    Includes clustering, PCA, etc.
+Depends: R (>= 3.1.0),    
+    shiny,
+    shinydashboard,
+    shinyBS,
+    PIVOT.data,
+    igraph
+Imports: 
+    RColorBrewer,
+    ggplot2,
+    ggvis,
+    networkD3,
+    igraph,
+    gplots
+License: http://kim.bio.upenn.edu/software/LICENSE
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.0.1

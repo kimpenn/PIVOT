@@ -1,0 +1,14 @@
+
+
+# Per-feature Standard Deviation Plot
+
+```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 10, fig.height = 8}
+ if(is.null(r_data$df)) return()
+    meanSdPlot(log10(as.matrix(r_data$df) + 1), bins = 100) 
+
+```
+
+
+> Wolfgang Huber, Anja von Heydebreck, Holger Sueltmann, Annemarie Poustka and Martin Vingron. Variance Stabilization Applied to Microarray Data Calibration and to the Quantification of Differential Expression. Bioinformatics 18, S96-S104 (2002).
+
+

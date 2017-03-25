@@ -1,0 +1,95 @@
+
+# Feature Correlation
+
+## Heatmap
+
+```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 10, fig.height = 10}
+
+cor_ft_data <- reactive({
+    if(is.null(r_data$glb.raw)) return()
+    rsList <- callModule(pivot_dataScaleRange, "cor_ft", r_data)
+    cor_ft_data <- rsList$df
+    if(is.null(cor_ft_data)) {
+        return(NULL)
+    } else {
+        return(cor_ft_data)
+    }
+})
+
+
+if(input$cor_ft_package == 'gplots') {
+    if(is.null(cor_ft_data()) || nrow(cor_ft_data()) > 1000) return ()
+    feature_cor <- cor(t(cor_ft_data()), method = input$cor_ft_method)
+
+    hclustfun1 = function(x, method=input$cor_ft_agglo_method, ...) hclust(x, method=method, ...)
+
+    if(input$cor_ft_dist == "corr1") {
+        distfun1 = function(c) as.dist(1 - c)
+    } else if(input$cor_ft_dist == "corr2") {
+        distfun1 = function(c) as.dist(1 - abs(c))
+    }
+
+    gplots::heatmap.2(feature_cor, scale="none", Rowv = T, symm=TRUE, dendrogram="both",revC=T,
+              distfun=distfun1, hclustfun = hclustfun1,
+              trace="none", col=get_heatmap_color(input$cor_ft_hmcolor), key.par=list(cex.axis=1), key.title=NA, key.xlab="  ", key.ylab=NA, keysize=1, density.info="density", margins=c(8,6))
+} else {
+    if(is.null(cor_ft_data()) || nrow(cor_ft_data()) > 1000) return ()
+    feature_cor <- cor(t(cor_ft_data()), method = input$cor_ft_method)
+
+    hclustfun1 = function(x, method=input$cor_ft_agglo_method, ...) hclust(x, method=method, ...)
+
+    if(input$cor_ft_dist == "corr1") {
+        distfun1 = function(c) as.dist(1 - c)
+    } else if(input$cor_ft_dist == "corr2") {
+        distfun1 = function(c) as.dist(1 - abs(c))
+    }
+    hmap<-heatmaply::heatmapr(feature_cor, scale="none", Rowv = T, symm=TRUE, dendrogram="both", revC=T,
+                              distfun=distfun1,hclustfun =hclustfun1)
+    heatmaply::heatmaply(hmap, colors=get_heatmap_color(input$cor_ft_hmcolor))
+}
+
+```
+
+
+## Genes Correlated/Coexpressed with Target Gene: `r r_data$coe_ft_target`
+
+### Table
+
+```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 10, fig.height = 10}
+    if(is.null(r_data$coe_ft_tbl)) return()
+    DT::datatable(r_data$coe_ft_tbl, selection = 'single',
+                  options = list(scrollX = TRUE, scrollY = "450px", lengthMenu = c(20, 50, 100)))
+```
+
+### Heatmap
+
+```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 10, fig.height = 10}
+ if(is.null(r_data$coe_ft_tbl)) {
+     return()
+ } else {
+     features <- rownames(r_data$coe_ft_tbl)
+
+    tmp_data <- list()
+    tmp_data$df <- r_data$df[which(rownames(r_data$df) %in% features), ]
+    tmp_data$raw <-r_data$raw[which(rownames(r_data$raw) %in% features), ]
+    rsList <- callModule(pivot_dataScale, "cor_ft_hmap_scale", tmp_data)
+    hm_data <- rsList$df
+
+    rsList <- callModule(pivot_colorBy, "cor_ft_hmap_col", meta = r_data$meta)
+    if(!is.null(rsList$meta)) {
+        group <- rsList$meta[,1]
+        group_color<-rsList$meta_color[,1]
+        legend_col <- unique(group_color)
+        names(legend_col) <- unique(group)
+        gplots::heatmap.2(as.matrix(hm_data), scale="none", trace="none", col=RColorBrewer::brewer.pal(9,"Blues"),
+                          key.par=list(cex.axis=0.7), key.title=NA, key.xlab="  ", key.ylab=NA, keysize=.7, density.info="density", revC=T, cexCol = 1.2, margins=c(10,15),
+                          ColSideColors = group_color)
+        legend("topright", legend = unique(group), bty="n", fill = legend_col, text.col = legend_col, border=FALSE, y.intersp = 1.2, cex = 0.9)
+    } else {
+        gplots::heatmap.2(as.matrix(hm_data), scale="none", trace="none", col=RColorBrewer::brewer.pal(9,"Blues"),
+                          key.par=list(cex.axis=0.7), key.title=NA, key.xlab="  ", key.ylab=NA, keysize=.7, density.info="density", revC=T, cexCol = 1.2, margins=c(8,6))
+    }
+ }
+
+```
+

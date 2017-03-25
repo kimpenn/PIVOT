@@ -1,0 +1,16 @@
+
+
+
+# Data Distribution
+
+```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 10, fig.height = 8}
+
+ if(is.null(r_data$df)) return()
+    L <- log(r_data$df)
+    # Standardize each gene, so that they are all on the same scale, Then melt # the data with plyr so we can plot it easily'
+    melted_dens_df <- reshape2::melt(t(scale(t(L))))
+    # Plot the distribution of the standardized gene expression values.
+    stdlog_plot(melted_dens_df)
+
+```
+
