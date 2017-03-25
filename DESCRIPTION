@@ -21,6 +21,8 @@ Imports:
     threejs,
     igraph,
     gplots,
+    heatmaply,
+    HSMMSingleCell,
     STRINGdb,
     monocle,
     scde
