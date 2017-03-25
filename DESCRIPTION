@@ -18,6 +18,8 @@ Imports:
     ggvis,
     networkD3,
     penalizedLDA,
+    threejs,
+    ggbiplot,
     igraph,
     gplots
 License: http://kim.bio.upenn.edu/software/LICENSE
