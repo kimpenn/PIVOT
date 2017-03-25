@@ -167,11 +167,7 @@ pivot_Plot1d <- function(input, output, session, type = NULL, obj = NULL, proj =
 #' @export
 pivot_Plot2d_UI <- function(id, type) {
     ns<- NS(id)
-    if(type == "pca") {
-        biplot_select <- selectInput(ns("plot2d_package"), "Plotting package", choices = list("plotly" = "plotly", "ggbiplot" = "ggbiplot"), selected = "plotly")
-    } else {
-        biplot_select <- selectInput(ns("plot2d_package"), "Plotting package", choices = list("plotly" = "plotly"), selected = "plotly")
-    }
+    biplot_select <- selectInput(ns("plot2d_package"), "Plotting package", choices = list("plotly" = "plotly"), selected = "plotly")
     tagList(
         conditionalPanel(sprintf("input['%s'] == 'plotly'", ns("plot2d_package")),
                          plotly::plotlyOutput(ns("plotly2d"))
@@ -191,7 +187,7 @@ pivot_Plot2d_UI <- function(id, type) {
 #'
 #' @description
 #' This is the server part of the module.
-#' @import plotly ggbiplot
+#' @import plotly
 #' @export
 pivot_Plot2d <- function(input, output, session, type = NULL, obj = NULL, proj = NULL, minfo = NULL) {
 
@@ -256,6 +252,7 @@ pivot_Plot2d <- function(input, output, session, type = NULL, obj = NULL, proj =
     })
 
     # 2d ggbiplot
+    # Not run due to ggbiplot makes installation more complicated
     output$biplot <- renderPlot({
         if(is.null(obj)) return()
         if(!is.null(minfo$meta)){
