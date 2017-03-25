@@ -17,6 +17,7 @@ Imports:
     ggplot2,
     ggvis,
     networkD3,
+    penalizedLDA,
     igraph,
     gplots
 License: http://kim.bio.upenn.edu/software/LICENSE
