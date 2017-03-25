@@ -22,7 +22,8 @@ Imports:
     igraph,
     gplots,
     STRINGdb,
-    monocle
+    monocle,
+    scde
 License: http://kim.bio.upenn.edu/software/LICENSE
 Encoding: UTF-8
 LazyData: true
