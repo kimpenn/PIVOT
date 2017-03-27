@@ -23,7 +23,9 @@ output$proc_method_ui <- renderUI({
                                    "Trimmed Mean of M-values (TMM) - RPKM" = "TMM-RPKM",
                                    "Upperquartile" = "upperquartile",
                                    "Upperquartile-RPKM" = "upperquartile-RPKM",
-                                   "RPKM" = "RPKM",
+                                   "Counts per Million (CPM)" = "CPM",
+                                   "Reads per Kilobase per Million (RPKM)" = "RPKM",
+                                   "Transcripts per Million (TPM)" = "TPM",
                                    "None" = "none"),
                     selected = "DESeq")
     } else {
@@ -50,8 +52,12 @@ output$norm_text_ui <- renderUI({
         tags$p("Input must be raw read counts. Data is transformed to upperquartile normalized counts per million (CPM). ")
     } else if(input$proc_method == "upperquartile-RPKM") {
         tags$p("Requires raw read counts and gene lengths. Data is transformed to upperquartile normalized reads per kilobase per million (RPKM). ")
+    } else if(input$proc_method == "CPM") {
+        tags$p("Requires raw read counts. Data is transformed to counts per million (CPM). ")
     } else if(input$proc_method == "RPKM") {
         tags$p("Requires raw read counts and gene lengths. Data is transformed to reads per kilobase per million (RPKM). ")
+    } else if(input$proc_method == "TPM") {
+        tags$p("Requires raw read counts and gene lengths. Data is transformed to transcripts per million (TPM). ")
     } else if(input$proc_method == "none") {
         tags$p("Input does NOT need to be raw counts, can be any data that are suitable for direct analysis (PIVOT will assume the data has already been normalized by the user).")
     }
@@ -82,7 +88,8 @@ gene_length <- reactiveValues()
 gene_length$tbl <- NULL
 
 output$gene_length_ui <- renderUI({
-    if(!is.null(input$proc_method) && grepl("RPKM", input$proc_method)) {
+    if(!is.null(input$proc_method)) {
+        if(grepl("RPKM", input$proc_method) || input$proc_method == "TPM")
         actionButton("gene_length_custom_btn", label = "Gene Lengths Upload", class = "btn-info")
     } else {
         return()

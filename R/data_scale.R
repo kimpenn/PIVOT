@@ -8,8 +8,6 @@ generateRelativeFreq <- function(raw){
     as.data.frame(apply(raw,2,function(col) col/sum(col)))
 }
 
-
-
 #' PIVOT data scale module
 #'
 #' @description
