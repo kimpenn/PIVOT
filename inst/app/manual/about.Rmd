@@ -3,7 +3,7 @@ title: "General Information"
 output: html_document
 ---
 
-### PIVOT: Platform for Interactive Analysis and Visualization of Transcriptomics Data v1.04
+### PIVOT: Platform for Interactive Analysis and Visualization of Transcriptomics Data v1.0.0
 
 * This program is developed based on the Shiny framework, a set of R packages and a collection of scripts written by members of Junhyong Kim Lab at University of Pennsylvania. Its goal is to facilitate fast and interactive RNA-Seq data analysis and visualization. 
 

@@ -29,7 +29,7 @@ dbHeader <- dashboardHeader(
                  ),
                  systemItem(
                      title = "Version Info",
-                     text = actionButton("version_sc","PIVOT, version: 1.00",  class = "btn_no_border"),
+                     text = actionButton("version_sc","PIVOT, version: 1.0.0",  class = "btn_no_border"),
                      icon = icon("compass")
                  ),
                  systemItem(
