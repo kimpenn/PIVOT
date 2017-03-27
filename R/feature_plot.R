@@ -140,6 +140,7 @@ pivot_colorBy <- function(input, output, session, meta) {
     if(is.null(input$group_by) || any(input$group_by %in% c("sample", "none"))) {
         meta <- NULL
     } else {
+        req(input$group_by %in% colnames(meta))
         meta <- meta[, input$group_by, drop = F]
     }
 

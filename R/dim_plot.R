@@ -314,7 +314,7 @@ pivot_Plot3d <- function(input, output, session, type = NULL, obj = NULL, proj =
     plot3d <- reactive({
         req(proj)
         if(ncol(proj) < 3) return()
-        assign("pj1",proj, env = .GlobalEnv)
+        #assign("pj1",proj, env = .GlobalEnv)
 
         if(type == "pca") {
             dname = "PC"
