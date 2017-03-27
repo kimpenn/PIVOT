@@ -78,8 +78,12 @@ observe({
     error = function(e) {
         session$sendCustomMessage(type = "showalert", "t-SNE failed.")
         r_data$tsne <- NULL
-        return()
+        error_I <<-1
     })
+
+    if(error_I) {
+        return()
+    }
 
     tsne_minfo<-callModule(pivot_colorBy, "tsne", meta = r_data$meta)
     callModule(pivot_dimScatter, "tsne", type = "tsne", obj = r_data$tsne, minfo = tsne_minfo)

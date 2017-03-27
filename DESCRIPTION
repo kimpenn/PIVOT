@@ -26,7 +26,8 @@ Imports:
     monocle,
     scde,
     shinyAce,
-    rmarkdown
+    rmarkdown,
+    Rtsne
 License: http://kim.bio.upenn.edu/software/LICENSE
 Encoding: UTF-8
 LazyData: true
