@@ -1,78 +1,4 @@
 
-
-#' a wrapper module for plot in 1D, 2D and 3D with different packages
-#'
-#' @description
-#' This is the UI part of the module.
-#' @import plotly threejs
-#' @export
-pivot_dimScatter_UI <- function(id, type = c("pca", "tsne", "plda")) {
-    ns<- NS(id)
-    tagList(
-        fluidRow(
-            column(6,
-                   enhanced_box(
-                       width = NULL,
-                       title = "1D projection",
-                       id = ns("box_1d"),
-                       status = "primary",
-                       solidHeader = T,
-                       pivot_Plot1d_UI(ns("plot1d"), type = type)
-                   )
-            ),
-            column(6,
-                   enhanced_box(
-                       width = NULL,
-                       title = "2D projection",
-                       id = ns("box_2d"),
-                       status = "warning",
-                       solidHeader = T,
-                       pivot_Plot2d_UI(ns("plot2d"), type = type)
-                   )
-            )
-        ),
-        fluidRow(
-            column(8,
-                   enhanced_box(
-                       width = NULL,
-                       title = "3D projection",
-                       id = ns("box_3d"),
-                       status = "danger",
-                       solidHeader = T,
-                       pivot_Plot3d_UI(ns("plot3d"), type = type)
-                   )
-            )
-        )
-    )
-}
-
-#' a wrapper module for scatter plot in 1D, 2D and 3D with different packages
-#'
-#' @description
-#' This is the server part of the module.
-#' @import plotly threejs
-#' @export
-pivot_dimScatter <- function(input, output, session, type = c("pca", "tsne", "plda"), obj = NULL, minfo = NULL) {
-    if(type == "pca") {
-        proj = as.data.frame(obj$x)
-        plot1d <- callModule(pivot_Plot1d, "plot1d", type = type, obj, proj, minfo = minfo)
-        plot2d <- callModule(pivot_Plot2d, "plot2d", type = type, obj, proj, minfo = minfo)
-        plot3d <- callModule(pivot_Plot3d, "plot3d", type = type, obj, proj, minfo = minfo)
-    } else if(type == "tsne"){
-        plot1d <- callModule(pivot_Plot1d, "plot1d", type = type, obj = NULL, proj = data.frame(X1 = obj$tsne_1d$Y), minfo = minfo)
-        plot2d <- callModule(pivot_Plot2d, "plot2d", type = type, obj = NULL, proj = data.frame(obj$tsne_2d$Y), minfo = minfo)
-        plot3d <- callModule(pivot_Plot3d, "plot3d", type = type, obj = NULL, proj = data.frame(obj$tsne_3d$Y), minfo = minfo)
-    } else if(type == "plda") {
-        proj <- obj$proj
-        plot1d <- callModule(pivot_Plot1d, "plot1d", type = type, obj = NULL, proj, minfo = minfo)
-        plot2d <- callModule(pivot_Plot2d, "plot2d", type = type, obj = NULL, proj, minfo = minfo)
-        plot3d <- callModule(pivot_Plot3d, "plot3d", type = type, obj = NULL, proj, minfo = minfo)
-    }
-    return(list(plot1d = plot1d, plot2d = plot2d, plot3d = plot3d))
-}
-
-
-
 #' a wrapper module for plot in 1D
 #'
 #' @description
@@ -116,13 +42,11 @@ pivot_Plot1d <- function(input, output, session, type = NULL, obj = NULL, proj =
     plot1d <- reactive ({
         req(proj)
         req(input$plot1d_step)
-        if(type == "pca") {
+        if(type %in% c("pca", "plda")) {
             req(input$plot1d_pc)
             d1 <- input$plot1d_pc
         } else if(type == "tsne") {
             d1 <- "X1"
-        } else if(type == "plda") {
-            d1 <- "V1"
         }
         if(!is.null(minfo$meta)){
             group = minfo$meta[,1]
@@ -155,7 +79,7 @@ pivot_Plot1d <- function(input, output, session, type = NULL, obj = NULL, proj =
         plot1d()
     })
 
-    return(plot1d())
+    return(isolate(plot1d()))
 }
 
 
@@ -227,7 +151,7 @@ pivot_Plot2d <- function(input, output, session, type = NULL, obj = NULL, proj =
         if(is.null(proj)) return()
         if(ncol(proj) < 2) return()
         if(type %in% c("pca", "plda")) {
-            if(is.null(input$plot2d_y)) return()
+            req(input$plot2d_y)
             d1 <- input$plot2d_x
             d2 <- input$plot2d_y
         } else if(type == "tsne") {
@@ -267,7 +191,7 @@ pivot_Plot2d <- function(input, output, session, type = NULL, obj = NULL, proj =
         }
     })
 
-    return(plot2d())
+    return(isolate(plot2d()))
 }
 
 

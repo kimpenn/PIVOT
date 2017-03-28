@@ -42,7 +42,40 @@ output$tsne_ui <- renderUI({
                    )
             )
         ),
-        pivot_dimScatter_UI("tsne", type = "tsne"),
+        fluidRow(
+            column(6,
+                   enhanced_box(
+                       width = NULL,
+                       title = "1D projection",
+                       id = "tsne_box_1d",
+                       status = "primary",
+                       solidHeader = T,
+                       pivot_Plot1d_UI("tsne_plot1d", type = "tsne")
+                   )
+            ),
+            column(6,
+                   enhanced_box(
+                       width = NULL,
+                       title = "2D projection",
+                       id = "tsne_box_2d",
+                       status = "warning",
+                       solidHeader = T,
+                       pivot_Plot2d_UI("tsne_plot2d", type = "tsne")
+                   )
+            )
+        ),
+        fluidRow(
+            column(8,
+                   enhanced_box(
+                       width = NULL,
+                       title = "3D projection",
+                       id = "tsne_box_3d",
+                       status = "danger",
+                       solidHeader = T,
+                       pivot_Plot3d_UI("tsne_plot3d", type = "tsne")
+                   )
+            )
+        ),
         box(
             width = 12,
             title = "Citation",
@@ -70,6 +103,7 @@ observe({
     error_I <- 0
 
     r_data$tsne <- tryCatch({
+        set.seed(1)
         tsne_1d <- Rtsne::Rtsne(t(tsne_data),perplexity = input$tsne_perplexity, theta = 0, dims = 1, pca = as.logical(input$tsne_pca))
         tsne_2d <- Rtsne::Rtsne(t(tsne_data),perplexity = input$tsne_perplexity, theta = 0, dims = 2, pca = as.logical(input$tsne_pca))
         tsne_3d <- Rtsne::Rtsne(t(tsne_data),perplexity = input$tsne_perplexity, theta = 0, dims = 3, pca = as.logical(input$tsne_pca))
@@ -84,8 +118,23 @@ observe({
     if(error_I) {
         return()
     }
-
-    tsne_minfo<-callModule(pivot_colorBy, "tsne", meta = r_data$meta)
-    callModule(pivot_dimScatter, "tsne", type = "tsne", obj = r_data$tsne, minfo = tsne_minfo)
 })
+
+tsne_minfo<- reactive(callModule(pivot_colorBy, "tsne", meta = r_data$meta))
+
+observe({
+    req(tsne_minfo(), r_data$tsne)
+    callModule(pivot_Plot1d, "tsne_plot1d", type = "tsne", obj = NULL, proj = data.frame(X1 = r_data$tsne$tsne_1d$Y), minfo = tsne_minfo())
+})
+
+observe({
+    req(tsne_minfo(), r_data$tsne)
+    callModule(pivot_Plot2d, "tsne_plot2d", type = "tsne", obj = NULL, proj = data.frame(r_data$tsne$tsne_2d$Y), minfo = tsne_minfo())
+})
+
+observe({
+    req(tsne_minfo(), r_data$tsne)
+    callModule(pivot_Plot3d, "tsne_plot3d", type = "tsne", obj = NULL, proj = data.frame(r_data$tsne$tsne_3d$Y), minfo = tsne_minfo())
+})
+
 

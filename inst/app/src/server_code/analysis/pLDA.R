@@ -55,7 +55,40 @@ output$plda_ui <- renderUI({
             DT::dataTableOutput("plda_discrim_tbl"),
             downloadButton('download_plda_discrim', 'Download', class = "btn btn-success")
         ),
-        pivot_dimScatter_UI("plda", type = "plda")
+        fluidRow(
+            column(6,
+                   enhanced_box(
+                       width = NULL,
+                       title = "1D projection",
+                       id = "plda_box_1d",
+                       status = "primary",
+                       solidHeader = T,
+                       pivot_Plot1d_UI("plda_plot1d", type = "plda")
+                   )
+            ),
+            column(6,
+                   enhanced_box(
+                       width = NULL,
+                       title = "2D projection",
+                       id = "plda_box_2d",
+                       status = "warning",
+                       solidHeader = T,
+                       pivot_Plot2d_UI("plda_plot2d", type = "plda")
+                   )
+            )
+        ),
+        fluidRow(
+            column(8,
+                   enhanced_box(
+                       width = NULL,
+                       title = "3D projection",
+                       id = "plda_box_3d",
+                       status = "danger",
+                       solidHeader = T,
+                       pivot_Plot3d_UI("plda_plot3d", type = "plda")
+                   )
+            )
+        )
     )
 })
 
@@ -191,7 +224,24 @@ observeEvent(input$run_plda, {
         error_I <<- 1
     })
     if(error_I) return()
-    callModule(pivot_dimScatter, "plda", type = "plda", obj = r_data$plda, minfo = plda_minfo)
+    r_data$plda$minfo <- plda_minfo
+    #callModule(pivot_dimScatter, "plda", type = "plda", obj = r_data$plda, minfo = plda_minfo)
+})
+
+
+observe({
+    req(r_data$plda)
+    callModule(pivot_Plot1d, "plda_plot1d", type = "plda", r_data$plda, r_data$plda$proj, minfo = r_data$plda$minfo)
+})
+
+observe({
+    req(r_data$plda)
+    callModule(pivot_Plot2d, "plda_plot2d", type = "plda", r_data$plda, r_data$plda$proj, minfo = r_data$plda$minfo)
+})
+
+observe({
+    req(r_data$plda)
+    callModule(pivot_Plot3d, "plda_plot3d", type = "plda", r_data$plda, r_data$plda$proj, minfo = r_data$plda$minfo)
 })
 
 output$plda_feature_plot <- renderPlot({

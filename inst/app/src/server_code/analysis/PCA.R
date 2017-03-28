@@ -72,7 +72,40 @@ output$pca_ui <- renderUI({
                    )
             )
         ),
-        pivot_dimScatter_UI("pca", type = "pca")
+        fluidRow(
+            column(6,
+                   enhanced_box(
+                       width = NULL,
+                       title = "1D projection",
+                       id = "pca_box_1d",
+                       status = "primary",
+                       solidHeader = T,
+                       pivot_Plot1d_UI("pca_plot1d", type = "pca")
+                   )
+            ),
+            column(6,
+                   enhanced_box(
+                       width = NULL,
+                       title = "2D projection",
+                       id = "pca_box_2d",
+                       status = "warning",
+                       solidHeader = T,
+                       pivot_Plot2d_UI("pca_plot2d", type = "pca")
+                   )
+            )
+        ),
+        fluidRow(
+            column(8,
+                   enhanced_box(
+                       width = NULL,
+                       title = "3D projection",
+                       id = "pca_box_3d",
+                       status = "danger",
+                       solidHeader = T,
+                       pivot_Plot3d_UI("pca_plot3d", type = "pca")
+                   )
+            )
+        )
     )
 })
 
@@ -94,9 +127,23 @@ observe({
         r_data$pca <- NULL
         return()
     })
+})
 
-    pca_minfo<-callModule(pivot_colorBy, "pca", meta = r_data$meta)
-    callModule(pivot_dimScatter, "pca", type = "pca", obj = r_data$pca, minfo = pca_minfo)
+pca_minfo<- reactive(callModule(pivot_colorBy, "pca", meta = r_data$meta))
+
+observe({
+    req(pca_minfo(), r_data$pca)
+    callModule(pivot_Plot1d, "pca_plot1d", type = "pca", r_data$pca, as.data.frame(r_data$pca$x), minfo = pca_minfo())
+})
+
+observe({
+    req(pca_minfo(), r_data$pca)
+    callModule(pivot_Plot2d, "pca_plot2d", type = "pca", r_data$pca, as.data.frame(r_data$pca$x), minfo = pca_minfo())
+})
+
+observe({
+    req(pca_minfo(), r_data$pca)
+    callModule(pivot_Plot3d, "pca_plot3d", type = "pca", r_data$pca, as.data.frame(r_data$pca$x), minfo = pca_minfo())
 })
 
 
