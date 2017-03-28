@@ -120,7 +120,7 @@ observe({
     error_I <- 0
 
     r_data$pca <- tryCatch({
-        prcomp(t(pca_data), scale. = as.logical(input$pca_scale))
+        prcomp(t(pca_data), center = TRUE, scale. = as.logical(input$pca_scale))
     },
     error = function(e) {
         session$sendCustomMessage(type = "showalert", "PCA failed.")
