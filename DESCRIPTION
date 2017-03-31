@@ -27,7 +27,10 @@ Imports:
     scde,
     shinyAce,
     rmarkdown,
-    Rtsne
+    Rtsne,
+    futile.logger,
+    VennDiagram,
+    grid
 License: http://kim.bio.upenn.edu/software/LICENSE
 Encoding: UTF-8
 LazyData: true
