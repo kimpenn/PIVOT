@@ -29,7 +29,6 @@ Imports:
     rmarkdown,
     Rtsne,
     htmltools,
-    shinyjs,
     futile.logger,
     VennDiagram,
     grid
