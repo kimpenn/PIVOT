@@ -164,6 +164,7 @@ output$rankfreq_plt <- renderPlot({
 
 
 output$mean_var_plt <- renderPlot({
+    req(r_data$df)
     if(input$meanvar_y_cutoff1 >= input$meanvar_y_cutoff2 || input$meanvar_x_cutoff1 >= input$meanvar_x_cutoff2) {
         session$sendCustomMessage(type = "showalert", "Bottom cutoff must be lower than top cutoff.")
         return()

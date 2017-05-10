@@ -56,7 +56,7 @@ output$data_pv_ui <- renderUI({
                 solidHeader = T,
                 fluidRow(
                     column(12,
-                           DT::dataTableOutput("cnt_tbl_original")
+                           pivot_filePreview_UI("single_preview")
                     )
                 )
             )
@@ -110,20 +110,17 @@ output$data_pv_ui <- renderUI({
                        downloadButton("download_his_tbl", "Download", class = "btn btn-success btn_rightAlign")
                 )
             )
-
-            #hr(),
-            #tags$p("This table shows the details of each dataset. To switch or delete dataset, please use the data map below.")
-            #fluidRow(
-            #    column(6),
-            #    column(3, actionButton("switch_data", "Switch to selected dataset", class = "btn-info"))
-            #column(3, uiOutput("dtbl_delete_ui"))
-            #)
         )
     } else {
         return()
     }
 })
 
+# Data in editting preview
+output$data_inprocess <- DT::renderDataTable({
+    if(is.null(r_data$df)) return ()
+    DT::datatable(r_data$df, options = list(scrollX = TRUE, scrollY = "500px", lengthMenu = c(20, 50, 100)))
+})
 
 output$download_feature_stats_tbl <- downloadHandler(
     filename = "feature_stats_tbl.csv",

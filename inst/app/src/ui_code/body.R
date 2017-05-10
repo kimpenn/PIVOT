@@ -77,19 +77,7 @@ body <- dashboardBody(
                                                pivot_help_UI("single", title = "How to input a count table"),
                                                class = "param_setting_title"
                                            ),
-                                           fileInput('file_single', 'Choose counts file', accept=c('text/csv', 'text/comma-separated-values,text/plain', '.csv')),
-                                           fluidRow(
-                                               column(9,
-                                                      wellPanel(
-                                                          checkboxInput('header_ct', 'Header', TRUE),
-                                                          radioButtons('sep_ct', 'Separator', c(Comma=',', Semicolon=';', Tab='\t', Space = ' '), selected = ',', inline = TRUE),
-                                                          fluidRow(
-                                                              column(6, selectInput('row_ct', 'Row names', choices = list("automatic" = "automatic", "first column" = "firstcol", "numbers" = "numbers"), selected = "firstcol"))
-                                                          ),
-                                                          radioButtons('quote_ct', 'Quote', c(None='', 'Double Quote'='"', 'Single Quote'="'"), selected = '"', inline = TRUE)
-                                                      )
-                                               )
-                                           )
+                                           pivot_fileInput_UI("single", format="compact")
                                        ),
 
                                        # Threshold
@@ -445,9 +433,12 @@ body <- dashboardBody(
              })
              ')
     ),
+    tags$script(HTML("$('body').addClass('sidebar-mini sidebar-collapse');")),
+
     tags$head(
         tags$script(src = "js/session.js"),
         tags$script(src = "js/custom.js")
     )
+
 )
 

@@ -108,19 +108,6 @@ sidebar <- dashboardSidebar(
     tags$head(
         tags$link(rel = "stylesheet", type = "text/css", href = "custom.css")
     ),
-    tags$head(
-        tags$style(HTML(".sidebar {
-                        height: 1200px; overflow-y: auto;
-                        }
-
-                        .content {
-                        padding-bottom: 50px; overflow-y: auto;
-                        }
-
-                        "
-        ) # close HTML
-        )            # close tags$style
-        ),
     hr(),
     ##################### Menu Module ###################
     sidebarMenu(id="tabs",
@@ -133,7 +120,7 @@ sidebar <- dashboardSidebar(
 
                 menuItem("Report", tabName = "report", icon = icon("file-pdf-o")),
                 #menuItem("User Manual", tabName = "manual_file", icon=icon("mortar-board")),
-                menuSubItem("About", tabName = "about", icon = icon("paw"))
+                menuItem("About", tabName = "about", icon = icon("paw"))
     ),
 
 

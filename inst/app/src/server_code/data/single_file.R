@@ -17,72 +17,47 @@
 ################################# Single data file processor #####################################
 ###### loading module #####
 
+tmpSingle <- reactiveValues()
+
 observe({
-    if(is.null(input$file_single)) return()
+    inFile<-callModule(pivot_fileInput, "single")
+    tmpSingle$inFile <- inFile
+    callModule(pivot_filePreview, "single_preview", inFile$df, height = "500px", search = T)
     isolate({
-        inFile <- input$file_single
         if (is.null(inFile))
             return(NULL)
         if(!is.null(r_data$glb.raw)) {
-            if(!identical(r_data$file_path, inFile)){ # New file
+            if(!identical(r_data$file_info$path, inFile$path)){ # New file
                 r_data <- init_state(r_data)
                 r_data <- clear_design(r_data)
             }
         }
     })
 })
-# This shows the data when it first loaded
-cnt_tbl_loaded <- reactive({
-    inFile <- input$file_single
-    if (is.null(inFile))
-        return(NULL)
-    error_I <- 0
-    withProgress(message = 'Loading the file', value = 0, {
-        incProgress(0.3)
-        tryCatch({
-            if(input$row_ct == "automatic")
-                return(read.table(inFile$datapath, header=input$header_ct, sep=input$sep_ct, quote=input$quote_ct))
-            else if(input$row_ct == "firstcol")
-                return(read.table(inFile$datapath, header=input$header_ct, sep=input$sep_ct, quote=input$quote_ct, row.names = 1))
-            else
-                return(read.table(inFile$datapath, header=input$header_ct, sep=input$sep_ct, quote=input$quote_ct, row.names = NULL))
-        },
-        error = function(e){
-            error_I <<- 1
-        })
-        if(error_I) {
-            session$sendCustomMessage(type = "showalert", "File format not recogonized.")
-            return()
-        }
-    })
-
-})
-
-output$cnt_tbl_original <- DT::renderDataTable({
-    if(is.null(cnt_tbl_loaded())) return()
-    validate(
-      need(!is.null(cnt_tbl_loaded()) && ncol(cnt_tbl_loaded()) > 1, "Please correct your input format. Try options on the left panel until you see your data here."),
-      errorClass = "myErrorClass1"
-    )
-    DT::datatable(cnt_tbl_loaded(), options = list(scrollX = TRUE, scrollY = "500px", lengthMenu = c(20, 50, 100)))
-})
-
-# Data in editting preview
-
-output$data_inprocess <- DT::renderDataTable({
-    if(is.null(r_data$df)) return ()
-    DT::datatable(r_data$df, options = list(scrollX = TRUE, scrollY = "500px", lengthMenu = c(20, 50, 100)))
-})
 
 
 ##### Single file data submission module #####
 observeEvent(input$submit_single, {
-    if (is.null(cnt_tbl_loaded())){
-        session$sendCustomMessage(type = "showalert", "Give me something!")
+    inFile <- tmpSingle$inFile
+    if (is.null(inFile)){
+        session$sendCustomMessage(type = "showalert", "Please first correct data input.")
         return()
     }
-    if (ncol(cnt_tbl_loaded()) < 2) {
+    df <- as.data.frame(inFile$df)
+
+    if (ncol(df) < 3) {
         session$sendCustomMessage(type = "showalert", "Too few samples or the input format is incorrect!")
+        return()
+    }
+
+    if(any(duplicated(df[,1]))){
+        dup_ones <- df[,1][which(duplicated(df[,1]))]
+        session$sendCustomMessage(type = "showalert", paste("Detect duplicated genes:", paste(dup_ones, collapse=", ")))
+        return()
+    }
+
+    if(any(is.na(df))) {
+        session$sendCustomMessage(type = "showalert", paste("Detect NA or Inf values."))
         return()
     }
 
@@ -92,40 +67,51 @@ observeEvent(input$submit_single, {
         r_data <- clear_design(r_data)
     }
 
-    # Reset data_ed
-    r_data$glb.raw <- cnt_tbl_loaded()
-    r_data$input_type <- "single"
-    r_data$file_path <- input$file_single
-    # Make sure the names are good
-    tmp_sample_name <- make.names(colnames(r_data$glb.raw), unique = TRUE)
-    colnames(r_data$glb.raw) <- tmp_sample_name
-    tmp_feature_name <- make.names(rownames(r_data$glb.raw), unique = TRUE)
-    rownames(r_data$glb.raw) <- tmp_feature_name
 
-    # Make sure the dataframe do not contain NAs
-    if(sum(is.na(r_data$glb.raw))) {
-        session$sendCustomMessage(type = "showalert", "NA value was found... Please check your input file again!")
-        return()
+    # Convert tibble to data frame (for compatibility)
+    firstcol <- as.character(df[,1])
+    tmp_feature_name <- make.names(firstcol, unique = TRUE)
+    sampleNm <- colnames(df)[-1]
+    tmp_sample_name <- make.names(sampleNm, unique = TRUE)
+
+    # Check if there are any difference between the new name and original names
+    if(!identical(firstcol, tmp_feature_name)) {
+        idx <- which(!firstcol%in%tmp_feature_name)
+        cov_ones <- firstcol[idx]
+        session$sendCustomMessage(type = "showalert", paste(length(idx), "feature names have been converted to syntactically valid names:",paste(cov_ones, collapse=", ")))
     }
+    if(!identical(sampleNm, tmp_sample_name)) {
+        idx <- which(!sampleNm%in%tmp_sample_name)
+        cov_ones <- sampleNm[idx]
+        session$sendCustomMessage(type = "showalert", paste(length(idx), "sample names have been converted to syntactically valid names:", paste(cov_ones, collapse=", ")))
+    }
+
+    df <- df[,-1,drop = F]
+    rownames(df) <- tmp_feature_name
+    colnames(df) <- tmp_sample_name
+
+    # Reset data_ed
+    r_data$glb.raw <- df
+    r_data$file_info$type <- "single"
+    r_data$file_info$path <- inFile$path
+    r_data$file_info$name <- inFile$name
 
     withProgress(message = 'Processing', value = 0, {
         incProgress(0.3, detail = "Getting feature list...")
         # Filter larger than threshold features
-        if(input$input_threshold_type == "mean")
-            r_data$glb.raw <- r_data$glb.raw[rowMeans(r_data$glb.raw) > input$min_cnt_avg, ] # The default filter is 0.
-        else if(input$input_threshold_type == "sum")
-            r_data$glb.raw <- r_data$glb.raw[rowSums(r_data$glb.raw) > input$min_cnt_sum, ]
-        else {
-            session$sendCustomMessage(type = "showalert", "Unknown threshold type.")
-            return()
-        }
-        r_data$sample_name <- colnames(r_data$glb.raw)
-        r_data$feature_list <- rownames(r_data$glb.raw)
-
-        incProgress(0.3, detail = "Perform data normalization...")
-
         error_I <- 0
         tryCatch({
+            if(input$input_threshold_type == "mean")
+                r_data$glb.raw <- r_data$glb.raw[rowMeans(r_data$glb.raw) > input$min_cnt_avg, ] # The default filter is 0.
+            else if(input$input_threshold_type == "sum")
+                r_data$glb.raw <- r_data$glb.raw[rowSums(r_data$glb.raw) > input$min_cnt_sum, ]
+            else {
+                session$sendCustomMessage(type = "showalert", "Unknown threshold type.")
+                return()
+            }
+            r_data$sample_name <- colnames(r_data$glb.raw)
+            r_data$feature_list <- rownames(r_data$glb.raw)
+
             result<-normalize_data(method = input$proc_method,
                                    params = list(gene_length = r_data$gene_len, deseq_threshold = input$deseq_threshold/100),
                                    raw = r_data$glb.raw)
@@ -135,7 +121,7 @@ observeEvent(input$submit_single, {
         if(error_I) {
             r_data <- init_state(r_data)
             r_data <- clear_design(r_data)
-            session$sendCustomMessage(type = "showalert", "Normalization failed! Please recheck.")
+            session$sendCustomMessage(type = "showalert", "Something went wrong. Please recheck format/try different normalization procedure.")
             return()
         }
 

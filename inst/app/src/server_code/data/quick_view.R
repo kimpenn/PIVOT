@@ -17,14 +17,14 @@
 ##################### Quick View Module ######################
 
 output$input_file_box <- renderInfoBox({
-    if(is.null(r_data$file_path) || is.null(r_data$input_type)) return(
+    if(is.null(r_data$file_info)) return(
         valueBox(value = "", "Input", icon = icon("credit-card"), color = "olive")
     ) else {
-        if(r_data$input_type == "single"){
-            valueBox(value = r_data$file_path$name, "Input file", icon = icon("credit-card"), color = "olive")
+        if(r_data$file_info$type == "single"){
+            valueBox(value = r_data$file_info$name, "Input file", icon = icon("credit-card"), color = "olive")
         }
-        else if(r_data$input_type == "dir") {
-            valueBox(value = r_data$file_path[[length(r_data$file_path)]], "Input folder", icon = icon("credit-card"), color = "olive")
+        else if(r_data$file_info$type == "dir") {
+            valueBox(value = r_data$file_info$path[[length(r_data$file_info$path)]], "Input folder", icon = icon("credit-card"), color = "olive")
         }
     }
 })

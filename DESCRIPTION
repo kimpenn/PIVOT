@@ -28,6 +28,8 @@ Imports:
     shinyAce,
     rmarkdown,
     Rtsne,
+    htmltools,
+    shinyjs,
     futile.logger,
     VennDiagram,
     grid

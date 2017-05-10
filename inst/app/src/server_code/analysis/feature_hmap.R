@@ -16,6 +16,7 @@
 ######## Some control ui #########
 
 output$hm_ui <- renderUI({
+    req(r_data$df)
     list(
         enhanced_box(
             width = 12,

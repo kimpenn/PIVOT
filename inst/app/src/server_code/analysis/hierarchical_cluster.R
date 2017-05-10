@@ -84,6 +84,7 @@ output$d3_hclust <- renderUI({
 # distance measure
 hclust0 <- reactive({
     rsList <- callModule(pivot_dataScale, "hc_scale", r_data, ercc_iso = FALSE)
+    req(rsList$df)
     hc_data <- rsList$df
     if(!(input$hc_dist_method %in% c('scde', 'corr'))) {
         t(hc_data) %>% dist(method = input$hc_dist_method) %>% hclust(method = input$hc_agglo_method)

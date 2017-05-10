@@ -5,6 +5,6 @@
 #' pivot_analysis()
 #' @import shiny
 #' @export
-pivot_analysis <- function(r_module = NULL) {
+pivot_main <- function(r_module = NULL) {
     shiny::runApp(system.file("app", package='PIVOT.analysis'),launch.browser = T)
 }

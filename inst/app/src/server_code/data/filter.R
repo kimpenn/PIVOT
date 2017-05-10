@@ -415,7 +415,7 @@ observe({
 observeEvent(input$submit_marker, {
     negf <- as.logical(input$is_neg_filter)
     inFile <- callModule(pivot_fileInput, "marker_filter")
-    marker_tbl <- inFile$df
+    marker_tbl <- as.data.frame(inFile$df)
     # First process the marker feature file and get the list
 
     marker_names <- make.names(as.character(unique(marker_tbl[,1])))

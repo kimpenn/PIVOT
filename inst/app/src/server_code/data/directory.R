@@ -28,7 +28,7 @@ observe({
     if(is.null(input$data_folder)) return()
     isolate({
         if(!is.null(r_data$glb.raw)) {
-            if(!identical(r_data$file_path, input$data_folder$path)){
+            if(!identical(r_data$file_info$path, input$data_folder$path)){
                 r_data <- init_state(r_data)
                 r_data <- clear_design(r_data)
             }
@@ -90,8 +90,8 @@ observeEvent(input$submit_dir, {
 
     withProgress(message = 'Processing', value = 0, {
         dfList <- list()
-        r_data$input_type <- "dir"
-        r_data$file_path <- input$data_folder$path
+        r_data$file_info$type <- "dir"
+        r_data$file_info$path <- input$data_folder$path
 
         n <- length(input$dataFiles)
         for(f in input$dataFiles) {

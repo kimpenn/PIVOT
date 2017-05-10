@@ -258,9 +258,63 @@ enhanced_box <- function (..., title = NULL, id = NULL, footer = NULL, status = 
                 div(class = "box-footer", footer)))
 }
 
+#' PIVOT Data Input, UI function from shinydashboard
+#' Modified for sidebar-mini
+#' @export
+pivotboardHeader <- function(..., title = NULL, titleWidth = NULL, disable = FALSE, .list = NULL) {
+    items <- c(list(...), .list)
+    lapply(items, tagAssert, type = "li", class = "dropdown")
 
+    titleWidth <- validateCssUnit(titleWidth)
 
+    # Set up custom CSS for custom width.
+    custom_css <- NULL
+    if (!is.null(titleWidth)) {
+        # This CSS is derived from the header-related instances of '230px' (the
+        # default sidebar width) from inst/AdminLTE/AdminLTE.css. One change is that
+        # instead making changes to the global settings, we've put them in a media
+        # query (min-width: 768px), so that it won't override other media queries
+        # (like max-width: 767px) that work for narrower screens.
+        custom_css <- tags$head(tags$style(HTML(gsub("_WIDTH_", titleWidth, fixed = TRUE, '
+                                                     @media (min-width: 768px) {
+                                                     .main-header > .navbar {
+                                                     margin-left: _WIDTH_;
+                                                     }
+                                                     .main-header .logo {
+                                                     width: _WIDTH_;
+                                                     }
+                                                     }
+                                                     '))))
+    }
 
+    # Modified the title argument to hard code the pivot icon
+    tags$header(class = "main-header",
+                custom_css,
+                style = if (disable) "display: none;",
+                tags$a(class = "logo",
+                     span(class="logo-mini",
+                          tags$b("P")
+                     ),
+                     span(class = "logo-lg",
+                          tags$b("PIVOT")
+                     )
+                ),
+                tags$nav(class = "navbar navbar-static-top", role = "navigation",
+                         # Embed hidden icon so that we get the font-awesome dependency
+                         span(shiny::icon("bars"), style = "display:none;"),
+                         # Sidebar toggle button
+                         a(href="#", class="sidebar-toggle", `data-toggle`="offcanvas",
+                           role="button",
+                           span(class="sr-only", "Toggle navigation")
+                         ),
+                         div(class = "navbar-custom-menu",
+                             tags$ul(class = "nav navbar-nav",
+                                     items
+                             )
+                         )
+                )
+    )
+}
 
 
 #' PIVOT Data Input, UI function

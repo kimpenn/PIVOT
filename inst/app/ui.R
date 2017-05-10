@@ -22,7 +22,7 @@ for(file in list.files("src/ui_code",
 
 ############################### Combine all ##################################
 dashboardPage(
-    skin = "red",
+    skin = "blue",
     dbHeader,
     sidebar,
     body

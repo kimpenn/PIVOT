@@ -268,14 +268,17 @@ observeEvent(input$submit_design_upload, {
         return()
     }
 
-    df_tmp <- design_upload$df
+    df_tmp <- as.data.frame(design_upload$df)
     # assign('df_tmp', df_tmp, env = .GlobalEnv)
     # Take first column as sample column
     sample_col <- df_tmp[,1]
     matched_sp <- match(colnames(r_data$glb.raw), sample_col) # If contain NA, some sample are not found in sample_col
     if(any(is.na(matched_sp)))
     {
-        session$sendCustomMessage(type = "showalert", "Please provide a meta table for ALL your input samples. Some sample names are not found.")
+        notFound <- colnames(r_data$glb.raw)[which(!colnames(r_data$glb.raw) %in% sample_col)]
+        session$sendCustomMessage(type = "showalert",
+                                  paste("Please provide a meta table for ALL your input samples. Following samples are not found:",
+                                  paste(notFound, collapse=",")))
         return()
     }
 

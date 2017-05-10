@@ -12,7 +12,7 @@
 # for the specific language governing permissions and limitations
 # under the License.
 
-dbHeader <- dashboardHeader(
+dbHeader <- pivotboardHeader(
     title = "PIVOT",
     dropdownMenu(type = "support",
                  top_msg = "PIVOT Support",

@@ -491,7 +491,7 @@ observeEvent(input$file_subset_btn, {
         negf <- as.logical(input$is_neg_subsetter)
 
         inFile <- callModule(pivot_fileInput, "subset")
-        sample_tbl <- inFile$df
+        sample_tbl <- as.data.frame(inFile$df)
 
         sample_names <- as.character(sample_tbl[,1])
         slist <- sample_names[which(sample_names %in% colnames(r_data$glb.raw))]

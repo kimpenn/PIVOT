@@ -96,6 +96,7 @@ output$download_sample_info_tbl <- downloadHandler(
 )
 
 output$sample_info_plt_type_ui <- renderUI({
+    req(r_data$norm_param$method)
     options <- list("Number of genes expressed" = "num_genes_expressed", "Total raw counts" = "total_raw_reads")
     if(r_data$norm_param$method %in% c("DESeq", "Modified_DESeq")) {
         options$"Total normalized counts" <- "total_normalized_counts"
