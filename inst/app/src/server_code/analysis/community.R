@@ -176,7 +176,7 @@ output$mst_d3 <- networkD3::renderForceNetwork({
     mst0 <- mst_graph()$g
     d3_g1<-networkD3::igraph_to_networkD3(mst0, group = V(mst0)$group)
     d3_g1$nodes$size <- rep(input$vertex_size, length(r_data$sample_name))
-    ColourScale <- paste0('d3.scale.ordinal().domain([\"',
+    ColourScale <- paste0('d3.scaleOrdinal().domain([\"',
                           paste0(unique(as.character(d3_g1$nodes$group)), collapse = "\",\""),
                           '\"]).range([\"',
                           paste0(unique(as.character(V(mst0)$color)), collapse = "\",\""),

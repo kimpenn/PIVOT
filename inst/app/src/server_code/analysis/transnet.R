@@ -1298,7 +1298,7 @@ output$tf_gp1_forcenet <- networkD3::renderForceNetwork({
     networkD3::forceNetwork(Links = d3_g1$links, Nodes = d3_g1$nodes, Source = "source", Target = "target",
                  NodeID = "name", Nodesize = "size", Group = "group", legend = T,
                  radiusCalculation = "Math.sqrt(d.nodesize) * 2",
-                 opacity = .8, zoom = T,  colourScale = networkD3::JS("d3.scale.category10()"))
+                 opacity = .8, zoom = T,  colourScale = networkD3::JS("d3.scaleOrdinal(d3.schemeCategory10)"))
 })
 
 
@@ -1429,7 +1429,7 @@ output$tf_gp2_forcenet <- networkD3::renderForceNetwork({
     networkD3::forceNetwork(Links = d3_g2$links, Nodes = d3_g2$nodes, Source = "source", Target = "target",
                  NodeID = "name", Nodesize = "size", Group = "group", legend = T,
                  radiusCalculation = "Math.sqrt(d.nodesize) * 2",
-                 opacity = .8, zoom = T,  colourScale = networkD3::JS("d3.scale.category10()"))
+                 opacity = .8, zoom = T,  colourScale = networkD3::JS("d3.scaleOrdinal(d3.schemeCategory10)"))
 })
 
 
