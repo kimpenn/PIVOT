@@ -290,16 +290,23 @@ border-top-color:#7c0057;
 }
 
 /* This is for the shinydashboard theme */
+.sidebar {
+    height: 1200px;
+}
+
+.content {
+    padding-bottom: 50px; overflow-y: auto;
+}
 
 .main-header .logo {
-  font-family: "Calibri", sans-serif, Times, "Times New Roman", serif;
+  font-family: "Book Antiqua", sans-serif, Times, "Times New Roman", serif;
   font-weight: bold;
   font-size: 24px;
 }
 
 
 .main-header .logo-lg:hover {
-	font-size: 15px;
+	font-size: 13px;
 	margin-top: 3px;
 	line-height: 15px;
 }
