@@ -13,9 +13,6 @@
 # under the License.
 
 
-options(shiny.maxRequestSize=1000*1024^2)
-
-
 shinyServer(function(input, output, session) {
 
     lapply(list.files("src/server_code", pattern = "\\.(r|R)$", recursive = TRUE, full.names = TRUE), function(x){source(file = x, local = TRUE)})

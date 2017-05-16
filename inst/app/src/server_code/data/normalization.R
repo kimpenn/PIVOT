@@ -90,7 +90,7 @@ gene_length$tbl <- NULL
 output$gene_length_ui <- renderUI({
     if(!is.null(input$proc_method)) {
         if(grepl("RPKM", input$proc_method) || input$proc_method == "TPM")
-        actionButton("gene_length_custom_btn", label = "Gene Lengths Upload", class = "btn-info")
+        actionButton("gene_length_custom_btn", label = "Upload Lengths", class = "btn-info")
     } else {
         return()
     }
@@ -194,7 +194,7 @@ observeEvent(input$gene_length_list_submit, {
 # Switch to normalization details
 output$norm_details_ui <- renderUI({
     if(is.null(r_data$norm_param)) return()
-    actionButton("norm_details", label = "View normalization details", class = "btn-warning")
+    actionButton("norm_details", label = "Normalization Details", class = "btn-warning")
 })
 
 observeEvent(input$norm_details, {

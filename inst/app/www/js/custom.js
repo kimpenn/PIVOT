@@ -1,1 +1,0 @@
-// Customized javascript for PIVOT

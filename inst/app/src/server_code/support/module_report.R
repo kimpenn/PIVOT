@@ -128,6 +128,35 @@ output$data_table_html <- downloadHandler(
     }
 )
 
+
+####### Spike-in Analysis ######
+observeEvent(input$spike_in_report, {
+    r_data$rmd <- update_rmd(session, r_data$rmd, id = "spike_in")
+})
+
+observeEvent(input$spike_in_reg, {
+    id = "spike_in"
+    withProgress(message = 'Processing...', value = 0.6, {
+        tmp_path <- generate_block_report(id, mode = "html_document")
+        if(!is.null(tmp_path)){
+            rawHTML <- paste(readLines(tmp_path), collapse="\n")
+            r_data <- update_reg_history(r_data, lists = rawHTML, action = "Spike-in Analysis")
+            session$sendCustomMessage(type = "showalert", "Analysis report generated and linked to the current dataset.")
+        }
+    })
+})
+
+output$spike_in_html <- downloadHandler(
+    filename = function() {
+        id = "spike_in"
+        paste0(id, ".html")
+    },
+    content = function(file) {
+        id = "spike_in"
+        generate_block_report(id, file, mode = "html_document")
+    }
+)
+
 ####### Data distribution plot ######
 
 observeEvent(input$"data_distribution_report", {

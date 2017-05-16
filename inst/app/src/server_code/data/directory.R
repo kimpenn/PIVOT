@@ -121,7 +121,8 @@ observeEvent(input$submit_dir, {
         tmp_feature_name <- make.names(rownames(r_data$glb.raw), unique = TRUE)
         rownames(r_data$glb.raw) <- tmp_feature_name
 
-        # Filter larger than threshold features
+        ### Feature exclusion
+        # Exclude low count genes
         if(input$input_threshold_type == "mean")
             r_data$glb.raw <- r_data$glb.raw[rowMeans(r_data$glb.raw) > input$min_cnt_avg, ] # The default filter is 0.
         else if(input$input_threshold_type == "sum")
@@ -130,6 +131,13 @@ observeEvent(input$submit_dir, {
             session$sendCustomMessage(type = "showalert", "Unknown threshold type.")
             return()
         }
+
+        # Extract and exclude ERCC
+        r_data$ercc <- r_data$glb.raw[grep("ERCC(-|[.])\\d{5}", rownames(r_data$glb.raw)),]
+        if(input$exclude_ercc) {
+            r_data$glb.raw<-r_data$glb.raw[-which(rownames(r_data$glb.raw) %in% rownames(r_data$ercc)), ]
+        }
+
         r_data$sample_name <- colnames(r_data$glb.raw) # Get the sample_key
         r_data$feature_list <- rownames(r_data$glb.raw) # Get the feature_key
 

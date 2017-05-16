@@ -67,7 +67,7 @@ rs_table <- reactive({
 # Normalized Data
 output$data_tbl <- DT::renderDataTable({
     req(rs_table())
-    DT::datatable(rs_table()$df, selection = 'single', options = list(scrollX = TRUE, scrollY = "600px", lengthMenu = c(20, 50, 100)))
+    DT::datatable(rs_table()$df, selection = 'single', options = list(scrollX = TRUE, scrollY = "500px", lengthMenu = c(20, 50, 100)))
 })
 
 

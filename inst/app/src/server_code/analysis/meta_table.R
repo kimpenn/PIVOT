@@ -68,7 +68,7 @@ output$meta_tbl <- DT::renderDataTable({
     if(is.null(r_data$glb.meta)) return()
     DT::datatable(r_data$glb.meta, selection = 'single',
                   options = list(
-                      scrollX = T, scrollY = "500px", lengthMenu = c(20, 50, 100)
+                      scrollX = T, scrollY = "450px", lengthMenu = c(20, 50, 100)
                   )
     )
 })
@@ -83,7 +83,7 @@ output$download_meta_tbl <- downloadHandler(
 output$sample_info_tbl <- DT::renderDataTable({
     if(is.null(r_data$sample_meta)) return()
     DT::datatable(r_data$sample_meta, selection = 'single', options = list(
-        scrollX = T, scrollY = "500px", lengthMenu = c(20, 50, 100)
+        scrollX = T, scrollY = "450px", lengthMenu = c(20, 50, 100)
     )
     )
 })
@@ -142,9 +142,9 @@ output$sample_info_plot <- render_Plotly({
             colnames(tbl)[which(colnames(tbl) == input$sample_info_plt_type)] <- "y"
             if(!is.null(input$sample_info_group) && input$sample_info_group != "None") {
                 tbl$Group <- r_data$glb.meta[,input$sample_info_group][match(tbl$sample,r_data$glb.meta[,1])]
-                plt1 <- tbl %>% plotly::plot_ly(x = ~sample, y = ~y, type = "bar", color = as.character(tbl$Group), source = "sample_range_select")
+                plt1 <- tbl %>% plotly::plot_ly(x = ~sample, y = ~y, type = "bar", color = as.character(tbl$Group))
             } else {
-                plt1 <- tbl %>% plotly::plot_ly(x = ~sample, y = ~y, type = "bar", source = "sample_range_select")
+                plt1 <- tbl %>% plotly::plot_ly(x = ~sample, y = ~y, type = "bar")
             }
 
             plt1 %>% plotly::layout(
@@ -199,7 +199,7 @@ output$feature_info_tbl <- DT::renderDataTable({
     ftbl <-r_data$feature_meta
     ftbl <- ftbl[, -which(names(ftbl) %in% c("use_for_ordering", "cap_name", "STRING_id"))]
     DT::datatable(ftbl, selection = 'single', rownames = FALSE, options = list(
-        scrollX = T, scrollY = "500px", lengthMenu = c(20, 50, 100)
+        scrollX = T, scrollY = "450px", lengthMenu = c(20, 50, 100)
     )
     )
 })

@@ -26,26 +26,27 @@ body <- dashboardBody(
                                    tabPanel(
                                        tags$b("FILE"),
                                        value = "file_in",
-                                       tags$div(tags$b("Input Method and Normalization Setting:"), class = "param_setting_title"),
+                                       tags$div(tags$b("Input Settings:"), class = "param_setting_title"),
                                        fluidRow(
-                                           column(6,
+                                           column(3,
                                                   selectInput("file_format", label = "Input file type", choices = list("Counts Directory" = "dir", "Counts Table" = "single", "PIVOT State" = "state"),selected = "single")
                                            ),
-                                           column(6,
+                                           column(4,
                                                   uiOutput("proc_method_ui")
-                                           )
+                                           ),
+                                           column(2, tags$br(), uiOutput("gene_length_ui")),
+                                           column(3, tags$br(), uiOutput("norm_details_ui"))
                                        ),
                                        uiOutput("deseq_threshold_ui"),
                                        uiOutput("norm_text_ui"),
+                                       tags$hr(),
+                                       tags$p("Choose if spike-ins or low count features should be excluded from the data BEFORE normalization:"),
                                        fluidRow(
-                                           column(6,
-                                                  uiOutput("gene_length_ui")
-                                           ),
-                                           column(6,
-                                                  uiOutput("norm_details_ui")
-                                           )
+                                           column(4, checkboxInput("exclude_ercc", tags$b("Exclude Spike-ins"), value = T)),
+                                           column(4, radioButtons("input_threshold_type", "Exclude features by:", choices = c("Row Mean" = "mean", "Row Sum" = "sum"), inline = T)),
+                                           column(4, uiOutput("input_threshold_ui"))
                                        ),
-                                       tags$p(),
+                                       tags$hr(),
                                        ##### count file input module #####
                                        conditionalPanel(
                                            "input.file_format == 'dir'",
@@ -78,31 +79,6 @@ body <- dashboardBody(
                                                class = "param_setting_title"
                                            ),
                                            pivot_fileInput_UI("single", format="compact")
-                                       ),
-
-                                       # Threshold
-                                       conditionalPanel(condition = "input.file_format == 'dir' || input.file_format == 'single'",
-                                                        tags$div(tags$b("Additional Input Settings:"), class = "param_setting_title"),
-                                                        fluidRow(
-                                                            column(6, radioButtons("input_threshold_type", "Choose pre-filtering type:", choices = c("Row Mean" = "mean", "Row Sum" = "sum"), inline = T)),
-                                                            column(6, uiOutput("input_threshold_ui"))
-                                                        )
-
-                                                        # ERCC isolation, no longer in PIVOT.data module
-                                                        # fluidRow(
-                                                        #     column(12,
-                                                        #            checkboxInput("ercc_isolation",
-                                                        #                          label = tags$span(
-                                                        #                              "Only analyze ERCC in ERCC module.",
-                                                        #                              shinyBS::tipify(
-                                                        #                                  bsButton("ercc_isolation_tooltip", label = NULL, icon = icon("question-circle"), style = "link", size = "extra-small"),
-                                                        #                                  title = "ERCC will not appear in modules like heatmap, PCA, etc. This exclusion of ERCC happens after DESeq normalization.",
-                                                        #                                  options = list(container = "body")
-                                                        #                              )
-                                                        #                          ),
-                                                        #                          value = T)
-                                                        #     )
-                                                        # )
                                        ),
 
                                        # upload state
@@ -436,8 +412,8 @@ body <- dashboardBody(
     tags$script(HTML("$('body').addClass('sidebar-mini sidebar-collapse');")),
 
     tags$head(
-        tags$script(src = "js/session.js"),
-        tags$script(src = "js/custom.js")
+        tags$script(src = "js/session.js")
+        #tags$script(src = "js/custom.js")
     )
 
 )

@@ -114,7 +114,8 @@ sidebar <- dashboardSidebar(
                 menuItem("Data",  icon = icon("table"),
                          menuSubItem("Input", tabName="data_input", icon = icon("angle-right")),
                          menuSubItem("Data Table", tabName="table", icon = icon("angle-right")),
-                         menuSubItem("Metadata Table", tabName="meta", icon = icon("angle-right"))
+                         menuSubItem("Metadata Table", tabName="meta", icon = icon("angle-right")),
+                         menuSubItem("Spike-in", tabName="ercc", icon = icon("angle-right"))
                 ),
                 side_ui,
 

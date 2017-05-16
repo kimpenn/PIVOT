@@ -41,33 +41,18 @@ pivot_dataScale <- function(input, output, session, r_data, order_by = NULL, kee
         nm <- as.data.frame(t(scale(t(df))))
         log_nm <- as.data.frame(t(scale(t(log10(df + 1)))))
 
-        if(ercc_iso) {
-            if(input$data_scale == "Counts (normalized)")
-                new_df <- df[!(rownames(df) %in% ercc$features),]
-            else if(input$data_scale == "Log10 Counts")
-                new_df <- log[!(rownames(log) %in% ercc$features),]
-            else if(input$data_scale == "Standardized Counts")
-                new_df <- nm[!(rownames(nm) %in% ercc$features),]
-            else if (input$data_scale == "Log10 & Standardized")
-                new_df <- log_nm[!(rownames(log_nm) %in% ercc$features),]
-            else if (input$data_scale == "Counts (raw)")
-                new_df <- raw[!(rownames(raw) %in% ercc$features),]
-            else if (input$data_scale == "Relative Frequency")
-                new_df <- generateRelativeFreq(raw[!(rownames(raw) %in% ercc$features),])
-        } else {
-            if(input$data_scale == "Counts (normalized)")
-                new_df <- df
-            else if(input$data_scale == "Log10 Counts")
-                new_df <- log
-            else if(input$data_scale == "Standardized Counts")
-                new_df <- nm
-            else if(input$data_scale == "Log10 & Standardized")
-                new_df <- log_nm
-            else if(input$data_scale == "Counts (raw)")
-                new_df <- raw
-            else if(input$data_scale == "Relative Frequency")
-                new_df <- generateRelativeFreq(raw)
-        }
+        if(input$data_scale == "Counts (normalized)")
+            new_df <- df
+        else if(input$data_scale == "Log10 Counts")
+            new_df <- log
+        else if(input$data_scale == "Standardized Counts")
+            new_df <- nm
+        else if(input$data_scale == "Log10 & Standardized")
+            new_df <- log_nm
+        else if(input$data_scale == "Counts (raw)")
+            new_df <- raw
+        else if(input$data_scale == "Relative Frequency")
+            new_df <- generateRelativeFreq(raw)
 
         if(!is.null(order_by) && order_by != "custom") {
             if(order_by == "none") {

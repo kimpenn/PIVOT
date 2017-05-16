@@ -14,7 +14,7 @@ rs_table <- reactive({
 
 ```{r echo = FALSE, warning=FALSE, message = FALSE}
 # Normalized Data
-DT::datatable(rs_table()$df, selection = 'single', options = list(scrollX = TRUE, scrollY = "600px", lengthMenu = c(20, 50, 100)))
+DT::datatable(rs_table()$df, selection = 'single', options = list(scrollX = TRUE, scrollY = "500px", lengthMenu = c(20, 50, 100)))
 ```
 
 
