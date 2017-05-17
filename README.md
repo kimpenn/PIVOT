@@ -16,7 +16,7 @@ saved, loaded and shared.
   * Upgrading R and Rstudio to the latest version (R > 3.2, Rstudio > 1.0.0) is strongly recommended. 
 
 ```
-# Load 
+# dependecies
 install.packages("devtools")
 library("devtools")
 source("http://bioconductor.org/biocLite.R")  
