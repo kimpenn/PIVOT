@@ -61,7 +61,12 @@ if('PIVOT.toolkit' %in% r_module) {
 
 if('PIVOT.analysis' %in% r_module) {
     side_ui <- list(
-        menuItem("Data Distribution", tabName = "data_distribution", icon = icon("area-chart")),
+        menuItem("Basic Statistics", icon = icon("area-chart"),
+                 menuSubItem("Data Table", tabName="table", icon = icon("angle-right")),
+                 menuSubItem("Metadata Table", tabName="meta", icon = icon("angle-right")),
+                 menuSubItem("Data Distribution", tabName = "data_distribution", icon = icon("angle-right")),
+                 menuSubItem("Spike-in", tabName="ercc", icon = icon("angle-right"))
+        ),
         menuItem("Differential Expression", icon = icon("eyedropper"),
                  deseq_sub_ui,
                  scde_sub_ui,
@@ -111,14 +116,8 @@ sidebar <- dashboardSidebar(
     hr(),
     ##################### Menu Module ###################
     sidebarMenu(id="tabs",
-                menuItem("Data",  icon = icon("table"),
-                         menuSubItem("Input", tabName="data_input", icon = icon("angle-right")),
-                         menuSubItem("Data Table", tabName="table", icon = icon("angle-right")),
-                         menuSubItem("Metadata Table", tabName="meta", icon = icon("angle-right")),
-                         menuSubItem("Spike-in", tabName="ercc", icon = icon("angle-right"))
-                ),
+                menuItem("Data Input",  icon = icon("table"), tabName="data_input"),
                 side_ui,
-
                 menuItem("Report", tabName = "report", icon = icon("file-pdf-o")),
                 #menuItem("User Manual", tabName = "manual_file", icon=icon("mortar-board")),
                 menuItem("About", tabName = "about", icon = icon("paw"))
