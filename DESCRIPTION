@@ -1,19 +1,19 @@
 Package: PIVOT.analysis
 Type: Package
-Title: PIVOT.analysis: Basic analysis module of PIVOT
+Title: PIVOT.analysis: Main interface of PIVOT
 Version: 1.0.0
 Author: Qin Zhu
 Maintainer: Qin Zhu <qinzhu@outlook.com>
-Description: Basic analysis module of PIVOT.
+Description: Main interface of PIVOT.
     Includes clustering, PCA, etc.
 Depends: R (>= 3.1.0),    
     shiny,
     shinydashboard,
     shinyBS,
-    PIVOT.data,
     igraph
 Imports: 
     RColorBrewer,
+    plotly,
     ggplot2,
     ggvis,
     networkD3,
@@ -33,7 +33,19 @@ Imports:
     VennDiagram,
     grid,
     DESeq2,
-    dendextend
+    dendextend,
+    plotly,
+    readr,
+    pryr,
+    dplyr,
+    DT (>= 0.2),
+    lubridate,
+    shinyFiles,
+    Rcpp,
+    rstudioapi,
+    edgeR,
+    visNetwork,
+    shinyjs
 License: http://kim.bio.upenn.edu/software/LICENSE
 Encoding: UTF-8
 LazyData: true
