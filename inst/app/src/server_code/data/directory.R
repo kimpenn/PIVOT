@@ -134,7 +134,7 @@ observeEvent(input$submit_dir, {
 
         # Extract and exclude ERCC
         r_data$ercc <- r_data$glb.raw[grep("ERCC(-|[.])\\d{5}", rownames(r_data$glb.raw)),]
-        if(input$exclude_ercc) {
+        if(input$exclude_ercc && nrow(r_data$ercc) > 0) {
             r_data$glb.raw<-r_data$glb.raw[-which(rownames(r_data$glb.raw) %in% rownames(r_data$ercc)), ]
         }
 
