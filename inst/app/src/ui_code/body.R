@@ -29,7 +29,9 @@ body <- dashboardBody(
                                        tags$div(tags$b("Input Settings:"), class = "param_setting_title"),
                                        fluidRow(
                                            column(3,
-                                                  selectInput("file_format", label = "Input file type", choices = list("Counts Directory" = "dir", "Counts Table" = "single", "PIVOT State" = "state"),selected = "single")
+                                                  selectInput("file_format", label = "Input file type",
+                                                              choices = list("Counts Directory" = "dir", "Counts Table" = "single", "PIVOT State" = "state"),
+                                                              selected = "single")
                                            ),
                                            column(4,
                                                   uiOutput("proc_method_ui")
@@ -37,7 +39,7 @@ body <- dashboardBody(
                                            column(2, tags$br(), uiOutput("gene_length_ui")),
                                            column(3, tags$br(), uiOutput("norm_details_ui"))
                                        ),
-                                       uiOutput("deseq_threshold_ui"),
+                                       uiOutput("norm_params_ui"),
                                        uiOutput("norm_text_ui"),
                                        tags$hr(),
                                        tags$p("Choose if spike-ins or low count features should be excluded from the data BEFORE normalization:"),

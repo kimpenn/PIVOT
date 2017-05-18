@@ -26,6 +26,8 @@ output$proc_method_ui <- renderUI({
                                    "Counts per Million (CPM)" = "CPM",
                                    "Reads per Kilobase per Million (RPKM)" = "RPKM",
                                    "Transcripts per Million (TPM)" = "TPM",
+                                   #"ERCC normalization with robust linear regression" = "ERCC-RLM",
+                                   "Census normalization" = "Census",
                                    "None" = "none"),
                     selected = "DESeq")
     } else {
@@ -58,27 +60,48 @@ output$norm_text_ui <- renderUI({
         tags$p("Requires raw read counts and gene lengths. Data is transformed to reads per kilobase per million (RPKM). ")
     } else if(input$proc_method == "TPM") {
         tags$p("Requires raw read counts and gene lengths. Data is transformed to transcripts per million (TPM). ")
+    } else if(input$proc_method == "ERCC-RLM") {
+        tags$p("Suggests relative expression value such as RPKM/TPM. Data is transformed to mRNAs per cell (RPC, absolute counts). ")
+    } else if(input$proc_method == "Census") {
+        tags$p("For single-cell RNA Seq data. Suggests relative expression value such as RPKM/TPM. Data is transformed to mRNAs per cell (RPC, absolute counts). ")
     } else if(input$proc_method == "none") {
         tags$p("Input does NOT need to be raw counts, can be any data that are suitable for direct analysis (PIVOT will assume the data has already been normalized by the user).")
     }
 })
 
 
-output$deseq_threshold_ui <- renderUI({
-    if(is.null(input$proc_method) || input$proc_method != "Modified_DESeq") return()
-    list(
-        sliderInput(inputId = "deseq_threshold",
-                    label = tags$span(
-                        "Include genes expressed in at least",
-                        shinyBS::tipify(
-                            bsButton("deseq_threshold_tooltip", label = NULL, icon = icon("question-circle"), style = "link", size = "extra-small"),
-                            title = "100% is exact DESeq, choose lower threshold to include more genes for normalization.",
-                            options = list(container = "body")
-                        )
-                    ),
-                    min = 0, max = 100, value = 70, step = 1, round = T,
-                    post = "% of the samples")
-    )
+output$norm_params_ui <- renderUI({
+    if(is.null(input$proc_method)) return()
+
+    if(input$proc_method == "Modified_DESeq") {
+        list(
+            sliderInput(inputId = "deseq_threshold",
+                        label = tags$span(
+                            "Include genes expressed in at least",
+                            shinyBS::tipify(
+                                bsButton("deseq_threshold_tooltip", label = NULL, icon = icon("question-circle"), style = "link", size = "extra-small"),
+                                title = "100% is exact DESeq, choose lower threshold to include more genes for normalization.",
+                                options = list(container = "body")
+                            )
+                        ),
+                        min = 0, max = 100, value = 70, step = 1, round = T,
+                        post = "% of the samples")
+        )
+    } else if(input$proc_method == "Census") {
+        list(
+            fluidRow(
+                column(3,
+                       shinyBS::tipify(
+                           numericInput("expected_capture_rate", "Expected capture rate", min = 0.01, max = 1, step = 0.01, value = 0.25),
+                           title = "the expected fraction of RNA molecules in the lysate that will be captured as cDNAs during reverse transcription",
+                           placement = "right", options = list(container = "body")
+                       )
+                ),
+                column(9)
+            )
+        )
+    }
+
 })
 
 # Gene lengths normalization ui
@@ -217,11 +240,11 @@ observeEvent(input$norm_details, {
         tags$li(paste("Normalization method of the current dataset:"), r_data$norm_param$method),
         gene_info,
         tags$br(),
-        tags$b("Size factor table"),
-        DT::dataTableOutput("size_factor_tbl"),
+        DT::dataTableOutput("norm_param_tbl"),
         tags$p(),
-        downloadButton("download_sizefactor", "Download", class = "btn-success btn_leftAlign")
+        downloadButton("download_norm_param", "Download", class = "btn-success btn_leftAlign")
     )
+
     showModal(modalDialog(
         title = "Normalization method of the current dataset",
         size = "m",
@@ -230,19 +253,24 @@ observeEvent(input$norm_details, {
     ))
 })
 
-output$size_factor_tbl <- DT::renderDataTable({
-    if(is.null(r_data$norm_param) || is.null(r_data$norm_param$sizeFactor)) return()
-    sizefactor <- as.data.frame(r_data$norm_param$sizeFactor)
-    DT::datatable(sizefactor, options = list(scrollY = "400px", paging = F, searching = F))
+output$norm_param_tbl <- DT::renderDataTable({
+    if(is.null(r_data$norm_param)) return()
+    if(!is.null(r_data$norm_param$sizeFactor)) {
+        DT::datatable(data.frame(size_factor = r_data$norm_param$sizeFactor), options = list(scrollY = "400px", paging = F, searching = F))
+    } else if(r_data$norm_param$method == "Census") {
+        DT::datatable(data.frame(t_estimate = r_data$norm_param$t_estimate, expected_total_mRNAs = r_data$norm_param$expected_total_mRNAs), options = list(scrollY = "400px", paging = F, searching = F))
+    }
 })
 
-output$download_sizefactor <- downloadHandler(
-    filename = function() { paste0("Sizefactor-",r_data$norm_param$method,".csv") },
+output$download_norm_param <- downloadHandler(
+    filename = function() { paste0("norm_info-",r_data$norm_param$method,".csv") },
     content = function(file) {
-        if(is.null(r_data$norm_param) || is.null(r_data$norm_param$sizeFactor)) return()
-        sizefactor <- as.data.frame(r_data$norm_param$sizeFactor)
-        colnames(sizefactor) <- "size_factor"
-        write.csv(sizefactor, file)
+        if(!is.null(r_data$norm_param$sizeFactor)) {
+            tbl<-data.frame(size_factor = r_data$norm_param$sizeFactor)
+        } else if(r_data$norm_param$method == "Census") {
+            tbl<-data.frame(t_estimate = r_data$norm_param$t_estimate, expected_total_mRNAs = r_data$norm_param$expected_total_mRNAs)
+        }
+        write.csv(tbl, file)
     }
 )
 

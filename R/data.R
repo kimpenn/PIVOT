@@ -170,6 +170,9 @@ init_meta <- function(r_data, type = "both") {
             r_data$sample_meta$total_raw_reads <- colSums(r_data$raw)
             if(r_data$norm_param$method %in% c("DESeq", "Modified_DESeq") ) {
                 r_data$sample_meta$deseq_size_factor <- r_data$norm_param$sizeFactor[r_data$sample_name,,drop = F]$size_factor
+            } else if(r_data$norm_param$method %in% c("ERCC-RLM", "Census")) {
+                r_data$sample_meta$t_estimate = r_data$norm_param$t_estimate
+                r_data$sample_meta$expected_total_mRNAs = r_data$norm_param$expected_total_mRNAs
             }
         }
 

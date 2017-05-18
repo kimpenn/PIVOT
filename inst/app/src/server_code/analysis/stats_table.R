@@ -117,13 +117,16 @@ output$design_pie <- render_Plotly({
     tbl<-as.data.frame(table(rsList$meta))
     colnames(tbl) <- c(rsList$group_by, "sample_number")
     pal = unique(rsList$meta_color[,1])
-    plot_ly(tbl, labels = as.formula(paste("~", rsList$group_by)), values = ~sample_number, type = 'pie',textposition = 'inside',
+
+    assign("tbl", tbl, env = .GlobalEnv)
+    assign("rsList", rsList, env = .GlobalEnv)
+    plotly::plot_ly(tbl, labels = as.formula(paste("~", rsList$group_by)), values = ~sample_number, type = 'pie',textposition = 'inside',
             textinfo = 'label+percent',
             insidetextfont = list(color = '#FFFFFF'),
             marker = list(colors = pal, line = list(color = '#FFFFFF', width = 1))) %>%
-        layout(title = paste("Pie chart of category", rsList$group_by),
+        plotly::layout(title = paste("Pie chart of category", rsList$group_by),
                xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-               yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE)) %>% config(displayModeBar = F)
+               yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE)) %>% plotly::config(displayModeBar = F)
 })
 
 output$sample_stats_tbl <- DT::renderDataTable({
@@ -142,14 +145,9 @@ output$download_sample_stats_tbl <- downloadHandler(
 )
 
 output$sample_plot_stats_ui <- renderUI({
-    req(r_data$norm_param$method)
-    options <- list("Number of genes expressed" = "num_genes_expressed", "Total raw counts" = "total_raw_reads")
-    if(r_data$norm_param$method %in% c("DESeq", "Modified_DESeq")) {
-        options$"Total normalized counts" <- "total_normalized_counts"
-        options$"DESeq size factor" <- "deseq_size_factor"
-    } else if (r_data$norm_param$method != "None"){
-        options$"Total normalized counts" <- "total_normalized_counts"
-    }
+    req(r_data$sample_meta)
+    options <- colnames(r_data$sample_meta)
+    names(options) <- options
     selectInput("sample_plot_stats", "Plot Stats",
                 choices = options
     )

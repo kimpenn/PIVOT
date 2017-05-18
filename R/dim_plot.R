@@ -257,7 +257,7 @@ pivot_Plot3d <- function(input, output, session, type = NULL, obj = NULL, proj =
             pal = NULL
         }
 
-        plot_ly(proj[,1:3], x = as.formula(paste0("~", dname, "1")), y = as.formula(paste0("~", dname, "2")), z = as.formula(paste0("~", dname, "3")), text = rownames(proj), color = minfo$meta[,1], colors = pal) %>%
+        plotly::plot_ly(proj[,1:3], x = as.formula(paste0("~", dname, "1")), y = as.formula(paste0("~", dname, "2")), z = as.formula(paste0("~", dname, "3")), text = rownames(proj), color = minfo$meta[,1], colors = pal) %>%
             add_markers() %>%
             layout(scene = list(xaxis = list(title = paste0(dname, "1")),
                                 yaxis = list(title =  paste0(dname, "2")),

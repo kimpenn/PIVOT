@@ -149,6 +149,7 @@ output$ercc_info_group_ui <- renderUI({
 # load ERCC info (data files from ERCC product website)
 erccStds <- read.table("src/built_in_files/ercc_standard_mix_conc.txt", header=T, row.names=1)
 erccStds$ERCC_ID <- make.names(erccStds$ERCC_ID)
+rownames(erccStds) <- erccStds$ERCC_ID
 
 output$ercc_std_tbl <- DT::renderDataTable({
     DT::datatable(erccStds, rownames = F,
@@ -160,7 +161,7 @@ output$download_ercc_std <- downloadHandler(
         "ERCC_standard_table.csv"
     },
     content = function(file) {
-        write.csv(erccStds, file)
+        write.csv(erccStds, file, row.names = F)
     }
 )
 
@@ -175,9 +176,9 @@ observe ({
     }
 
     if(input$ercc_mix_type == "mix1") {
-        conc = erccStds$concentration_in_Mix_1_.attomoles.ul.
+        conc = erccStds$conc_attomoles_ul_Mix1
     } else {
-        conc = erccStds$concentration_in_Mix_2_.attomoles.ul.
+        conc = erccStds$conc_attomoles_ul_Mix2
     }
 
     convert_ratio <- input$ercc_added * 602214.15/input$ercc_ratio

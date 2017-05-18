@@ -74,9 +74,6 @@ normalize_data <- function(method, params = NULL, raw) {
         } else {
             norm_param <- list(method = method, sizeFactor = sf)
         }
-    } else if(method == "none") {
-        norm_param <- list(method = method)
-        df <- raw
     } else if(method == "RPKM") {
         y <- edgeR::DGEList(counts=raw)
         df <- as.data.frame(edgeR::rpkm(y, gene.length = glen, normalized.lib.sizes=FALSE))
@@ -85,6 +82,22 @@ normalize_data <- function(method, params = NULL, raw) {
         y <- edgeR::DGEList(counts=raw)
         df <- as.data.frame(apply(raw, 2, function(col) {countToTpm(counts = col, effLen = glen)}))
         norm_param <- list(method = method, sizeFactor = y$samples %>% dplyr::select(-group))
+    } else if(method == "Census") {
+        if(is.null(params$expected_capture_rate)) {
+            stop("Expected capture rate required")
+        }
+        tryCatch({
+            rpc <- relative2abs_modified(as.matrix(raw), expected_capture_rate = params$expected_capture_rate, return_all = T)
+            norm_param <- list(method = method, t_estimate = rpc$t_estimate, expected_total_mRNAs = rpc$expected_total_mRNAs)
+            df <- as.data.frame(rpc$norm_cds)
+        },
+        error = function(e){
+            error_I <<- 1
+        }
+        )
+    } else if(method == "none") {
+        norm_param <- list(method = method)
+        df <- raw
     } else {
         stop("Not recognized normalization method.")
     }
@@ -205,7 +218,6 @@ countToTpm <- function(counts, effLen)
     denom <- log(sum(exp(rate)))
     exp(rate - denom + log(1e6))
 }
-
 
 
 

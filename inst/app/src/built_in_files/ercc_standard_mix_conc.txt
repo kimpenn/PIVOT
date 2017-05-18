@@ -1,4 +1,4 @@
-Re-sort_ID	ERCC_ID	subgroup	concentration_in_Mix_1_(attomoles/ul)	concentration_in_Mix_2_(attomoles/ul)	expected_fold-change_ratio	log2(Mix1/Mix2)
+Re-sort_ID	ERCC_ID	subgroup	conc_attomoles_ul_Mix1	conc_attomoles_ul_Mix2	expected_fold-change_ratio	log2(Mix1/Mix2)
 1	ERCC-00130	A	30000	7500	4	2
 2	ERCC-00004	A	7500	1875	4	2
 3	ERCC-00136	A	1875	468.75	4	2

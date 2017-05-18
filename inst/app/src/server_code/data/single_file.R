@@ -123,7 +123,7 @@ observeEvent(input$submit_single, {
             r_data$feature_list <- rownames(r_data$glb.raw)
 
             result<-normalize_data(method = input$proc_method,
-                                   params = list(gene_length = r_data$gene_len, deseq_threshold = input$deseq_threshold/100),
+                                   params = list(gene_length = r_data$gene_len, deseq_threshold = input$deseq_threshold/100, expected_capture_rate = input$expected_capture_rate),
                                    raw = r_data$glb.raw)
         }, error = function(e){
             error_I <<- 1
