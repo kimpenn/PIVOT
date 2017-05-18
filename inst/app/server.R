@@ -130,7 +130,7 @@ shinyServer(function(input, output, session) {
                 })
             } else {
                 isolate({
-                    stopApp("PIVOT closed. Relaunch using command 'pivot('launcher')'.")
+                    stopApp("PIVOT closed. Relaunch using command 'pivot()'.")
                 })
             }
 

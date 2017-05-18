@@ -178,7 +178,7 @@ output$sample_stats_ui <- renderUI({
         )
     } else {
         list(
-            plotly::plotlyOutput("sample_stats_plot"),
+            plotly::plotlyOutput("sample_subset_plot"),
             tags$br(),
             uiOutput("current_sample_ui"),
             uiOutput("plt_subset_btn_ui")
@@ -201,7 +201,7 @@ output$plt_subset_btn_ui <- renderUI({
     }
 })
 
-output$sample_stats_plot <- render_Plotly({
+output$sample_subset_plot <- render_Plotly({
     if(is.null(r_data$sample_meta) || is.null(input$sample_stats_plt_type) || input$sample_stats_plt_type == "cooks") return()
     r_data$glb.meta
     input$sample_stats_group

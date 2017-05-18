@@ -68,35 +68,49 @@ get_color_vector <- function(labels, pal="Set1", maxCol=9)
 
 #' Plot feature expression with ggplot
 #'
-#' @import ggplot2
+#' @import ggplot2 plotly
 #' @export
-feature_super_plot <- function(df, selected_gene, plot_by = "sample", meta = NULL, palette = "Set1", style = "box", log_scale = F, legend_pos = "top", textSize = 15, pointSize = 3){
+feature_plot <- function(df, selected_gene, plot_by = "sample", meta = NULL, palette = "Set1", style = "box", log_scale = F, legend_pos = "top", textSize = 15, pointSize = 3){
+
+    if(is.null(df) || nrow(df) == 0) {
+        return()
+    }
+
     if (is.null(meta)) {
         g1 <- ggplot(df, aes(x=sample, y=expression_level)) +
-            geom_point(size = pointSize) +
             theme(text = element_text(size=textSize), plot.title = element_text(hjust = 0.5)) +
             ggtitle(paste("Expression level of gene", selected_gene, "across samples"))
+        if(style == "points") {
+            g1 <- g1 + geom_point(size = pointSize)
+        } else if(style == "bar") {
+            g1 <- g1 + geom_bar(stat = "identity")
+        }
     } else {
-        if(is.null(style) || is.null(palette)) return(NULL)
+        if(is.null(palette)) return(NULL)
         df <- cbind(df, meta)
-        g1 <- ggplot(df, aes_string(x=plot_by, y="expression_level")) +
-            geom_point(position=position_jitter(w=0.1,h=0), size = pointSize, aes_string(colour = plot_by, group = plot_by)) +
-            ggtitle(paste0("Expression level of gene ", selected_gene))  +
-            theme(text = element_text(size=textSize), legend.position=legend_pos, plot.title = element_text(hjust = 0.5)) +
-            guides(fill=FALSE, alpha = F)
-        if(style == "box") {
+        g1 <- ggplot(df, aes_string(x=plot_by, y="expression_level"))
+        if(style == "bar") {
+            g1 <- ggplot(df, aes_string(x="sample", y="expression_level"))
+            g1 <- g1 + geom_bar(stat = "identity", aes_string(fill = plot_by))
+        } else if(style == "points") {
+            g1 <- g1 + geom_point(position=position_jitter(w=0.1,h=0), size = pointSize, aes_string(colour = plot_by, group = plot_by))
+        } else if(style == "box") {
             g1 <- g1 + geom_boxplot(aes_string(fill = plot_by, alpha = 0.2))
         } else if(style == "violin") {
             g1 <- g1 + geom_violin(aes_string(fill = plot_by, alpha = 0.2), trim = F)
         }
-        g1 <- g1 + scale_color_brewer(palette = palette) + scale_fill_brewer(palette = palette)
+        g1 <- g1 + scale_color_brewer(palette = palette) +
+            scale_fill_brewer(palette = palette) +
+            ggtitle(paste0("Expression level of gene ", selected_gene))  +
+            theme(text = element_text(size=textSize), legend.position=legend_pos, plot.title = element_text(hjust = 0.5)) +
+            guides(fill=FALSE, alpha = F)
     }
 
     if(log_scale) {
         g1 <- g1 + scale_y_log10(breaks=c(25,100,400))
     }
 
-    return(g1)
+    return(g1 + theme_minimal())
 }
 
 
@@ -178,7 +192,7 @@ pivot_featurePlot_UI <- function(id, meta, ids = NULL) {
     ns<- NS(id)
     if(!is.null(meta)) {
         color_ui <- pivot_colorBy_UI(ns("tbl_plt"), meta = meta, append_sample = T, bset = c("qualitative","diverging"), width = 6)
-        style_ui <- column(3, selectInput(ns("plt_style"), "Plot type", choices = list("Plot points" = "points", "Box plot" = "box", "Violin plot" = "violin")))
+        style_ui <- column(3, selectInput(ns("plt_style"), "Plot type", choices = list("Plot points" = "points", "Bar plot" = "bar", "Box plot" = "box", "Violin plot" = "violin")))
     } else {
         color_ui <-  NULL
         style_ui <- NULL
@@ -197,7 +211,7 @@ pivot_featurePlot_UI <- function(id, meta, ids = NULL) {
             style_ui
         ),
         fluidRow(
-            column(6, tags$p("Note if the data is already log scaled, use 'current scale' here (log twice otherwise).")),
+            column(6),
             column(3, plotGroup_ui),
             column(3, checkboxInput(ns("plt_interactive"), tags$p("Interactive Plot"), value = F))
         ),
@@ -231,7 +245,7 @@ pivot_featurePlot <- function(input, output, session, meta, df, gene, ids = NULL
         return(list(df = df, meta = meta, group_by = rsList$group_by, color_set = rsList$color_set))
     })
 
-    g0 <- feature_super_plot(plotObj()$df, gene, plot_by = plotObj()$group_by, plotObj()$meta, palette = plotObj()$color_set, style = input$plt_style, log_scale = input$plt_scale, legend_pos = "right")
+    g0 <- feature_plot(plotObj()$df, gene, plot_by = plotObj()$group_by, plotObj()$meta, palette = plotObj()$color_set, style = input$plt_style, log_scale = input$plt_scale, legend_pos = "right")
     output$ft_stats_plt <- renderPlot({
         req(plotObj())
         #assign("t1",plotObj(),env = .GlobalEnv)
@@ -239,7 +253,7 @@ pivot_featurePlot <- function(input, output, session, meta, df, gene, ids = NULL
     })
     output$ft_stats_plt_interactive <- plotly::renderPlotly({
         req(plotObj())
-        g<-feature_super_plot(plotObj()$df, gene, plot_by = plotObj()$group_by, plotObj()$meta, palette = plotObj()$color_set, style = input$plt_style, log_scale = input$plt_scale, legend_pos = "right", textSize = 12, pointSize = 2)
+        g<-feature_plot(plotObj()$df, gene, plot_by = plotObj()$group_by, plotObj()$meta, palette = plotObj()$color_set, style = input$plt_style, log_scale = input$plt_scale, legend_pos = "right", textSize = 12, pointSize = 2)
         plotly::ggplotly(g)
     })
 

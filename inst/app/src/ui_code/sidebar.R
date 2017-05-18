@@ -63,7 +63,7 @@ if('PIVOT.analysis' %in% r_module) {
     side_ui <- list(
         menuItem("Basic Statistics", icon = icon("area-chart"),
                  menuSubItem("Data Table", tabName="table", icon = icon("angle-right")),
-                 menuSubItem("Metadata Table", tabName="meta", icon = icon("angle-right")),
+                 menuSubItem("Sample/Feature Stats", tabName="meta", icon = icon("angle-right")),
                  menuSubItem("Data Distribution", tabName = "data_distribution", icon = icon("angle-right")),
                  menuSubItem("Spike-in", tabName="ercc", icon = icon("angle-right"))
         ),

@@ -17,16 +17,16 @@
 
 # Function From Hannah
 compute_mww<-function(counts, group1, group2) {
-    testRecords <- apply ( counts , 1 , function ( geneA ) { 
+    testRecords <- apply ( counts , 1 , function ( geneA ) {
         group1.counts <- as.numeric(as.character(geneA [ group1 ]))
-        group2.counts <- as.numeric(as.character(geneA [ group2 ]))      
+        group2.counts <- as.numeric(as.character(geneA [ group2 ]))
         testResult <- tryCatch({
             wilcox.test ( group1.counts , group2.counts , alternative = 'two.sided' , paired = FALSE, conf.int = T , conf.level = 0.95 )
         }, error = function(e) { # So here basically set those failed computations (because of tie) to NULL and later to NA in the table, the warnings are ignored here
             return(NULL)
         }
         )
-        
+
         if(!is.null(testResult)) {
             c ("Statistic" = testResult$statistic [[ 1 ]] , "P.value" = testResult$p.value [[ 1 ]], "group1.n" = length ( group1 ) , "group2.n" = length ( group2 ) ,
                "effectSize" = as.numeric(testResult$estimate) , "effectSize.CI.lower" = testResult$conf.int [ 1 ] , "effectSize.CI.upper" = testResult$conf.int [ 2 ] )
@@ -36,7 +36,7 @@ compute_mww<-function(counts, group1, group2) {
         }
 
     })
-    
+
     return(as.data.frame(t(testRecords)))
 }
 
@@ -46,10 +46,10 @@ output$mww_ui <- renderUI({
     if(is.null(r_data$group) || length(unique(r_data$group)) < 2) return({
         tags$li("This module requires group (condition) information.")
     })
-    
+
     groups <- as.list(as.character(unique(r_data$group)))
     names(groups) <- unique(r_data$group)
-    
+
     mww_group_ui <- list(
         wellPanel(
             fluidRow(
@@ -73,7 +73,7 @@ output$mww_ui <- renderUI({
     } else {
         batch_ui <- NULL
     }
-    
+
     list(
         enhanced_box(
             width = 12,
@@ -85,7 +85,7 @@ output$mww_ui <- renderUI({
             reportable = T,
             get_html = T,
             register_analysis= T,
-           
+
            tags$p("The Mann–Whitney U test is also called the Mann–Whitney–Wilcoxon (MWW), Wilcoxon rank-sum test (WRS), or Wilcoxon–Mann–Whitney test.", class = "citation"),
            a("https://en.wikipedia.org/wiki/Mann%E2%80%93Whitney_U_test", href = "https://en.wikipedia.org/wiki/Mann%E2%80%93Whitney_U_test"),
            hr(),
@@ -106,7 +106,7 @@ output$mww_ui <- renderUI({
            reportable = T,
            get_html = T,
            register_analysis= T,
-           
+
            wellPanel(
                fluidRow(
                    column(4, checkboxInput("mww_gene_plt_all", "Show counts in all groups", value = F)),
@@ -125,7 +125,7 @@ output$tbl_caption_ui <- renderUI({
     } else {
         tags$b(paste("Mann–Whitney U test Results of", r_data$mww_group[1], "vs", r_data$mww_group[2]))
     }
-    
+
 })
 
 output$download_mww_result_ui <- renderUI({
@@ -140,7 +140,7 @@ output$download_mww_result_ui <- renderUI({
 })
 
 output$download_mww_result <- downloadHandler(
-    filename = function() { 
+    filename = function() {
         "mann_whitney_results.csv"
     },
     content = function(file) {
@@ -149,7 +149,7 @@ output$download_mww_result <- downloadHandler(
         } else {
             tbl <- r_data$mww_results
         }
-        
+
         tbl<-tbl[order(tbl$P.value),]
         write.csv(tbl, file)
     }
@@ -161,10 +161,10 @@ observeEvent(input$perform_mww, {
     if(input$mww_group1 == input$mww_group2){
         session$sendCustomMessage(type = "showalert", "Groups must be different.")
         return()
-    } 
+    }
     withProgress(message = 'Processing...', value = 0.8, {
         sp1 <- names(r_data$group[r_data$group == input$mww_group1])
-        
+
         if(input$mww_group2 == "combined_rest") {
             sp2 <- names(r_data$group[r_data$group != input$mww_group1])
         } else {
@@ -211,40 +211,40 @@ output$mww_summary <- renderUI({
 # Gene plot
 
 output$mww_gene_plt <- renderPlot({
-    
+
     s = input$mww_result_tbl_row_last_clicked
     tbl<-as.data.frame(r_data$mww_results)
-    
-    if (length(s)) {    
-        r_data$mww_gene <- rownames(tbl[s, , drop = FALSE]) 
+
+    if (length(s)) {
+        r_data$mww_gene <- rownames(tbl[s, , drop = FALSE])
     } else {
         return()
     }
-    
+
     if(is.null(input$mww_gene_plt_type) || input$mww_gene_plt_type == "group") {
         v1<-r_data$df[r_data$mww_gene,]
         d<-data.frame(t(v1), group = as.character(r_data$group))
         colnames(d) <- c("expression_level", "group")
-        
+
         if(!is.null(input$mww_gene_plt_all) && input$mww_gene_plt_all) {
         } else {
             if(r_data$mww_group[2] != "combined_rest") {
                 d <- subset(d, group %in% c(r_data$mww_group[1], r_data$mww_group[2]))
             }
         }
-        
-        feature_super_plot(d, r_data$mww_gene, plot_group = "group",  style = input$mww_gene_plt_style, legend_pos = "top")
-        
+
+        feature_plot(d, r_data$mww_gene, plot_group = "group",  style = input$mww_gene_plt_style, legend_pos = "top")
+
     } else if(input$mww_gene_plt_type == "batch") {
         v1<-r_data$df[r_data$mww_gene,]
         d<-data.frame(t(v1), group = as.character(r_data$batch))
         colnames(d) <- c("expression_level", "batch")
 
-        feature_super_plot(d, r_data$mww_gene, plot_group = "batch", style = input$mww_gene_plt_style, legend_pos = "top")
+        feature_plot(d, r_data$mww_gene, plot_group = "batch", style = input$mww_gene_plt_style, legend_pos = "top")
     }
-    
+
 })
-    
+
 
 
 
