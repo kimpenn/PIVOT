@@ -17,6 +17,24 @@
 output$meta_ui <- renderUI({
     list(
         enhanced_box(width = 12,
+                     title = "Design Table",
+                     status = "custom2",
+                     solidHeader = T,
+                     fluidRow(
+                         column(7,
+                                DT::dataTableOutput("meta_tbl"),
+                                downloadButton("download_meta_tbl", "Download", class = "btn-success btn_rightAlign")
+                         ),
+                         column(5,
+                                fluidRow(
+                                    pivot_colorBy_UI("pie", meta = r_data$meta, append_none = F, multiple = F, width = 12)
+                                ),
+                                br(),
+                                plotly::plotlyOutput("design_pie")
+                         )
+                     )
+        ),
+        enhanced_box(width = 12,
                      title = "Sample Statistics",
                      status = "custom5",
                      solidHeader = T,
@@ -57,10 +75,8 @@ output$meta_ui <- renderUI({
                                             choices = c("Bar Plot" = "bar", "Histogram" = "histogram", "Density Plot" = "density"),
                                             selected = "bar")
                          ),
-                         column(3,
-                                uiOutput("sample_stats_group_ui")
-                         ),
-                         column(3, uiOutput("sample_bin_width_ui"))
+                         pivot_colorBy_UI("sample_stats", meta = r_data$meta, append_none = T, multiple = F, width = 4),
+                         column(2, uiOutput("sample_bin_width_ui"))
                      ),
                      plotly::plotlyOutput("sample_stats_plot")
         ),
@@ -79,6 +95,36 @@ output$meta_ui <- renderUI({
     )
 })
 
+output$meta_tbl <- DT::renderDataTable({
+    if(is.null(r_data$glb.meta)) return()
+    DT::datatable(r_data$glb.meta, selection = 'single',
+                  options = list(
+                      scrollX = T, scrollY = "400px", lengthMenu = c(20, 50, 100)
+                  )
+    )
+})
+
+output$download_meta_tbl <- downloadHandler(
+    filename = "meta_tbl.csv",
+    content = function(file) {
+        write.csv(r_data$glb.meta, file)
+    }
+)
+
+output$design_pie <- render_Plotly({
+    req(r_data$meta, ncol(r_data$meta) >= 2)
+    rsList <- callModule(pivot_colorBy, "pie", meta = r_data$meta)
+    tbl<-as.data.frame(table(rsList$meta))
+    colnames(tbl) <- c(rsList$group_by, "sample_number")
+    pal = unique(rsList$meta_color[,1])
+    plot_ly(tbl, labels = as.formula(paste("~", rsList$group_by)), values = ~sample_number, type = 'pie',textposition = 'inside',
+            textinfo = 'label+percent',
+            insidetextfont = list(color = '#FFFFFF'),
+            marker = list(colors = pal, line = list(color = '#FFFFFF', width = 1))) %>%
+        layout(title = paste("Pie chart of category", rsList$group_by),
+               xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+               yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE)) %>% config(displayModeBar = F)
+})
 
 output$sample_stats_tbl <- DT::renderDataTable({
     if(is.null(r_data$sample_meta)) return()
@@ -109,14 +155,6 @@ output$sample_plot_stats_ui <- renderUI({
     )
 })
 
-output$sample_stats_group_ui <- renderUI({
-    if(is.null(r_data$glb.meta) || ncol(r_data$glb.meta) < 2) return()
-    categories = colnames(r_data$glb.meta)[-1]
-    names(categories) <- categories
-    options <- as.list(categories)
-    options$None = "None"
-    selectInput("sample_stats_group", label = "Color by", choices = options)
-})
 
 output$sample_bin_width_ui <- renderUI({
     req(input$sample_plot_type %in% c("histogram", "density"))
@@ -128,15 +166,19 @@ output$sample_bin_width_ui <- renderUI({
 output$sample_stats_plot <- render_Plotly({
     req(r_data$sample_meta,input$sample_plot_stats)
     tbl <- r_data$sample_meta %>% tibble::rownames_to_column("sample")
-    if(!is.null(input$sample_stats_group) && input$sample_stats_group != "None") {
-        tbl$Group <- r_data$glb.meta[,input$sample_stats_group][match(tbl$sample,r_data$glb.meta[,1])]
+    rsList <- callModule(pivot_colorBy, "sample_stats", meta = r_data$meta)
+    if(!is.null(rsList$meta)) {
+        tbl$Group <- rsList$meta[,1]
+        pal = unique(rsList$meta_color[,1])
     } else {
         tbl$Group <- rep("sample", nrow(tbl))
+        pal = NULL
     }
 
     if(input$sample_plot_type == "bar") {
         plt1 <- tbl %>%
-            plotly::plot_ly(x = ~sample, y = as.formula(paste0("~", input$sample_plot_stats)), type = "bar", source = "selectSampleStats", color = as.character(tbl$Group)) %>%
+            plotly::plot_ly(x = ~sample, y = as.formula(paste0("~", input$sample_plot_stats)), type = "bar",
+                            source = "selectSampleStats", color = as.character(tbl$Group), colors = pal) %>%
             plotly::layout(margin = list(b=100))
     } else if(input$sample_plot_type == "density") {
         dens<-tapply(tbl[,input$sample_plot_stats], INDEX = tbl$Group, function(x){density(x,adjust = input$sample_stats_step)})
@@ -145,14 +187,15 @@ output$sample_stats_plot <- render_Plotly({
             y = unlist(lapply(dens, "[[", "y")),
             Group = rep(names(dens[!sapply(dens, is.null)]), each = length(dens[[1]]$x))
         )
-        plt1 <- plotly::plot_ly(df, x = ~x, y = ~y, color = ~Group, type  = "scatter", mode = "lines", fill = "tozeroy") %>%
+        plt1 <- plotly::plot_ly(df, x = ~x, y = ~y, color = ~Group, colors = pal,
+                                type  = "scatter", mode = "lines", fill = "tozeroy") %>%
             plotly::layout(xaxis = list(title = input$sample_plot_stats))
     } else if (input$sample_plot_type == "histogram") {
         start = min(tbl[,input$sample_plot_stats])
         end = max(tbl[,input$sample_plot_stats])
         plt1 <- plotly::plot_ly(tbl, x = as.formula(paste0("~", input$sample_plot_stats)), type = "histogram",
                                 xbins=list(start = start, end = end, size = (end - start)*input$sample_stats_step/2),
-                                autobinx=F, color = as.character(tbl$Group), opacity = 0.8)
+                                autobinx=F, color = as.character(tbl$Group), colors = pal, opacity = 0.8)
     }
     plt1
 })

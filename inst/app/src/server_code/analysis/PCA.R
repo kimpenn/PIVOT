@@ -32,7 +32,7 @@ output$pca_ui <- renderUI({
                        fluidRow(
                            column(3, pivot_dataScale_UI("pca", include = c("Counts (raw)", "Counts (normalized)", "Log10 Counts"), selected = "Log10 Counts")),
                            column(3, selectInput("pca_scale", label = "PCA Scale", choices = list("Scale to Unit Varience" = T, "None" = F))),
-                           pivot_colorBy_UI("pca", meta = r_data$meta, multiple = F, width = 6)
+                           pivot_colorBy_UI("pca", meta = r_data$meta, append_none = T, multiple = F, width = 6)
                        )
                    )
             )

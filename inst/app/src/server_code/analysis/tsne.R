@@ -33,11 +33,11 @@ output$tsne_ui <- renderUI({
                        fluidRow(
                            column(4, pivot_dataScale_UI("tsne", include = c("Counts (raw)", "Counts (normalized)", "Log10 Counts", "Standardized Counts", "Log10 & Standardized"), selected = "Log10 Counts")),
                            column(4, numericInput("tsne_perplexity", label = "Perplexity", min = 1, max = 50, value = 1, step = 1)),
-                           column(4, radioButtons("tsne_pca", label = "Perform initial PCA step?", choices = list("Yes" = "TRUE", "No" = "FALSE"), selected = "TRUE", inline = TRUE))
+                           column(4, numericInput("tsne_seed", label = "Set Seed", min = 1, max = 50, value = 1, step = 1))
                        ),
-                       tags$div(tags$b("Visualization Settings:"), class = "param_setting_title"),
                        fluidRow(
-                           pivot_colorBy_UI("tsne", meta = r_data$meta, multiple = F, width = 8)
+                           pivot_colorBy_UI("tsne", meta = r_data$meta, append_none = T, multiple = F, width = 8),
+                           column(4, radioButtons("tsne_pca", label = "Perform initial PCA step?", choices = list("Yes" = "TRUE", "No" = "FALSE"), selected = "TRUE", inline = TRUE))
                        )
                    )
             )
@@ -101,9 +101,9 @@ observe({
     }
 
     error_I <- 0
-
+    req(tsne_data, input$tsne_seed, input$tsne_pca)
     r_data$tsne <- tryCatch({
-        set.seed(1)
+        set.seed(input$tsne_seed)
         tsne_1d <- Rtsne::Rtsne(t(tsne_data),perplexity = input$tsne_perplexity, theta = 0, dims = 1, pca = as.logical(input$tsne_pca))
         tsne_2d <- Rtsne::Rtsne(t(tsne_data),perplexity = input$tsne_perplexity, theta = 0, dims = 2, pca = as.logical(input$tsne_pca))
         tsne_3d <- Rtsne::Rtsne(t(tsne_data),perplexity = input$tsne_perplexity, theta = 0, dims = 3, pca = as.logical(input$tsne_pca))

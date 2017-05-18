@@ -53,7 +53,6 @@ shinyServer(function(input, output, session) {
                 if(not_pressed(input$session_clear_sc) &&
                    not_pressed(input$exit_and_save) &&
                    not_pressed(input$return_btn_sc) &&
-                   not_pressed(input$return_btn_body) &&
                    is.null(input$uploadState)) {
 
                     assign(ip_inputs, reactiveValuesToList(input), envir = .GlobalEnv)
@@ -116,7 +115,7 @@ shinyServer(function(input, output, session) {
     })
 
     observe({
-        if(not_pressed(input$return_btn_sc) && not_pressed(input$return_btn_body) && not_pressed(input$exit_and_save)) return()
+        if(not_pressed(input$return_btn_sc) && not_pressed(input$exit_and_save)) return()
         # quit R, unless you are running an interactive session
         if(interactive()) {
             assign("r_state", reactiveValuesToList(input), envir = .GlobalEnv)

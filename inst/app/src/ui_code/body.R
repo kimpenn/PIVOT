@@ -153,7 +153,6 @@ body <- dashboardBody(
 
                     column(width = 4,
                            uiOutput("data_pv_ui")
-                           #uiOutput("return_btn_window")
                     )
                 ),
 

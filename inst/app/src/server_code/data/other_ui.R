@@ -143,12 +143,6 @@ output$input_feature_stats_tbl <- DT::renderDataTable({
 })
 
 
-output$return_btn_window <- renderUI({
-    enhanced_box(width = NULL,
-        tags$p("When data (and design info) are submitted, press this button to get back to launcher."),
-        actionButton("return_btn_body", label = "Return to Launcher", icon = icon("sign-out"), class = "btn-return btn_rightAlign", onclick = "setTimeout(function(){window.close();}, 100); ")
-    )
-})
 
 
 
