@@ -22,7 +22,7 @@ library("devtools")
 source("http://bioconductor.org/biocLite.R")  
 
 # Install PIVOT
-install_github("qinzhu/PIVOT.analysis")
+install_github("qinzhu/PIVOT")
 install_github("qinzhu/PIVOT.launcher")
 ```
  * (Optional but strongly recommended) Dependencies:
