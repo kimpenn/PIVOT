@@ -101,7 +101,6 @@ pivot_dataScale <- function(input, output, session, r_data, order_by = NULL, kee
 #'
 #' @description
 #' This is the UI part of the module.
-#' @import PIVOT.data
 #' @export
 pivot_dataScaleRange_UI <- function(id, bound = 500, value = 100, include = c("Counts (raw)", "Counts (normalized)", "Log10 Counts", "Standardized Counts", "Log10 & Standardized")) {
     ns<- NS(id)
@@ -140,7 +139,6 @@ pivot_dataScaleRange_UI <- function(id, bound = 500, value = 100, include = c("C
 #'
 #' @description
 #' This is the server part of the module.
-#' @import PIVOT.data
 #' @export
 pivot_dataScaleRange <- function(input, output, session, r_data, keep_stats = FALSE) {
 
