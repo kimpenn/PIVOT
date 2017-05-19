@@ -2,7 +2,7 @@
 #' Data normalization master function
 #'
 #' @export
-normalize_data <- function(method, params = NULL, raw) {
+normalize_data <- function(method, params = NULL, raw, ercc = NULL) {
     error_I <- 0
     # Gene lengths verification
     if(grepl("RPKM", method) || method == "TPM") {
@@ -41,7 +41,6 @@ normalize_data <- function(method, params = NULL, raw) {
                 dds <- DESeq2::DESeqDataSetFromMatrix(countData = raw, colData=samplesAll, design = ~ 1)
                 sf_list <- estimateSizeFactorsForMatrix_MK(raw, threshold = params$deseq_threshold)
                 DESeq2::sizeFactors(dds) <- sf_list$sf
-
                 norm_param <- list(method = method, sizeFactor = data.frame(size_factor = sf_list$sf), numGenes = sf_list$numGenes, deseq_threshold = params$deseq_threshold)
                 df <- as.data.frame(DESeq2::counts(dds, normalized=T))
             })
@@ -90,6 +89,29 @@ normalize_data <- function(method, params = NULL, raw) {
             rpc <- relative2abs_modified(as.matrix(raw), expected_capture_rate = params$expected_capture_rate, return_all = T)
             norm_param <- list(method = method, t_estimate = rpc$t_estimate, expected_total_mRNAs = rpc$expected_total_mRNAs)
             df <- as.data.frame(rpc$norm_cds)
+        },
+        error = function(e){
+            error_I <<- 1
+        }
+        )
+    } else if(method == "ERCC-RLM") {
+        if(any(sapply(list(params$expected_capture_rate, params$ercc_added,
+                       params$ercc_dilution, params$ercc_mix_type,
+                       params$ercc_detection_threshold, params$ercc_std), is.null))) {
+            stop("Missing required parameters")
+        }
+
+        tryCatch({
+            rpc <- relative2abs_modified(
+                as.matrix(raw), expected_capture_rate = params$expected_capture_rate, return_all = T,
+                ERCC_controls = as.matrix(ercc), ERCC_annotation = params$ercc_std, volume = params$ercc_added * 1e3, dilution = params$ercc_dilution,
+                mixture_type = as.numeric(params$ercc_mix_type), detection_threshold = params$ercc_detection_threshold
+            )
+            norm_param <- list(method = method, k_b_solution = rpc$k_b_solution, ercc_added = params$ercc_added, ercc_dilution = params$ercc_dilution,
+                               ercc_mix_type = as.numeric(params$ercc_mix_type), ercc_detection_threshold = params$ercc_detection_threshold)
+            df <- as.data.frame(rpc$norm_cds)
+            colnames(df) <- colnames(raw)
+            rownames(df) <- rownames(raw)
         },
         error = function(e){
             error_I <<- 1

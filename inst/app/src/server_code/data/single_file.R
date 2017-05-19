@@ -97,34 +97,49 @@ observeEvent(input$submit_single, {
     r_data$file_info$name <- inFile$name
 
     withProgress(message = 'Processing', value = 0, {
-        incProgress(0.3, detail = "Getting feature list...")
-        # Filter larger than threshold features
+        ### Feature exclusion
+        # Exclude low count genes
+        if(input$input_threshold_type == "mean")
+            r_data$glb.raw <- r_data$glb.raw[rowMeans(r_data$glb.raw) > input$min_cnt_avg, ] # The default filter is 0.
+        else if(input$input_threshold_type == "sum")
+            r_data$glb.raw <- r_data$glb.raw[rowSums(r_data$glb.raw) > input$min_cnt_sum, ]
+        else {
+            session$sendCustomMessage(type = "showalert", "Unknown threshold type.")
+            r_data <- init_state(r_data)
+            r_data <- clear_design(r_data)
+            return()
+        }
+
+        # Extract and exclude ERCC
+        r_data$ercc <- r_data$glb.raw[grep("ERCC(-|[.])\\d{5}", rownames(r_data$glb.raw)),]
+        if(grepl("ERCC", input$proc_method) && nrow(r_data$ercc) == 0) {
+            session$sendCustomMessage(type = "showalert", "No ERCC detected.")
+            r_data <- init_state(r_data)
+            r_data <- clear_design(r_data)
+            return()
+        }
+        if(input$exclude_ercc && nrow(r_data$ercc) > 0) {
+            r_data$glb.raw<-r_data$glb.raw[-which(rownames(r_data$glb.raw) %in% rownames(r_data$ercc)), ]
+        }
+
+        r_data$sample_name <- colnames(r_data$glb.raw)
+        r_data$feature_list <- rownames(r_data$glb.raw)
+        incProgress(0.1, detail = "Perform data normalization...")
         error_I <- 0
+
         tryCatch({
-            ### Feature exclusion
-            # Exclude low count genes
-            if(input$input_threshold_type == "mean")
-                r_data$glb.raw <- r_data$glb.raw[rowMeans(r_data$glb.raw) > input$min_cnt_avg, ] # The default filter is 0.
-            else if(input$input_threshold_type == "sum")
-                r_data$glb.raw <- r_data$glb.raw[rowSums(r_data$glb.raw) > input$min_cnt_sum, ]
-            else {
-                session$sendCustomMessage(type = "showalert", "Unknown threshold type.")
-                return()
-            }
-
-            # Extract and exclude ERCC
-            r_data$ercc <- r_data$glb.raw[grep("ERCC(-|[.])\\d{5}", rownames(r_data$glb.raw)),]
-
-            if(input$exclude_ercc && nrow(r_data$ercc) > 0) {
-                r_data$glb.raw<-r_data$glb.raw[-which(rownames(r_data$glb.raw) %in% rownames(r_data$ercc)), ]
-            }
-
-            r_data$sample_name <- colnames(r_data$glb.raw)
-            r_data$feature_list <- rownames(r_data$glb.raw)
-
             result<-normalize_data(method = input$proc_method,
-                                   params = list(gene_length = r_data$gene_len, deseq_threshold = input$deseq_threshold/100, expected_capture_rate = input$expected_capture_rate),
-                                   raw = r_data$glb.raw)
+                                   params = list(
+                                       gene_length = r_data$gene_len,
+                                       deseq_threshold = input$deseq_threshold/100,
+                                       expected_capture_rate = input$expected_capture_rate,
+                                       ercc_added = input$norm_ercc_added,
+                                       ercc_dilution = input$norm_ercc_ratio,
+                                       ercc_mix_type = input$norm_ercc_mix_type,
+                                       ercc_detection_threshold = input$ercc_detection_threshold,
+                                       ercc_std = erccStds
+                                   ),
+                                   raw = r_data$glb.raw, ercc = r_data$ercc)
         }, error = function(e){
             error_I <<- 1
         })

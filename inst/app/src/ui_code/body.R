@@ -36,7 +36,7 @@ body <- dashboardBody(
                                            column(4,
                                                   uiOutput("proc_method_ui")
                                            ),
-                                           column(2, tags$br(), uiOutput("gene_length_ui")),
+                                           column(2, uiOutput("gene_length_ui")),
                                            column(3, tags$br(), uiOutput("norm_details_ui"))
                                        ),
                                        uiOutput("norm_params_ui"),
@@ -44,7 +44,7 @@ body <- dashboardBody(
                                        tags$hr(),
                                        tags$p("Choose if spike-ins or low count features should be excluded from the data BEFORE normalization:"),
                                        fluidRow(
-                                           column(4, checkboxInput("exclude_ercc", tags$b("Exclude Spike-ins"), value = T)),
+                                           column(4, checkboxInput("exclude_ercc", tags$b("Exclude Spike-ins (except for ERCC module/normalization)"), value = T)),
                                            column(4, radioButtons("input_threshold_type", "Exclude features by:", choices = c("Row Mean" = "mean", "Row Sum" = "sum"), inline = T)),
                                            column(4, uiOutput("input_threshold_ui"))
                                        ),

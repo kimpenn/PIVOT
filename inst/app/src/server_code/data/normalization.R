@@ -26,7 +26,7 @@ output$proc_method_ui <- renderUI({
                                    "Counts per Million (CPM)" = "CPM",
                                    "Reads per Kilobase per Million (RPKM)" = "RPKM",
                                    "Transcripts per Million (TPM)" = "TPM",
-                                   #"ERCC normalization with robust linear regression" = "ERCC-RLM",
+                                   "ERCC normalization with robust linear regression" = "ERCC-RLM",
                                    "Census normalization" = "Census",
                                    "None" = "none"),
                     selected = "DESeq")
@@ -61,7 +61,7 @@ output$norm_text_ui <- renderUI({
     } else if(input$proc_method == "TPM") {
         tags$p("Requires raw read counts and gene lengths. Data is transformed to transcripts per million (TPM). ")
     } else if(input$proc_method == "ERCC-RLM") {
-        tags$p("Suggests relative expression value such as RPKM/TPM. Data is transformed to mRNAs per cell (RPC, absolute counts). ")
+        tags$p("Input: Relative expression values such as RPKM/TPM containing ERCC (in every sample). Data is transformed to mRNAs per cell (RPC, absolute counts). ")
     } else if(input$proc_method == "Census") {
         tags$p("For single-cell RNA Seq data. Suggests relative expression value such as RPKM/TPM. Data is transformed to mRNAs per cell (RPC, absolute counts). ")
     } else if(input$proc_method == "none") {
@@ -87,17 +87,19 @@ output$norm_params_ui <- renderUI({
                         min = 0, max = 100, value = 70, step = 1, round = T,
                         post = "% of the samples")
         )
-    } else if(input$proc_method == "Census") {
+    } else if(input$proc_method == "ERCC-RLM") {
         list(
             fluidRow(
+                column(3, numericInput("norm_ercc_added", label = "Amount of ERCC added (µL)", value = 0.9, min = 0, max = 100, step = .1)),
+                column(3, numericInput("norm_ercc_ratio", label = "ERCC dilution, 1 : ", value = 4000000, min = 0, max = 10e9, step = 100)),
+                column(3, selectInput("norm_ercc_mix_type", label = "Mix 1/2", choices = c("Mix 1" = 1, "Mix 2" = 2), selected = 1)),
                 column(3,
                        shinyBS::tipify(
-                           numericInput("expected_capture_rate", "Expected capture rate", min = 0.01, max = 1, step = 0.01, value = 0.25),
-                           title = "the expected fraction of RNA molecules in the lysate that will be captured as cDNAs during reverse transcription",
-                           placement = "right", options = list(container = "body")
+                           numericInput("ercc_detection_threshold", label = "Detection Threshold : ", value = 800, min = 0.01430512, max = 7500),
+                           title = "the lowest concentration of spikein transcript considered for the regression. Default is 800 which will ensure (almost) all included spike transcripts expressed in all the cells.",
+                           options = list(container = "body")
                        )
-                ),
-                column(9)
+                )
             )
         )
     }
@@ -112,8 +114,19 @@ gene_length$tbl <- NULL
 
 output$gene_length_ui <- renderUI({
     if(!is.null(input$proc_method)) {
-        if(grepl("RPKM", input$proc_method) || input$proc_method == "TPM")
-        actionButton("gene_length_custom_btn", label = "Upload Lengths", class = "btn-info")
+        if(grepl("RPKM", input$proc_method) || input$proc_method == "TPM") {
+            list(
+                tags$br(),
+                actionButton("gene_length_custom_btn", label = "Upload Lengths", class = "btn-info")
+            )
+        } else if(input$proc_method %in% c("Census", "ERCC-RLM")) {
+            shinyBS::tipify(
+                numericInput("expected_capture_rate", "RNA capture rate", min = 0.01, max = 1, step = 0.01, value = 0.25),
+                title = "the expected fraction of RNA molecules in the lysate that will be captured as cDNAs during reverse transcription",
+                placement = "right", options = list(container = "body")
+            )
+        }
+
     } else {
         return()
     }
@@ -232,6 +245,13 @@ observeEvent(input$norm_details, {
             tags$li(paste(paste("norm.factors: scaling factors computed using the", r_data$norm_param$method), "method.")),
             tags$li("effective.lib.size: product of the original library size and the scaling factor, in millions of reads.")
         )
+    } else if(grepl("ERCC", r_data$norm_param$method))  {
+        gene_info <- list(
+            tags$li(paste("ERCC added volumn:", r_data$norm_param$ercc_added)),
+            tags$li(paste("ERCC dilution: 1 :", r_data$norm_param$ercc_dilution)),
+            tags$li(paste("ERCC mixture type:", r_data$norm_param$ercc_mix_type)),
+            tags$li(paste("ERCC detection threshold:", r_data$norm_param$ercc_detection_threshold))
+        )
     } else {
         gene_info <- NULL
     }
@@ -259,6 +279,8 @@ output$norm_param_tbl <- DT::renderDataTable({
         DT::datatable(data.frame(size_factor = r_data$norm_param$sizeFactor), options = list(scrollY = "400px", paging = F, searching = F))
     } else if(r_data$norm_param$method == "Census") {
         DT::datatable(data.frame(t_estimate = r_data$norm_param$t_estimate, expected_total_mRNAs = r_data$norm_param$expected_total_mRNAs), options = list(scrollY = "400px", paging = F, searching = F))
+    } else if(r_data$norm_param$method == "ERCC-RLM") {
+        DT::datatable(r_data$norm_param$k_b_solution, options = list(scrollY = "400px", paging = F, searching = F))
     }
 })
 
@@ -269,6 +291,8 @@ output$download_norm_param <- downloadHandler(
             tbl<-data.frame(size_factor = r_data$norm_param$sizeFactor)
         } else if(r_data$norm_param$method == "Census") {
             tbl<-data.frame(t_estimate = r_data$norm_param$t_estimate, expected_total_mRNAs = r_data$norm_param$expected_total_mRNAs)
+        } else if(r_data$norm_param$method == "ERCC-RLM") {
+            tbl <- r_data$norm_param$k_b_solution
         }
         write.csv(tbl, file)
     }

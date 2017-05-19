@@ -146,11 +146,6 @@ output$ercc_info_group_ui <- renderUI({
 })
 
 
-# load ERCC info (data files from ERCC product website)
-erccStds <- read.table("src/built_in_files/ercc_standard_mix_conc.txt", header=T, row.names=1)
-erccStds$ERCC_ID <- make.names(erccStds$ERCC_ID)
-rownames(erccStds) <- erccStds$ERCC_ID
-
 output$ercc_std_tbl <- DT::renderDataTable({
     DT::datatable(erccStds, rownames = F,
                   options = list(scrollX = TRUE, scrollY = "350px", lengthMenu = c(20, 50, 100)))

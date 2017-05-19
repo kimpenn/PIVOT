@@ -14,6 +14,10 @@
 
 
 shinyServer(function(input, output, session) {
+    # load ERCC info (data files from ERCC product website)
+    erccStds <- read.table("src/built_in_files/ercc_standard_mix_conc.txt", header=T, row.names=1)
+    erccStds$ERCC_ID <- make.names(erccStds$ERCC_ID)
+    rownames(erccStds) <- erccStds$ERCC_ID
 
     lapply(list.files("src/server_code", pattern = "\\.(r|R)$", recursive = TRUE, full.names = TRUE), function(x){source(file = x, local = TRUE)})
 
