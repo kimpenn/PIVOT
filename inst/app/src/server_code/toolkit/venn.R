@@ -12,6 +12,9 @@ output$venn_ui <- renderUI({
                 solidHeader = T,
                 fluidRow(
                     column(6,
+                           tags$b("Input intructions:"),
+                           tags$p("If you have three feature lists produced by e.g., different DE methods, and you want to know what's their union and intersection.
+                                  You can upload each of them below (feature list as first column) and see the Venn diagram."),
                            tags$b("Upload lists"),
                            fluidRow(
                                column(6,

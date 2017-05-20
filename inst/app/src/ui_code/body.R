@@ -337,6 +337,13 @@ body <- dashboardBody(
                 br()
         ),
 
+        tabItem(tabName = "biomart",
+                uiOutput("biomart_ui"),
+                hr(),
+                br()
+        ),
+
+
         tabItem(tabName = "report",
                 uiOutput("report_ui")
 

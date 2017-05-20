@@ -73,7 +73,7 @@ observeEvent(input$submit_dir, {
     #print(input$dataFiles)
     if(is.null(input$dataFiles))
     {
-        session$sendCustomMessage(type = "showalert", "Give me something!")
+        session$sendCustomMessage(type = "showalert", "Please specify your data input.")
         return()
     }
 
