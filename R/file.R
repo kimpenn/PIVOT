@@ -130,7 +130,11 @@ pivot_featureInputModal_UI <- function(id, label = NULL) {
                        pivot_fileInput_UI(ns("ft_file"))
                    ),
 
-                   actionButton(ns("ft_submit"), "Submit List", class = "btn btn-info")
+                   fluidRow(
+                       column(6),
+                       column(3,actionButton(ns("ft_submit"), "Submit List", class = "btn btn-info")),
+                       column(3,uiOutput(ns("ft_submit_img")))
+                   )
             ),
             column(6,
                    conditionalPanel(
@@ -164,6 +168,7 @@ pivot_featureInputModal <- function(input, output, session, r_data, match_rdata 
 
     flist<-reactive({
         input$ft_submit
+        req(input$input_type)
         isolate({
             # First process the marker feature file and get the list
             if(input$input_type == "upload") {
@@ -206,6 +211,13 @@ pivot_featureInputModal <- function(input, output, session, r_data, match_rdata 
             return(flist)
         })
     })
+
+    output$ft_submit_img <- renderUI({
+        if(is.null(flist())) return()
+        img(src = "button_ok.png", width = 35, height = 35)
+    })
+
+
     return(flist())
 }
 

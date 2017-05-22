@@ -54,7 +54,7 @@ if('PIVOT.network' %in% r_module) {
 if('PIVOT.toolkit' %in% r_module) {
     toolkit_side_ui <- menuItem("Toolkit", icon = icon("wrench"),
              menuSubItem("Venn Diagram", tabName = "venn", icon = icon("angle-right")),
-             menuSubItem("BioMart", tabName = "biomart", icon = icon("angle-right"))
+             menuSubItem("Gene Annotation", tabName = "biomart", icon = icon("angle-right"))
     )
 } else {
     toolkit_side_ui <- NULL
