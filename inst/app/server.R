@@ -19,30 +19,25 @@ shinyServer(function(input, output, session) {
     erccStds$ERCC_ID <- make.names(erccStds$ERCC_ID)
     rownames(erccStds) <- erccStds$ERCC_ID
 
-    lapply(list.files("src/server_code", pattern = "\\.(r|R)$", recursive = TRUE, full.names = TRUE), function(x){source(file = x, local = TRUE)})
-
+    # load previous state if available
     ip_inputs <- paste0("r_state")
     ip_data <- paste0("r_data")
     ip_module <- paste0("r_module")
+    if (exists("r_state") && exists("r_data")) {
+        r_data <- do.call(reactiveValues, r_data)
+        r_state <- r_state
+        rm(r_data, r_state, envir = .GlobalEnv)
+    } else {
+        r_state <- list()
+        r_data <- init_state(reactiveValues())
+    }
+
+    lapply(list.files("src/server_code", pattern = "\\.(r|R)$", recursive = TRUE, full.names = TRUE), function(x){source(file = x, local = TRUE)})
 
     if(!exists("r_module")) {
         r_module <- c('PIVOT.analysis')
     } else {
         r_module <- r_module
-    }
-
-    # load previous state if available
-    if (exists("r_state") && exists("r_data")) {
-        r_data <- do.call(reactiveValues, r_data)
-        r_state <- r_state
-        rm(r_data, r_state, envir = .GlobalEnv)
-    } else if (exists(ip_inputs) && exists(ip_data)) {
-        r_data <- do.call(reactiveValues, get(ip_data))
-        r_state <- get(ip_inputs)
-        rm(list = c(ip_inputs, ip_data), envir = .GlobalEnv)
-    } else {
-        r_state <- list()
-        r_data <- init_state(reactiveValues())
     }
 
     r_env <<- pryr::where("r_data")

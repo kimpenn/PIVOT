@@ -123,7 +123,7 @@ pivot_featureInputModal_UI <- function(id, label = NULL) {
                    selectInput(ns("input_type"), "Input Method:", choices = list("Manually Input" = "manual", "Upload Feature List" = "upload")),
                    conditionalPanel(
                        sprintf("input['%s'] == 'manual'", ns("input_type")),
-                       tags$p("Please enter feature names in the right text box. Names should be separated by an <ENTER> (one line for one feature).")
+                       tags$p("Please enter features in the right text box. Names should be separated by an <ENTER> (one line for one feature).")
                    ),
                    conditionalPanel(
                        sprintf("input['%s'] == 'upload'", ns("input_type")),
@@ -135,11 +135,11 @@ pivot_featureInputModal_UI <- function(id, label = NULL) {
             column(6,
                    conditionalPanel(
                        sprintf("input['%s'] == 'manual'", ns("input_type")),
-                       textareaInput(ns("manual_genes"), "Feature Manual Input:", placeholder = "Type feature names here (separated by an <ENTER>).", rows = 15)
+                       textareaInput(ns("manual_genes"), "Feature Manual Input:", placeholder = "Type features here (separated by an <ENTER>).", rows = 15)
                    ),
                    conditionalPanel(
                        sprintf("input['%s'] == 'upload'", ns("input_type")),
-                       tags$p("[feature name in 1st column, case insensitive]"),
+                       tags$p("[feature in 1st column, case insensitive]"),
                        pivot_filePreview_UI(ns("ft_preview"))
                    )
             )
@@ -155,7 +155,7 @@ pivot_featureInputModal_UI <- function(id, label = NULL) {
 #' @description
 #' This is the server part of the module.
 #' @export
-pivot_featureInputModal <- function(input, output, session, r_data) {
+pivot_featureInputModal <- function(input, output, session, r_data, match_rdata = T) {
     observe({
         df <- callModule(pivot_fileInput, "ft_file")
         callModule(pivot_filePreview, "ft_preview", df$df)
@@ -183,20 +183,26 @@ pivot_featureInputModal <- function(input, output, session, r_data) {
             } else {
                 return()
             }
-            cur_flist <- rownames(r_data$df)
 
-            flist <- cur_flist[match(toupper(marker_names), toupper(cur_flist))]
-            unmatch <- marker_names[which(!toupper(marker_names) %in% toupper(cur_flist))]
-            flist <- flist[!is.na(flist)]
+            if(match_rdata) {
+                cur_flist <- rownames(r_data$df)
+                flist <- cur_flist[match(toupper(marker_names), toupper(cur_flist))]
+                unmatch <- marker_names[which(!toupper(marker_names) %in% toupper(cur_flist))]
+                flist <- flist[!is.na(flist)]
+                if(length(unmatch)) {
+                    message_gl <- paste0(length(unmatch)," features in your feature list (", length(marker_names),") are not found in the current dataset.")
+                    session$sendCustomMessage(type = "showalert", message_gl)
+                }
+            } else {
+                flist <- marker_names
+            }
+
 
             if(length(flist) > 5000) {
                 session$sendCustomMessage(type = "showalert", "Exceed maximum number of features (5000) allowed.")
                 return()
             }
-            if(length(unmatch)) {
-                message_gl <- paste0(length(unmatch)," features in your feature list (", length(marker_names),") are not found in the current dataset.")
-                session$sendCustomMessage(type = "showalert", message_gl)
-            }
+
             return(flist)
         })
     })

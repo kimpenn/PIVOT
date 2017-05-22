@@ -4,7 +4,7 @@
 \alias{pivot_featureInputModal}
 \title{a wrapper for feature input and preview in Modal}
 \usage{
-pivot_featureInputModal(input, output, session, r_data)
+pivot_featureInputModal(input, output, session, r_data, match_rdata = T)
 }
 \description{
 This is the server part of the module.

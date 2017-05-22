@@ -31,7 +31,7 @@ output$hm_ui <- renderUI({
             register_analysis = T,
 
             tags$div(tags$b("General Settings:"), class = "param_setting_title"),
-            tags$p("Heatmap support plotting of up to 1000 features. Please rank your feature. The top ranked features will be plotted."),
+            tags$p("Heatmap support plotting of up to 10000 features. Please rank your feature. The top ranked features will be plotted."),
             pivot_dataScaleRange_UI("ft_hmap", bound = nrow(r_data$df)),
             tags$div(tags$b("Heatmap Settings:"), class = "param_setting_title"),
             fluidRow(

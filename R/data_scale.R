@@ -175,8 +175,8 @@ pivot_dataScaleRange <- function(input, output, session, r_data, keep_stats = FA
                 session$sendCustomMessage(type = "showalert", "Max must be larger than min by at least 1!")
                 return()
             }
-            if(input$max_rank - input$min_rank + 1 > 1000) {
-                session$sendCustomMessage(type = "showalert", "You specified more than 1000 features, please choose less.")
+            if(input$max_rank - input$min_rank + 1 > 10000) {
+                session$sendCustomMessage(type = "showalert", "You specified more than 10000 features, please choose less.")
                 return()
             }
             updateSliderInput(session, "feature_range",
