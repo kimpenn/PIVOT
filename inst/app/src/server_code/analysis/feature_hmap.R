@@ -35,8 +35,8 @@ output$hm_ui <- renderUI({
             pivot_dataScaleRange_UI("ft_hmap", bound = nrow(r_data$df)),
             tags$div(tags$b("Heatmap Settings:"), class = "param_setting_title"),
             fluidRow(
-                column(4, selectInput("hm_sp_order_type", "Sample (Column) Order", choices = list("Order sample by hierarchical cluster" = "hc", "Do not cluster sample" = "io"), selected = "hc")),
-                column(4, selectInput("hm_ft_order_type", "Feature (Row) Order", choices = list("Order feature by hierarchical cluster" = "hc", "Do not cluster feature" = "io"), selected = "hc"))
+                column(4, selectInput("hm_sp_order_type", "Sample (Column) Order", choices = list("Order sample by hierarchical cluster" = "hc", "Do not cluster sample" = "no"), selected = "hc")),
+                column(4, selectInput("hm_ft_order_type", "Feature (Row) Order", choices = list("Order feature by hierarchical cluster" = "hc", "Do not cluster feature" = "no"), selected = "hc"))
             ),
             uiOutput("hm_sp_hc_control"),
             uiOutput("hm_ft_hc_control"),
@@ -63,7 +63,8 @@ output$hm_ui <- renderUI({
 })
 
 output$hm_sp_hc_control <- renderUI({
-    if(input$hm_sp_order_type == "io") return()
+    req(input$hm_sp_order_type)
+    if(input$hm_sp_order_type == "no") return()
     fluidRow(
         column(4, selectInput("hm_sp_dist_method", "Sample distance", choices = list("Euclidean" = "euclidean", "Maximum" = "maximum", "Manhattan" = "manhattan", "Canberra" = "canberra", "Binary" = "binary", "Minkowski" = "minkowski", "Correlation Distance" = "corr"), selected = "euclidean")),
         uiOutput("hm_sp_corr_ui"),
@@ -72,7 +73,8 @@ output$hm_sp_hc_control <- renderUI({
 })
 
 output$hm_ft_hc_control <- renderUI({
-    if(input$hm_ft_order_type == "io") return()
+    req(input$hm_ft_order_type)
+    if(input$hm_ft_order_type == "no") return()
     fluidRow(
         column(4, selectInput("hm_ft_dist_method", "Feature distance", choices = list("Euclidean" = "euclidean", "Manhattan" = "manhattan", "Correlation Distance (1-r)" = "corr1", "Absolute Correlation (1-|r|)" = "corr2"), selected = "euclidean")),
         uiOutput("hm_ft_corr_ui"),
@@ -96,13 +98,13 @@ output$hm_ft_corr_ui <- renderUI({
 
 # rank by fano factor
 
-hmList <- reactive({
-    rsList <- callModule(pivot_dataScaleRange, "ft_hmap", r_data)
-})
+hmList <- callModule(pivot_dataScaleRange, "ft_hmap", r_data)
+
 
 # sample clustering result
 hm_sp_dend <- reactive({
-    if(is.null(hmList()$df) || is.null(input$hm_sp_order_type) || is.null(input$hm_sp_dist_method)) return()
+    req(hmList(), input$hm_sp_order_type, input$hm_sp_dist_method)
+
     if(input$hm_sp_order_type == 'hc') {
         if(input$hm_sp_dist_method == 'corr') {
             as.dist(1 - cor(hmList()$df, method = input$hm_sp_cor_method)) %>% hclust(method = input$hm_sp_agglo_method) %>% as.dendrogram()
@@ -116,7 +118,7 @@ hm_sp_dend <- reactive({
 })
 
 hm_ft_dend <- reactive({
-    if(is.null(hmList()$df) || is.null(input$hm_ft_order_type) || is.null(input$hm_ft_dist_method)) return()
+    req(hmList(), input$hm_ft_order_type, input$hm_ft_dist_method)
     if(input$hm_ft_order_type == 'hc') {
         if(input$hm_ft_dist_method == 'corr1') {
             as.dist(1 - cor(t(hmList()$df), method = input$hm_ft_cor_method)) %>% hclust(method = input$hm_ft_agglo_method) %>% as.dendrogram()
@@ -138,7 +140,7 @@ hm_ft_dend <- reactive({
 # })
 
 output$ft_hmap_gplots <- renderPlot({
-    if(is.null(hmList()$df) || is.null(hm_sp_dend()) || is.null(hm_ft_dend())) return ()
+    if(is.null(hmList()) || is.null(hm_sp_dend()) || is.null(hm_ft_dend())) return ()
     if(input$hm_sp_order_type == 'hc' && input$hm_ft_order_type == 'hc') {
         dend1 <- 'both'
     } else if(input$hm_sp_order_type == 'hc' && input$hm_ft_order_type != 'hc') {
@@ -167,7 +169,7 @@ output$ft_hmap_gplots <- renderPlot({
 })
 
 output$ft_hmap_plotly <- plotly::renderPlotly({
-    if(is.null(hmList()$df) || is.null(hm_sp_dend()) || is.null(hm_ft_dend())) return ()
+    if(is.null(hmList()) || is.null(hm_sp_dend()) || is.null(hm_ft_dend())) return ()
     if(input$hm_sp_order_type == 'hc' && input$hm_ft_order_type == 'hc') {
         dend1 <- 'both'
     } else if(input$hm_sp_order_type == 'hc' && input$hm_ft_order_type != 'hc') {

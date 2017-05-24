@@ -91,21 +91,12 @@ output$cor_ft_ui <- renderUI({
 })
 
 
-cor_ft_data <- reactive({
-    if(is.null(r_data$glb.raw)) return()
-    rsList <- callModule(pivot_dataScaleRange, "cor_ft", r_data)
-    cor_ft_data <- rsList$df
-    if(is.null(cor_ft_data)) {
-        return(NULL)
-    } else {
-        return(cor_ft_data)
-    }
-})
+cor_ft_data <- callModule(pivot_dataScaleRange, "cor_ft", r_data)
 
 
 output$cor_ft_exceed_max_plot <- renderUI({
     if(is.null(cor_ft_data())) return()
-    if(nrow(cor_ft_data()) > 1000) {
+    if(nrow(cor_ft_data()$df) > 1000) {
         tags$p("Exceeding maximum plotting capability (1000).")
     } else {
         return()
@@ -113,8 +104,8 @@ output$cor_ft_exceed_max_plot <- renderUI({
 })
 
 output$cor_ft_gplots <- renderPlot({
-    if(is.null(cor_ft_data()) || nrow(cor_ft_data()) > 1000) return ()
-    feature_cor <- cor(t(cor_ft_data()), method = input$cor_ft_method)
+    if(is.null(cor_ft_data()) || nrow(cor_ft_data()$df) > 1000) return ()
+    feature_cor <- cor(t(cor_ft_data()$df), method = input$cor_ft_method)
 
     hclustfun1 = function(x, method=input$cor_ft_agglo_method, ...) hclust(x, method=method, ...)
 
@@ -130,8 +121,8 @@ output$cor_ft_gplots <- renderPlot({
 })
 
 output$cor_ft_plotly <- plotly::renderPlotly({
-    if(is.null(cor_ft_data()) || nrow(cor_ft_data()) > 1000) return ()
-    feature_cor <- cor(t(cor_ft_data()), method = input$cor_ft_method)
+    if(is.null(cor_ft_data()) || nrow(cor_ft_data()$df) > 1000) return ()
+    feature_cor <- cor(t(cor_ft_data()$df), method = input$cor_ft_method)
 
     hclustfun1 = function(x, method=input$cor_ft_agglo_method, ...) hclust(x, method=method, ...)
 

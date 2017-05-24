@@ -5,21 +5,12 @@
 
 ```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 10, fig.height = 10}
 
-cor_ft_data <- reactive({
-    if(is.null(r_data$glb.raw)) return()
-    rsList <- callModule(pivot_dataScaleRange, "cor_ft", r_data)
-    cor_ft_data <- rsList$df
-    if(is.null(cor_ft_data)) {
-        return(NULL)
-    } else {
-        return(cor_ft_data)
-    }
-})
+cor_ft_data <- callModule(pivot_dataScaleRange, "cor_ft", r_data)
 
 
 if(input$cor_ft_package == 'gplots') {
-    if(is.null(cor_ft_data()) || nrow(cor_ft_data()) > 1000) return ()
-    feature_cor <- cor(t(cor_ft_data()), method = input$cor_ft_method)
+    if(is.null(cor_ft_data()) || nrow(cor_ft_data()$df) > 1000) return ()
+    feature_cor <- cor(t(cor_ft_data()$df), method = input$cor_ft_method)
 
     hclustfun1 = function(x, method=input$cor_ft_agglo_method, ...) hclust(x, method=method, ...)
 
@@ -33,8 +24,8 @@ if(input$cor_ft_package == 'gplots') {
               distfun=distfun1, hclustfun = hclustfun1,
               trace="none", col=get_heatmap_color(input$cor_ft_hmcolor), key.par=list(cex.axis=1), key.title=NA, key.xlab="  ", key.ylab=NA, keysize=1, density.info="density", margins=c(8,6))
 } else {
-    if(is.null(cor_ft_data()) || nrow(cor_ft_data()) > 1000) return ()
-    feature_cor <- cor(t(cor_ft_data()), method = input$cor_ft_method)
+    if(is.null(cor_ft_data()) || nrow(cor_ft_data()$df) > 1000) return ()
+    feature_cor <- cor(t(cor_ft_data()$df), method = input$cor_ft_method)
 
     hclustfun1 = function(x, method=input$cor_ft_agglo_method, ...) hclust(x, method=method, ...)
 

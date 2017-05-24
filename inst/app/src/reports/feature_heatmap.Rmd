@@ -3,13 +3,11 @@
 
 ```{r echo = FALSE, warning=FALSE, message = FALSE}
 # Preprocessing
-hmList <- reactive({
-    rsList <- callModule(pivot_dataScaleRange, "ft_hmap", r_data)
-})
+hmList <-callModule(pivot_dataScaleRange, "ft_hmap", r_data)
 
 # sample clustering result
 hm_sp_dend <- reactive({
-    if(is.null(hmList()$df) || is.null(input$hm_sp_order_type) || is.null(input$hm_sp_dist_method)) return()
+    if(is.null(hmList()) || is.null(input$hm_sp_order_type) || is.null(input$hm_sp_dist_method)) return()
     if(input$hm_sp_order_type == 'hc') {
         if(input$hm_sp_dist_method == 'corr') {
             as.dist(1 - cor(hmList()$df, method = input$hm_sp_cor_method)) %>% hclust(method = input$hm_sp_agglo_method) %>% as.dendrogram()
@@ -23,7 +21,7 @@ hm_sp_dend <- reactive({
 })
 
 hm_ft_dend <- reactive({
-    if(is.null(hmList()$df) || is.null(input$hm_ft_order_type) || is.null(input$hm_ft_dist_method)) return()
+    if(is.null(hmList()) || is.null(input$hm_ft_order_type) || is.null(input$hm_ft_dist_method)) return()
     if(input$hm_ft_order_type == 'hc') {
         if(input$hm_ft_dist_method == 'corr1') {
             as.dist(1 - cor(t(hmList()$df), method = input$hm_ft_cor_method)) %>% hclust(method = input$hm_ft_agglo_method) %>% as.dendrogram()
@@ -42,7 +40,7 @@ hm_ft_dend <- reactive({
 ```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 10, fig.height = 10}
 
 if(input$hmap_package == 'gplots'){ # heatmap.2
-    if(is.null(hmList()$df) || is.null(hm_sp_dend()) || is.null(hm_ft_dend())) return ()
+    if(is.null(hmList()) || is.null(hm_sp_dend()) || is.null(hm_ft_dend())) return ()
     if(input$hm_sp_order_type == 'hc' && input$hm_ft_order_type == 'hc') {
         dend1 <- 'both'
     } else if(input$hm_sp_order_type == 'hc' && input$hm_ft_order_type != 'hc') {

@@ -1,100 +1,25 @@
+---
+title: ''
+author: ''
+date: '2017-05-24'
+output:
+  html_document:
+    toc: true
+    number_sections: true
+    theme: default
+---
 
-# Spike_in Analysis
+For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+You can embed an R code chunk like this:
 
-**ERCC Scale:** `r input$ercc_scale`
-
-**Amount of ERCC added (µL):** `r input$ercc_added`
-
-**ERCC dilution, 1 :** `r input$ercc_ratio`
-
-**Mix Type:** `r input$ercc_mix_type`
-
-## ERCC Counts Detected
-
-```{r echo = FALSE, warning=FALSE, message = FALSE}
-if(is.null(r_data$ercc_wt_mol)) return()
-    df_wt_mol <- r_data$ercc_wt_mol %>% dplyr::select(molecules, dplyr::one_of(r_data$sample_name))
-    DT::datatable(df_wt_mol, options = list(scrollX = TRUE, scrollY = "350px", lengthMenu = c(20, 50, 100)))
+```{r}
+summary(cars)
 ```
 
+You can also embed plots, for example:
 
-## ERCC Distribution
-
-```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 10, fig.height = 8}
-# Normalized Data
-    if(is.null(r_data$ercc_wt_mol)) return()
-    df_wt_mol <- r_data$ercc_wt_mol %>% dplyr::select(molecules, dplyr::one_of(r_data$sample_name))
-    plotERCCDistribution(df_wt_mol)
+```{r, echo=FALSE}
+plot(cars)
 ```
 
-**Coefficient of Variation: **
-
-```{r echo = FALSE, warning=FALSE, message = FALSE}
-    if(is.null(r_data$ercc_wt_mol)) return()
-    df_wt_mol <- r_data$ercc_wt_mol %>% dplyr::select(molecules, dplyr::one_of(r_data$sample_name))
-    DT::datatable(erccCv(df_wt_mol))
-```
-
-## ERCC per Sample
-
-```{r echo = FALSE, warning=FALSE, message = FALSE}
-if(input$ercc_scale == "Counts (raw)") {
-        tmp_ercc <- r_data$ercc[, r_data$sample_name]
-    } else {
-        tmp_ercc <- as.data.frame(r_data$df[grep("ERCC(-|[.])\\d{5}", rownames(r_data$df)),])
-    }
-
-    if(length(grep("ERCC(-|[.])\\d{5}", rownames(r_data$glb.raw))) == 0) { # ERCC excluded
-        count_fraction = colSums(r_data$ercc[, r_data$sample_name]) / (colSums(r_data$raw) + colSums(r_data$ercc[, r_data$sample_name]))
-    } else {
-        count_fraction = colSums(r_data$ercc[, r_data$sample_name]) / colSums(r_data$raw)
-    }
-
-    tbl<-data.frame(total_counts = colSums(tmp_ercc),
-                    count_fraction = count_fraction)
-    tbl <- tbl %>% tibble::rownames_to_column("sample")
-    if(!is.null(input$ercc_info_group) && input$ercc_info_group != "None") {
-        tbl$Group <- r_data$glb.meta[,input$ercc_info_group][match(tbl$sample,r_data$glb.meta[,1])]
-    } else {
-        tbl$Group <- rep("sample", nrow(tbl))
-    }
-    if(input$ercc_plot_type == "bar") {
-        plt1 <- tbl %>%
-            plotly::plot_ly(x = ~sample, y = as.formula(paste0("~", input$ercc_plot_stats)), type = "bar", source = "selectERCCSample", color = as.character(tbl$Group)) %>%
-            plotly::layout(margin = list(b=100))
-    } else if(input$ercc_plot_type == "density") {
-        dens<-tapply(tbl[,input$ercc_plot_stats], INDEX = tbl$Group, function(x){density(x,adjust = input$ercc_step)})
-        df <- data.frame(
-            x = unlist(lapply(dens, "[[", "x")),
-            y = unlist(lapply(dens, "[[", "y")),
-            Group = rep(names(dens[!sapply(dens, is.null)]), each = length(dens[[1]]$x))
-        )
-        plt1 <- plotly::plot_ly(df, x = ~x, y = ~y, color = ~Group, type  = "scatter", mode = "lines", fill = "tozeroy") %>%
-            plotly::layout(xaxis = list(title = input$ercc_plot_stats))
-    } else if (input$ercc_plot_type == "histogram") {
-        start = min(tbl[,input$ercc_plot_stats])
-        end = max(tbl[,input$ercc_plot_stats])
-        plt1 <- plotly::plot_ly(tbl, x = as.formula(paste0("~", input$ercc_plot_stats)), type = "histogram",
-                        xbins=list(start = start, end = end, size = (end - start)*input$ercc_step/2),
-                        autobinx=F, color = as.character(tbl$Group), opacity = 0.8)
-    }
-    plt1
-```
-
-## ERCC Detection Probability
-
-```{r echo = FALSE, warning=FALSE, message = FALSE}
-    if(is.null(r_data$ercc_wt_mol)) return()
-    ercc_detect_plot(r_data$ercc_wt_mol)
-```
-
-**Binomial Logistic Regression Model Fit:**
-
-```{r echo = FALSE, warning=FALSE, message = FALSE}
-    if(is.null(r_data$ercc_wt_mol)) return()
-    ercc_glm <- reactive({
-        glm(cbind(Detected, NotDetected) ~ Log10molecules, family=binomial(logit), data=r_data$ercc_wt_mol)
-    })
-    summary(ercc_glm())
-```
 

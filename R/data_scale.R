@@ -143,32 +143,19 @@ pivot_dataScaleRange_UI <- function(id, bound = 500, value = 100, include = c("C
 pivot_dataScaleRange <- function(input, output, session, r_data, keep_stats = FALSE) {
 
     output$min_rank_ui <- renderUI({
-        if(is.null(r_data$df)) return()
+        req(r_data$df, input$feature_range)
         feature_num = nrow(r_data$df)
-
-        if (!is.null(input$feature_range)) {
-            cur_val = input$feature_range[1]
-        } else {
-            cur_val = 1
-        }
-
-        numericInput_1(session$ns("min_rank"), label = "Min:", value = cur_val, min = 1, max = feature_num, step = 1)
+        numericInput_1(session$ns("min_rank"), label = "Min:", value = input$feature_range[1], min = 1, max = feature_num - 1, step = 1)
     })
 
     output$max_rank_ui <- renderUI({
-        if(is.null(r_data$df)) return()
+        req(r_data$df, input$feature_range)
         feature_num = nrow(r_data$df)
-
-        if (!is.null(input$feature_range)) {
-            cur_val = input$feature_range[2]
-        } else {
-            cur_val = feature_num
-        }
-
-        numericInput_1(session$ns("max_rank"), label = "Max:", value = cur_val, min = 2, max = feature_num, step = 1)
+        numericInput_1(session$ns("max_rank"), label = "Max:", value = input$feature_range[2], min = 2, max = feature_num, step = 1)
     })
 
     observeEvent(input$update_range, {
+        req(r_data$df, input$min_rank, input$max_rank)
         feature_num = nrow(r_data$df)
         if(input$min_rank <= feature_num & input$max_rank <= feature_num) {
             if(input$max_rank - input$min_rank + 1 < 2) {
@@ -188,16 +175,13 @@ pivot_dataScaleRange <- function(input, output, session, r_data, keep_stats = FA
         }
     })
 
-    if(input$rank_method == "custom") {
-        flist <- callModule(pivot_featureInputModal, "ft_hmap", r_data = r_data)
-    }
-
     data0 <- reactive({
         #flist <- callModule(pivot_featureInputModal, "ft_hmap", r_data = r_data)
         rsList <- callModule(pivot_dataScale, "hm_scale", r_data, ercc_iso = FALSE, keep_stats = keep_stats, order_by = input$rank_method)
         hm_data <- rsList$df
 
         if(input$rank_method == "custom") {
+            flist <- callModule(pivot_featureInputModal, "ft_hmap", r_data = r_data)
             if(is.null(flist)){
                 return(NULL)
             }
@@ -216,12 +200,17 @@ pivot_dataScaleRange <- function(input, output, session, r_data, keep_stats = FA
         }
     })
 
-    return(list(
-        df = data0(),
-        scale = input$scale,
-        order = input$rank_method,
-        range = c(input$feature_range[1],input$feature_range[2])
-    ))
+    return(reactive({
+        if(is.null(data0())){
+            return()
+        } else {
+            list(
+                df = data0(),
+                order = input$rank_method,
+                range = c(input$feature_range[1],input$feature_range[2])
+            )
+        }
+    }))
 }
 
 
