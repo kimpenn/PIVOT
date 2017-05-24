@@ -180,15 +180,18 @@ pivot_deGroupBy <- function(input, output, session, r_data, method = c("deseq", 
     })
 
     returnList<-reactive({
-        if(any(reactiveValuesToList(sanity) == 0)) return(NULL) # All sanity checked
         req(input$design_set)
         if(input$design_set == "condition") {
+            if(sanity$condition == 0) return()
             return(list(design = "condition", model = list(full = formula(~ group), reduced = formula(~1)), group_cate = input$condition))
         } else if(input$design_set == "condition_batch") {
+            if(sanity$condition == 0 || sanity$batch == 0) return()
             return(list(design = "condition_batch", model = list(full = formula(~ batch + group), reduced = formula(~ batch)), group_cate = input$condition, batch_cate = input$batch))
         } else if(input$design_set == "timecourse1") {
+            if(sanity$condition == 0 || sanity$time == 0) return()
             return(list(design = "timecourse1", model = list(full = formula(~ group + timecourse + group:timecourse), reduced = formula(~ group + timecourse)), group_cate = input$condition, time_cate = input$time))
         } else if(input$design_set == "timecourse2") {
+            if(sanity$condition == 0 || sanity$time == 0) return()
             return(list(design = "timecourse2", model = list(full = formula(~ group + timecourse), reduced = formula(~ timecourse)), group_cate = input$condition, time_cate = input$time))
         } else {
             return()
