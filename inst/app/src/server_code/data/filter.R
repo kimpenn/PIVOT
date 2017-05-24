@@ -308,7 +308,7 @@ observeEvent(input$range_filter_btn, {
 
         actionText <- paste(tmpText, "features in range:", input$min_cnt, "≤", input$filter_type1, input$filter_type2, "counts", "≤", input$max_cnt)
 
-        r_data <- create_subset(r_data, input, flist, slist, keep_filter = input$keep_filter, renorm = F, actionType = "Filter", actionText = actionText)
+        r_data <- create_subset(r_data, input, flist, slist, keep_filter = input$keep_filter, renorm = F, erccStds = erccStds, actionType = "Filter", actionText = actionText)
 
         setProgress(1)
     })
@@ -356,7 +356,7 @@ observeEvent(input$express_filter_btn, {
 
         actionText <- paste(tmpText, "features expressed in more than", input$min_express_cells, "cells")
 
-        r_data <- create_subset(r_data, input, flist, slist, keep_filter = input$keep_filter, renorm = F, actionType = "Filter", actionText = actionText)
+        r_data <- create_subset(r_data, input, flist, slist, keep_filter = input$keep_filter, renorm = F, erccStds = erccStds, actionType = "Filter", actionText = actionText)
 
         # use flist to update, do not interfere with r_data until success
 
@@ -460,7 +460,7 @@ observeEvent(input$submit_marker, {
             tmpText <- "Keep"
         }
         actionText <- paste(tmpText, length(flist), "marker features")
-        r_data <- create_subset(r_data, input, flist, slist, keep_filter = input$keep_filter, renorm = F, actionType = "Filter", actionText = actionText)
+        r_data <- create_subset(r_data, input, flist, slist, keep_filter = input$keep_filter, renorm = F, erccStds = erccStds, actionType = "Filter", actionText = actionText)
 
         setProgress(1)
     })

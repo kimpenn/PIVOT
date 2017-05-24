@@ -171,8 +171,8 @@ init_meta <- function(r_data, type = "both") {
             if(r_data$norm_param$method %in% c("DESeq", "Modified_DESeq") ) {
                 r_data$sample_meta$deseq_size_factor <- r_data$norm_param$sizeFactor[r_data$sample_name,,drop = F]$size_factor
             } else if(r_data$norm_param$method %in% c("ERCC-RLM", "Census")) {
-                r_data$sample_meta$t_estimate = r_data$norm_param$t_estimate
-                r_data$sample_meta$expected_total_mRNAs = r_data$norm_param$expected_total_mRNAs
+                r_data$sample_meta$t_estimate = r_data$norm_param$t_estimate[r_data$sample_name]
+                r_data$sample_meta$expected_total_mRNAs = r_data$norm_param$expected_total_mRNAs[r_data$sample_name]
             }
         }
 
@@ -241,15 +241,23 @@ switch_to_dataset <- function(r_data, s) {
 #' Create subset by filtering or subsetting
 #'
 #' @export
-create_subset <- function(r_data, input, flist, slist, keep_filter = F, renorm = F, actionType = c("Filter", "Subset"), actionText = "") {
-
+create_subset <- function(r_data, input, flist, slist, keep_filter = F, renorm = F, erccStds = NULL, actionType = c("Filter", "Subset"), actionText = "") {
     if(actionType == "Subset") {
         if(renorm) {
             error_I <- 0
             tryCatch({
                 result <- normalize_data(method = input$proc_method,
-                                         params = list(gene_length = r_data$gene_len, deseq_threshold = input$deseq_threshold/100),
-                                         raw = r_data$glb.raw[flist,slist])
+                                         params = list(
+                                             gene_length = r_data$gene_len,
+                                             deseq_threshold = input$deseq_threshold/100,
+                                             expected_capture_rate = input$expected_capture_rate,
+                                             ercc_added = input$norm_ercc_added,
+                                             ercc_dilution = input$norm_ercc_ratio,
+                                             ercc_mix_type = input$norm_ercc_mix_type,
+                                             ercc_detection_threshold = input$ercc_detection_threshold,
+                                             ercc_std = erccStds
+                                         ),
+                                         raw = r_data$glb.raw[flist,slist], ercc = r_data$ercc[, slist, drop = F])
             }, error = function(e){
                 error_I <<- 1
             })
@@ -262,9 +270,9 @@ create_subset <- function(r_data, input, flist, slist, keep_filter = F, renorm =
                 norm_method <- paste(r_data$norm_param$method, "(renormalize)")
                 actionText <- paste(actionText, "(with renormalization)")
             }
-        } else {
+        } else { # Use original normalization parameters from input dataset
             r_data$df <- r_data$history[[1]]$lists$df[flist,slist]
-            r_data$norm_param <- r_data$history[[1]]$norm_param # Use original normalization parameters from input dataset
+            r_data$norm_param <- r_data$history[[1]]$norm_param
             norm_method <- r_data$history[[1]]$norm_param$method
         }
     } else if(actionType == "Filter") {

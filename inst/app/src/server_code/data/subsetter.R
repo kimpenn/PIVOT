@@ -313,7 +313,7 @@ observeEvent(input$plt_subset_btn, {
 
         error_I <- 0
         tryCatch({
-            r_data <- create_subset(r_data, input, flist, slist, keep_filter = F, renorm = as.logical(input$subsetter_renormalize), actionType = "Subset", actionText = actionText)
+            r_data <- create_subset(r_data, input, flist, slist, keep_filter = F, renorm = as.logical(input$subsetter_renormalize), erccStds = erccStds, actionType = "Subset", actionText = actionText)
         },error = function(e){
             error_I <<- 1
         })
@@ -436,7 +436,7 @@ observeEvent(input$manual_subset_btn, {
         actionText <- paste("Subset manually picked samples")
         error_I <- 0
         tryCatch({
-            r_data <- create_subset(r_data, input, flist, slist, keep_filter = F, renorm = as.logical(input$subsetter_renormalize), actionType = "Subset", actionText = actionText)
+            r_data <- create_subset(r_data, input, flist, slist, keep_filter = F, renorm = as.logical(input$subsetter_renormalize), erccStds = erccStds, actionType = "Subset", actionText = actionText)
         },error = function(e){
             error_I <<- 1
         })
@@ -523,7 +523,7 @@ observeEvent(input$file_subset_btn, {
 
         error_I <- 0
         tryCatch({
-            r_data <- create_subset(r_data, input, flist, slist, keep_filter = F, renorm = as.logical(input$subsetter_renormalize), actionType = "Subset", actionText = actionText)
+            r_data <- create_subset(r_data, input, flist, slist, keep_filter = F, renorm = as.logical(input$subsetter_renormalize), erccStds = erccStds, actionType = "Subset", actionText = actionText)
         },error = function(e){
             error_I <<- 1
         })
