@@ -93,48 +93,39 @@ output$tsne_ui <- renderUI({
 
 
 observe({
-    if(is.null(r_data$glb.raw)) return()
+    req(r_data$df)
     rsList <- callModule(pivot_dataScale, "tsne", r_data)
     tsne_data <- rsList$df
-    if(is.null(tsne_data)) {
-        return(NULL)
-    }
 
-    error_I <- 0
     req(tsne_data, input$tsne_seed, input$tsne_pca)
-    r_data$tsne <- tryCatch({
+    tryCatch({
         set.seed(input$tsne_seed)
         tsne_1d <- Rtsne::Rtsne(t(tsne_data),perplexity = input$tsne_perplexity, theta = 0, dims = 1, pca = as.logical(input$tsne_pca))
         tsne_2d <- Rtsne::Rtsne(t(tsne_data),perplexity = input$tsne_perplexity, theta = 0, dims = 2, pca = as.logical(input$tsne_pca))
         tsne_3d <- Rtsne::Rtsne(t(tsne_data),perplexity = input$tsne_perplexity, theta = 0, dims = 3, pca = as.logical(input$tsne_pca))
-        list(tsne_1d = tsne_1d, tsne_2d = tsne_2d, tsne_3d = tsne_3d)
+        r_data$tsne <- list(tsne_1d = tsne_1d, tsne_2d = tsne_2d, tsne_3d = tsne_3d)
     },
     error = function(e) {
         session$sendCustomMessage(type = "showalert", "t-SNE failed.")
         r_data$tsne <- NULL
-        error_I <<-1
     })
-
-    if(error_I) {
-        return()
-    }
 })
 
 tsne_minfo<- reactive(callModule(pivot_colorBy, "tsne", meta = r_data$meta))
 
 observe({
     req(tsne_minfo(), r_data$tsne)
-    callModule(pivot_Plot1d, "tsne_plot1d", type = "tsne", obj = NULL, proj = data.frame(X1 = r_data$tsne$tsne_1d$Y), minfo = tsne_minfo())
+    callModule(pivot_Plot1d, "tsne_plot1d", type = "tsne", obj = NULL, proj = as.data.frame(r_data$tsne$tsne_1d$Y), minfo = tsne_minfo())
 })
 
 observe({
     req(tsne_minfo(), r_data$tsne)
-    callModule(pivot_Plot2d, "tsne_plot2d", type = "tsne", obj = NULL, proj = data.frame(r_data$tsne$tsne_2d$Y), minfo = tsne_minfo())
+    callModule(pivot_Plot2d, "tsne_plot2d", type = "tsne", obj = NULL, proj = as.data.frame(r_data$tsne$tsne_2d$Y), minfo = tsne_minfo())
 })
 
 observe({
     req(tsne_minfo(), r_data$tsne)
-    callModule(pivot_Plot3d, "tsne_plot3d", type = "tsne", obj = NULL, proj = data.frame(r_data$tsne$tsne_3d$Y), minfo = tsne_minfo())
+    callModule(pivot_Plot3d, "tsne_plot3d", type = "tsne", obj = NULL, proj = as.data.frame(r_data$tsne$tsne_3d$Y), minfo = tsne_minfo())
 })
 
 

@@ -84,10 +84,11 @@ if('PIVOT.analysis' %in% r_module) {
                  menuSubItem("Sample Correlation Heatmap", tabName = "correlation_hm",icon = icon("angle-right")),
                  menuSubItem("Feature Correlation Heatmap", tabName = "cor_ft",icon = icon("angle-right"))
         ),
-        menuItem("Heatmap", tabName = "heatmap", icon = icon("th")),
+        menuItem("Heatmap", tabName = "heatmap", icon = icon("barcode")),
         menuItem("Dimension Reduction", icon = icon("yelp"),
                  menuSubItem("PCA", tabName = "pca", icon = icon("angle-right")),
                  menuSubItem("t-SNE", tabName = "tsne", icon = icon("angle-right")),
+                 menuSubItem("MDS", tabName = "mds", icon = icon("angle-right")),
                  menuSubItem("penalizedLDA", tabName = "plda", icon = icon("angle-right"))
         ),
 
@@ -119,9 +120,9 @@ sidebar <- dashboardSidebar(
     sidebarMenu(id="tabs",
                 menuItem("Data Input",  icon = icon("table"), tabName="data_input"),
                 side_ui,
-                menuItem("Report", tabName = "report", icon = icon("file-pdf-o")),
+                menuItem("Report", tabName = "report", icon = icon("file-text")),
                 #menuItem("User Manual", tabName = "manual_file", icon=icon("mortar-board")),
-                menuItem("About", tabName = "about", icon = icon("paw"))
+                menuItem("About", tabName = "about", icon = icon("font"))
     ),
 
 

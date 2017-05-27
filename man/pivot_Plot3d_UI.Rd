@@ -4,7 +4,7 @@
 \alias{pivot_Plot3d_UI}
 \title{a wrapper module for plot in 3D}
 \usage{
-pivot_Plot3d_UI(id, type)
+pivot_Plot3d_UI(id, type, height = "600px")
 }
 \description{
 This is the UI part of the module.

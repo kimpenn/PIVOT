@@ -112,20 +112,17 @@ output$pca_ui <- renderUI({
 
 
 observe({
-    req(r_data$glb.raw)
+    req(r_data$df)
     rsList <- callModule(pivot_dataScale, "pca", r_data)
     pca_data <- rsList$df
-    req(pca_data)
-    req(input$pca_scale)
-    error_I <- 0
+    req(pca_data, input$pca_scale)
 
-    r_data$pca <- tryCatch({
-        prcomp(t(pca_data), center = TRUE, scale. = as.logical(input$pca_scale))
+    tryCatch({
+        r_data$pca <- prcomp(t(pca_data), center = TRUE, scale. = as.logical(input$pca_scale))
     },
     error = function(e) {
         session$sendCustomMessage(type = "showalert", "PCA failed.")
         r_data$pca <- NULL
-        return()
     })
 })
 

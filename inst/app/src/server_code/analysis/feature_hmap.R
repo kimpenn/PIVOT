@@ -66,7 +66,7 @@ output$hm_sp_hc_control <- renderUI({
     req(input$hm_sp_order_type)
     if(input$hm_sp_order_type == "no") return()
     fluidRow(
-        column(4, selectInput("hm_sp_dist_method", "Sample distance", choices = list("Euclidean" = "euclidean", "Maximum" = "maximum", "Manhattan" = "manhattan", "Canberra" = "canberra", "Binary" = "binary", "Minkowski" = "minkowski", "Correlation Distance" = "corr"), selected = "euclidean")),
+        column(4, selectInput("hm_sp_dist_method", "Sample distance", choices = list("Euclidean" = "euclidean", "Maximum" = "maximum", "Manhattan" = "manhattan", "Canberra" = "canberra", "Binary" = "binary", "Correlation Distance" = "corr"), selected = "euclidean")),
         uiOutput("hm_sp_corr_ui"),
         column(4, selectInput("hm_sp_agglo_method", "Sample agglomeration method", choices = list("Ward.D" = "ward.D", "Ward.D2" = "ward.D2","Single"= "single", "Complete"="complete", "Average"= "average", "Mcquitty"="mcquitty", "Median"= "median", "Centroid" = "centroid"), selected = "complete"))
     )

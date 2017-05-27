@@ -17,39 +17,22 @@
 
 ## Penalized LDA Projection Plot
 
-```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 5}
-if(is.null(r_data$meta)) return()
-    plda_minfo<-callModule(pivot_colorBy, "plda", meta = r_data$meta)
-
-    rsList <- callModule(pivot_dataScale, "plda", r_data)
-    plda_data <- rsList$df
-    if(input$plda_select_feature == "custom") {
-        plda_data <- plda_data[r_data$plda_flist, ]
-    } else {
-        plda_data <- plda_data
-    }
-
-    r_data$plda<-make_plda(plda_data, as.numeric(as.factor(plda_minfo$meta[,1])), lambda=input$plda_L,K=input$plda_K)
-    
-    plda_plots <- callModule(pivot_dimScatter, "plda", type = "plda", obj = r_data$plda, minfo = plda_minfo)
-    
-```    
 
 ### 1D Projection
 
 ```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 6}
-    plda_plots$plot1d
+    callModule(pivot_Plot1d, "plda_plot1d", type = "plda", r_data$plda, r_data$plda$proj, minfo = r_data$plda$minfo)
 ```
 
 ### 2D Projection
 
 ```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 6}
-    plda_plots$plot2d
+    callModule(pivot_Plot2d, "plda_plot2d", type = "plda", r_data$plda, r_data$plda$proj, minfo = r_data$plda$minfo)
 ```
 
 ### 3D Projection
 
 ```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 6}
-    plda_plots$plot3d
+    callModule(pivot_Plot3d, "plda_plot3d", type = "plda", r_data$plda, r_data$plda$proj, minfo = r_data$plda$minfo)
 ```
 

@@ -191,12 +191,6 @@ body <- dashboardBody(
                 br()
         ),
 
-        tabItem(tabName = "dmap",
-                uiOutput("dmap_ui"),
-                hr(),
-                br()
-        ),
-
         tabItem(tabName = "data_distribution",
                 uiOutput("distribution_ui"),
                 hr(),
@@ -299,6 +293,13 @@ body <- dashboardBody(
         # PCA
         tabItem(tabName = "pca",
                 uiOutput("pca_ui"),
+                hr(),
+                br()
+        ),
+
+        # MDS
+        tabItem(tabName = "mds",
+                uiOutput("mds_ui"),
                 hr(),
                 br()
         ),

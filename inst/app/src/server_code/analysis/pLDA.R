@@ -262,32 +262,3 @@ output$download_plda_discrim <-downloadHandler(
         write.csv(r_data$plda$discrim, file)
     })
 
-
-# 2d_plda select discriminant vector UI
-output$plda_x_ui <- renderUI({
-    req(r_data$plda)
-    dims <- colnames(r_data$plda$discrim)[-1]
-    names(dims) <- dims
-    selectInput("plda_2d_x", "Discriminant vector on X axis", choices = dims)
-})
-
-output$plda_y_ui <- renderUI({
-    req(r_data$plda)
-    dims <- colnames(r_data$plda$discrim)[-1]
-    if(length(dims) < 2) return()
-    names(dims) <- dims
-    selectInput("plda_2d_y", "Discriminant vector on Y axis", choices = dims, selected = dims[2])
-})
-
-
-output$plda_3d_proj_plt <- threejs::renderScatterplotThree({
-    req(r_data$plda)
-    xproj1 <- as.data.frame(r_data$plda$plda$xproj)
-    if(ncol(xproj1) < 3) return()
-    group_color <- get_color_vector(r_data$group, pal = group_pal$val, maxCol = length(unique(r_data$group)))
-
-    threejs::scatterplot3js(xproj1[,1:3], color=group_color,size=2,labels=rownames(xproj1), renderer="canvas")
-})
-
-
-

@@ -826,6 +826,66 @@ output$tsne_html <- downloadHandler(
     }
 )
 
+####### Metric MDS #######
+
+# id = mds
+observeEvent(input$"mds_report", {
+    r_data$rmd <- update_rmd(session, r_data$rmd, id = "mds")
+})
+
+observeEvent(input$"mds_reg", {
+    id = "mds"
+    withProgress(message = 'Processing...', value = 0.6, {
+        tmp_path <- generate_block_report(id, mode = "html_document")
+        if(!is.null(tmp_path)){
+            rawHTML <- paste(readLines(tmp_path), collapse="\n")
+            r_data <- update_reg_history(r_data, lists = rawHTML, action = "Metric MDS")
+            session$sendCustomMessage(type = "showalert", "Analysis report generated and linked to the current dataset.")
+        }
+    })
+})
+
+output$mds_html <- downloadHandler(
+    filename = function() {
+        id = "mds"
+        paste0(id, ".html")
+    },
+    content = function(file) {
+        id = "mds"
+        generate_block_report(id, file, mode = "html_document")
+    }
+)
+
+####### Nonmetric MDS #######
+
+# id = nds
+observeEvent(input$"nds_report", {
+    r_data$rmd <- update_rmd(session, r_data$rmd, id = "nds")
+})
+
+observeEvent(input$"nds_reg", {
+    id = "nds"
+    withProgress(message = 'Processing...', value = 0.6, {
+        tmp_path <- generate_block_report(id, mode = "html_document")
+        if(!is.null(tmp_path)){
+            rawHTML <- paste(readLines(tmp_path), collapse="\n")
+            r_data <- update_reg_history(r_data, lists = rawHTML, action = "Nonmetric MDS")
+            session$sendCustomMessage(type = "showalert", "Analysis report generated and linked to the current dataset.")
+        }
+    })
+})
+
+output$nds_html <- downloadHandler(
+    filename = function() {
+        id = "nds"
+        paste0(id, ".html")
+    },
+    content = function(file) {
+        id = "nds"
+        generate_block_report(id, file, mode = "html_document")
+    }
+)
+
 
 ####### Penalized LDA ######
 # id = plda

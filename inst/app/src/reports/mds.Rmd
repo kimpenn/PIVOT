@@ -1,0 +1,21 @@
+
+# Metric MDS
+
+## Metric MDS Projection Plots
+
+```{r echo = FALSE, warning=FALSE, message = FALSE}
+    mds_minfo<- reactive(callModule(pivot_colorBy, "mds", meta = r_data$meta))
+```
+
+### 2D Projection
+
+```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 6}
+    callModule(pivot_Plot2d, "mds_plot2d", type = "mds", obj = NULL, proj = as.data.frame(r_data$mds$mds_2d), minfo = mds_minfo())
+```
+
+### 3D Projection
+
+```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 6}
+     callModule(pivot_Plot3d, "mds_plot3d", type = "mds", obj = NULL, proj = as.data.frame(r_data$mds$mds_3d), minfo = mds_minfo())
+```
+

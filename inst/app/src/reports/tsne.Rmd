@@ -4,36 +4,24 @@
 ## T-SNE Projection Plots
 
 ```{r echo = FALSE, warning=FALSE, message = FALSE}
-    if(is.null(r_data$glb.raw)) return()
-    rsList <- callModule(pivot_dataScale, "tsne", r_data)
-    tsne_data <- rsList$df
-    if(is.null(tsne_data)) {
-        return(NULL)
-    }
-
-    r_data$tsne <- list(tsne_1d = Rtsne::Rtsne(t(tsne_data),perplexity = input$tsne_perplexity, theta = 0, dims = 1, pca = as.logical(input$tsne_pca)),
-             tsne_2d =  Rtsne::Rtsne(t(tsne_data),perplexity = input$tsne_perplexity, theta = 0, dims = 2, pca = as.logical(input$tsne_pca)),
-             tsne_3d = Rtsne::Rtsne(t(tsne_data),perplexity = input$tsne_perplexity, theta = 0, dims = 3, pca = as.logical(input$tsne_pca)))
-
-    tsne_minfo<-callModule(pivot_colorBy, "tsne", meta = r_data$meta)
-    tsne_plots<- callModule(pivot_dimScatter, "tsne", type = "tsne", obj = r_data$tsne, minfo = tsne_minfo)
+    tsne_minfo<- reactive(callModule(pivot_colorBy, "tsne", meta = r_data$meta))
 ```
 
 ### 1D Projection
 
 ```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 6}
-   tsne_plots$plot1d
+   callModule(pivot_Plot1d, "tsne_plot1d", type = "tsne", obj = NULL, proj = as.data.frame(r_data$tsne$tsne_1d$Y), minfo = tsne_minfo())
 ```
 
 ### 2D Projection
 
 ```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 6}
-    tsne_plots$plot2d
+    callModule(pivot_Plot2d, "tsne_plot2d", type = "tsne", obj = NULL, proj = as.data.frame(r_data$tsne$tsne_2d$Y), minfo = tsne_minfo())
 ```
 
 ### 3D Projection
 
 ```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 6}
-    tsne_plots$plot3d
+    callModule(pivot_Plot3d, "tsne_plot3d", type = "tsne", obj = NULL, proj = as.data.frame(r_data$tsne$tsne_3d$Y), minfo = tsne_minfo())
 ```
 

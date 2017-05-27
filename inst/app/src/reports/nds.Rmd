@@ -1,0 +1,25 @@
+
+# Nonmetric MDS
+
+## Nonmetric MDS Projection Plots
+
+```{r echo = FALSE, warning=FALSE, message = FALSE}
+    nds_minfo<- reactive(callModule(pivot_colorBy, "nds", meta = r_data$meta))
+```
+
+### 2D Projection
+
+**Stress**: `r r_data$nds$nds_2d$stress`
+
+```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 6}
+    callModule(pivot_Plot2d, "nds_plot2d", type = "nds", obj = NULL, proj = as.data.frame(r_data$nds$nds_2d$points), minfo = nds_minfo())
+```
+
+### 3D Projection
+
+**Stress**: `r r_data$nds$nds_3d$stress`
+
+```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 6}
+     callModule(pivot_Plot3d, "nds_plot3d", type = "nds", obj = NULL, proj = as.data.frame(r_data$nds$nds_3d$points), minfo = nds_minfo())
+```
+

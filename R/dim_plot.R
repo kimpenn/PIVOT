@@ -46,7 +46,7 @@ pivot_Plot1d <- function(input, output, session, type = NULL, obj = NULL, proj =
             req(input$plot1d_pc)
             d1 <- input$plot1d_pc
         } else if(type == "tsne") {
-            d1 <- "X1"
+            d1 <- "V1"
         }
         if(!is.null(minfo$meta)){
             group = minfo$meta[,1]
@@ -118,7 +118,7 @@ pivot_Plot2d <- function(input, output, session, type = NULL, obj = NULL, proj =
     # 2d_pca select principal component UI
     output$plot2d_x_ui <- renderUI({
         if(is.null(proj)) return()
-        if(type == "tsne") return()
+        if(type %in% c("tsne", "mds", "nds")) return()
         if(type == "pca") {
             dname = "PC"
         } else if(type == "plda") {
@@ -132,7 +132,7 @@ pivot_Plot2d <- function(input, output, session, type = NULL, obj = NULL, proj =
 
     output$plot2d_y_ui <- renderUI({
         if(is.null(proj)) return()
-        if(type == "tsne") return()
+        if(type %in% c("tsne", "mds", "nds")) return()
         if(type == "pca") {
             dname = "PC"
         } else if(type == "plda") {
@@ -150,13 +150,10 @@ pivot_Plot2d <- function(input, output, session, type = NULL, obj = NULL, proj =
     plot2d <- reactive({
         if(is.null(proj)) return()
         if(ncol(proj) < 2) return()
-        if(type %in% c("pca", "plda")) {
-            req(input$plot2d_y)
-            d1 <- input$plot2d_x
-            d2 <- input$plot2d_y
-        } else if(type == "tsne") {
-            d1 <- "X1"
-            d2 <- "X2"
+        if(type == "pca") {
+            dname = "PC"
+        } else {
+            dname = "V"
         }
         if(!is.null(minfo$meta)){
             group = minfo$meta[,1]
@@ -166,7 +163,7 @@ pivot_Plot2d <- function(input, output, session, type = NULL, obj = NULL, proj =
             group = NULL
             pal = NULL
         }
-        plotly::plot_ly(proj, x = as.formula(paste0("~", d1)) , y = as.formula(paste0("~", d2)), text = rownames(proj),
+        plotly::plot_ly(proj, x = as.formula(paste0("~", dname, "1")), y = as.formula(paste0("~", dname, "2")), text = rownames(proj),
                         type = "scatter", mode = "markers", color = minfo$meta[,1], colors = pal, marker = list(size = 10))
     })
 
@@ -202,14 +199,14 @@ pivot_Plot2d <- function(input, output, session, type = NULL, obj = NULL, proj =
 #' This is the UI part of the module.
 #' @import plotly
 #' @export
-pivot_Plot3d_UI <- function(id, type) {
+pivot_Plot3d_UI <- function(id, type, height = "600px") {
     ns<- NS(id)
     tagList(
         conditionalPanel(sprintf("input['%s'] == 'plotly'", ns("plot3d_package")),
-                         plotly::plotlyOutput(ns("plotly3d"), height = "600px")
+                         plotly::plotlyOutput(ns("plotly3d"), height = height)
         ),
         conditionalPanel(sprintf("input['%s'] == 'threejs'", ns("plot3d_package")),
-                         threejs::scatterplotThreeOutput(ns("threejs3d"), height = "600px")
+                         threejs::scatterplotThreeOutput(ns("threejs3d"), height = height)
         ),
         fluidRow(
             column(6, selectInput(ns("plot3d_package"), "Plotting package", choices = list("plotly" = "plotly", "threejs" = "threejs"), selected = "plotly"))
@@ -242,9 +239,7 @@ pivot_Plot3d <- function(input, output, session, type = NULL, obj = NULL, proj =
 
         if(type == "pca") {
             dname = "PC"
-        } else if(type == "tsne"){
-            dname = "X"
-        } else if(type == "plda") {
+        } else {
             dname = "V"
         }
 
