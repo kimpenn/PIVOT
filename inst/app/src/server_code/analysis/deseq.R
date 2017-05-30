@@ -36,10 +36,15 @@ output$deseq_ui <- renderUI({
             register_analysis= T,
             tags$div(tags$b("General Settings:"), class = "param_setting_title"),
             fluidRow(
-                pivot_deGroupBy_UI("deseq", r_data$meta, width = 12, method = "deseq", model = c("condition", "condition_batch", "timecourse1"))
+                pivot_deGroupBy_UI("deseq", r_data$meta, width = 12, reduced = F, model = c("condition", "condition_batch", "custom"))
             ),
-
-            uiOutput("perform_deseq_ui")
+            fluidRow(
+                column(4, selectInput("deseq_test_method", "Test Method", choices = list("Wald" = "Wald", "LRT" = "LRT"), selected = "Wald")),
+                column(8,
+                       uiOutput("deseq_test_explain")
+                )
+            ),
+            actionButton("perform_deseq", "Perform DE Analysis", class = "btn-info btn_leftAlign")
         ),
         uiOutput("deseq_results_box"),
         enhanced_box(
@@ -69,25 +74,7 @@ output$deseq_ui <- renderUI({
 })
 
 
-deseqModel <- callModule(pivot_deGroupBy, "deseq", r_data = r_data)
-
-output$perform_deseq_ui <- renderUI({
-    req(deseqModel())
-    # examine if required deseq_sanity check are passed
-    method_ui <- selectInput("deseq_test_method", "Test Method", choices = list("Wald" = "Wald", "LRT" = "LRT"), selected = "Wald")
-    if(deseqModel()$design %in% c("timecourse1", "timecourse2")) {
-        method_ui <- selectInput("deseq_test_method", "Test Method", choices = list("LRT" = "LRT"))
-    }
-    list(
-        fluidRow(
-            column(4, method_ui),
-            column(8,
-                   uiOutput("deseq_test_explain")
-            )
-        ),
-        actionButton("perform_deseq", "Perform DE Analysis", class = "btn-info btn_leftAlign")
-    )
-})
+deseqModel <- callModule(pivot_deGroupBy, "deseq", meta = r_data$meta, reduced = F)
 
 output$deseq_test_explain <- renderUI({
     req(input$deseq_test_method)
@@ -123,8 +110,9 @@ observeEvent(input$perform_deseq, {
         error_I <- 0
         # Perform size factor re-estimation if necessary
         tryCatch({
-            samplesAll <- data.frame(row.names=colnames(r_data$raw), celltype=rep("nt",length(colnames(r_data$raw))))
-            dds <- DESeq2::DESeqDataSetFromMatrix(countData = r_data$raw, colData=samplesAll, design = ~ 1) # Design here does not matter, overwrite later
+            dds <- DESeq2::DESeqDataSetFromMatrix(
+                countData = r_data$raw, colData=r_data$meta[,-1,drop =F],
+                design = deseqModel()$model$full)
 
             # If the data was normalized by DESeq modified, use the new size factor estimation
             if(r_data$norm_param$method == "Modified_DESeq") {
@@ -143,50 +131,39 @@ observeEvent(input$perform_deseq, {
             session$sendCustomMessage(type = "showalert", "DESeq failed.")
             return()
         }
-        groups <- r_data$meta[, deseqModel()$group_cate]
-        SummarizedExperiment::colData(dds)$group <- factor(groups, levels = unique(groups)) # update dds with group info
-        if(deseqModel()$design == "condition_batch") {
-            batches = r_data$meta[,deseqModel()$batch_cate]
-            SummarizedExperiment::colData(dds)$batch <- factor(batches, levels = unique(batches))
-        } else if(deseqModel()$design == "timecourse1") {
-            timecourse = r_data$meta[,deseqModel()$time_cate]
-            SummarizedExperiment::colData(dds)$timecourse <- factor(timecourse, levels = unique(timecourse))
-        }
-        BiocGenerics::design(dds) <- deseqModel()$model$full
+
         if(input$deseq_test_method == "Wald") {
             r_data$dds <- DESeq2::DESeq(dds)
         } else if(input$deseq_test_method == "LRT") {
+            if(is.null(deseqModel()$model$reduced)) {
+                session$sendCustomMessage(type = "showalert", "Reduced formula required.")
+                return()
+            }
             r_data$dds <- DESeq2::DESeq(dds, test = "LRT", reduced = deseqModel()$model$reduced)
         }
 
-        r_data$deseq_params <- list(design = deseqModel()$design, test = input$deseq_test_method, condition = deseqModel()$group_cate, batch = deseqModel()$batch_cate, timecourse = deseqModel()$time_cate)
+        r_data$deseq_params <- list(design = deseqModel()$design, test = input$deseq_test_method, model = deseqModel()$model)
     })
 })
 
 output$deseq_results_box <- renderUI({
-    req(r_data$meta, ncol(r_data$meta) >= 2, r_data$dds, r_data$deseq_params)
-
-    groups = unique(as.character(r_data$meta[,r_data$deseq_params$condition]))
-    names(groups) = groups
+    req(r_data$meta, ncol(r_data$meta) >= 2, r_data$dds)
+    options<-DESeq2::resultsNames(r_data$dds)[-1]
+    names(options) <- options
 
     deseq_group_ui <- list(
         if(r_data$deseq_params$test != "LRT") {
             fluidRow(
-                column(4, tags$br(),tags$b("Pairwise comparison:")),
-                column(3, selectInput("deseq_group1", "Group 1", choices = as.list(groups), selected = groups[[1]])),
-                column(1, tags$b("vs")),
-                column(3, selectInput("deseq_group2", "Group 2", choices = as.list(groups), selected = groups[[2]]))
+                column(4, tags$br(),tags$b("Contrast:")),
+                column(4, selectInput("deseq_term1", "Term 1", choices = as.list(options), selected = options[[1]])),
+                column(4, selectInput("deseq_term2", "Term 2", choices = as.list(options), selected = options[[2]]))
             )
         } else {
-            options<-DESeq2::resultsNames(r_data$dds)[-1]
-            names(options) <- options
-            list(
-                fluidRow(
-                    column(4, selectInput("deseq_pval_type", "P value type", choices = list("LRT" = "LRT", "Wald" = "Wald"), selected = "LRT")),
-                    column(8,
-                           selectInput("deseq_result_name", "Choose comparison/individual points",
-                                       choices = as.list(options))
-                    )
+            fluidRow(
+                column(4, selectInput("deseq_pval_type", "P value type", choices = list("LRT" = "LRT", "Wald" = "Wald"), selected = "LRT")),
+                column(8,
+                       selectInput("deseq_result_name", "Choose comparison/individual effect",
+                                   choices = as.list(options))
                 )
             )
 
@@ -264,7 +241,7 @@ observe({
     if(r_data$deseq_params$test == "LRT") {
         req(input$deseq_pval_type, input$deseq_result_name)
     } else {
-        req(input$deseq_group1, input$deseq_group1 != input$deseq_group2)
+        req(input$deseq_term1, input$deseq_term1 != input$deseq_term2)
     }
     withProgress(message = 'Processing...', value = 0.5, {
         if(r_data$deseq_params$test == "LRT") {
@@ -274,11 +251,11 @@ observe({
                                     name = input$deseq_result_name,
                                     alpha = input$deseq_alpha)
         } else {
-            res1 <- DESeq2::results(r_data$dds, contrast = c("group", input$deseq_group1, input$deseq_group2), alpha = input$deseq_alpha)
+            res1 <- DESeq2::results(r_data$dds, contrast = list(input$deseq_term1, input$deseq_term2), alpha = input$deseq_alpha)
         }
 
         resOrdered <- res1[order(res1$padj),]
-        r_data$deseq_group <- c(input$deseq_group1, input$deseq_group2)
+        r_data$deseq_group <- c(input$deseq_term1, input$deseq_term2)
         if(input$deseq_cuttbl) {
             r_data$deseq_results <- BiocGenerics::subset(resOrdered, padj <= input$deseq_alpha)
         } else {
@@ -310,10 +287,10 @@ output$deseq_ma_plt <- renderPlot({
 
 output$deseq_gene_plot_ui <- renderUI({
     req(r_data$deseq_params)
-    if(r_data$deseq_params$test == "LRT") {
-        pivot_featurePlot_UI("deseq_gene_plt", meta = r_data$meta) # We do not allow plotting for paired comparison while using LRT. (Since it's ANOVA like)
+    if(r_data$deseq_params$test != "LRT" && r_data$deseq_params$design %in% c("condition", "condition_batch")) {
+        pivot_featurePlot_UI("deseq_gene_plt", meta = r_data$meta, ids = 1)
     } else {
-        pivot_featurePlot_UI("deseq_gene_plt", meta = r_data$meta, ids = 1) # ids = 1 indicate we are going to input ids in the caller.
+        pivot_featurePlot_UI("deseq_gene_plt", meta = r_data$meta)
     }
 })
 
@@ -331,11 +308,12 @@ observe({
     d <- as.data.frame(t(r_data$df[selected_gene,])) %>% tibble::rownames_to_column()
     colnames(d) <- c("sample", "expression_level")
 
-    if(r_data$deseq_params$test == "LRT") {
-        samples = NULL
-    } else {
-        req(input$deseq_group1, input$deseq_group2)
-        samples = r_data$meta[,1][which(r_data$meta[,r_data$deseq_params$condition] %in% c(input$deseq_group1, input$deseq_group2))]
+    samples = NULL
+    if(r_data$deseq_params$test != "LRT" && r_data$deseq_params$design %in% c("condition", "condition_batch")) {
+        req(r_data$deseq_group)
+        designVar <- all.vars(r_data$deseq_params$model$full)
+        cond <- designVar[1]
+        samples = r_data$meta[,1][which(r_data$meta[,cond] %in% gsub(cond, "",r_data$deseq_group))]
     }
 
     callModule(pivot_featurePlot, "deseq_gene_plt", meta = r_data$meta, df = d, gene = selected_gene, ids = samples)

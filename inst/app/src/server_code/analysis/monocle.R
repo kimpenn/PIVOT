@@ -31,6 +31,11 @@ output$monocle_ui <- renderUI({
 
             tags$div(tags$b("STEP 0: Initiate Monocle CellDataSet"), class = "param_setting_title"),
             fluidRow(
+                column(4, uiOutput("mn_data_ui"), uiOutput("mn_norm_ui")),
+                column(4, numericInput("mn_min_expr", "Minimum expression level (detection limit)",  min = 0.01, value = 0.1, step = 1)),
+                column(4, numericInput("mn_min_cell", "Minimum cell number (>=2)",  min = 2, value = 2, step = 1))
+            ),
+            fluidRow(
                 column(4,
                        selectInput("mn_family_fun", "Choose a distribution for your expression data",
                                    choices = list("Tobits" = "tobit", "Negbinomial" = "negbinomial", "Negbinomial.size" = "negbinomial.size", "Gaussianff" = "gaussianff"),
@@ -41,15 +46,6 @@ output$monocle_ui <- renderUI({
                 )
             ),
             tags$br(),
-            fluidRow(
-                column(4, tags$p("Note: PIVOT will supply monocle with your raw read count matrix.
-                   The normalization procedure monocle uses is different from DESeq.
-                                 If your input dataset has already been normalized, or are relative expression values,
-                                 please first convert your data to transcript counts.")),
-                column(4, numericInput("mn_min_expr", "Minimum expression level (detection limit)",  min = 0.01, value = 0.1, step = 1)),
-                column(4, numericInput("mn_min_cell", "Minimum cell number (>=2)",  min = 2, value = 2, step = 1))
-            ),
-
                 actionButton("init_monocle", "Create Monocle CellDataSet", class = "btn btn-info"),
                 tags$p(),
                 uiOutput("monocle_ok")
@@ -80,6 +76,32 @@ output$monocle_ui <- renderUI({
 })
 
 
+output$mn_data_ui <- renderUI({
+    if(r_data$norm_param$method %in% c("DESeq","Modified_DESeq","TMM","upperquartile")) {
+        options <- c("Raw count")
+    } else if(r_data$norm_param$method %in% c("TMM-RPKM","upperquartile-RPKM","CPM","RPKM","TPM")) {
+        options <- c("Raw count", paste(r_data$norm_param$method, "normalized count"))
+    } else if(r_data$norm_param$method %in% c("ERCC-RLM","Census")) {
+        options <- c("Raw count", paste(r_data$norm_param$method, "normalized count"))
+    } else if(r_data$norm_param$method == "none") {
+        options <- c("Raw count")
+    }
+    names(options) <- options
+    selectInput("mn_data", "Data Input", choices = options, selected = "Raw count")
+})
+
+output$mn_norm_ui <- renderUI({
+    if(r_data$norm_param$method %in% c("DESeq","Modified_DESeq","TMM","upperquartile")) {
+        tags$p("Recommend using raw read count input with NB model.")
+    } else if(r_data$norm_param$method %in% c("TMM-RPKM","upperquartile-RPKM","CPM","RPKM","TPM")) {
+        tags$p("Recommend using raw read count input with NB model or FPKM/TPM type of values with tobit model.")
+    } else if(r_data$norm_param$method %in% c("ERCC-RLM","Census")) {
+        tags$p("Recommend using absolute transcript counts with NB model or raw counts with NB model.")
+    } else if(r_data$norm_param$method == "none") {
+        tags$p("Please make sure the specified model fits your data.")
+    }
+})
+
 output$mn_data_dist_text_ui <- renderUI({
     if(input$mn_family_fun == "tobit") {
         fluidRow(
@@ -96,7 +118,7 @@ output$mn_data_dist_text_ui <- renderUI({
         fluidRow(
             column(4,
                    tags$b("Data type"),
-                   tags$p("UMIs, Transcript counts from experiments with spike-ins or relative2abs, raw read counts. ")
+                   tags$p("UMIs, Transcript counts from experiments with spike-ins or census normalization, raw read counts. ")
             ),
             column(8,
                    tags$b("Notes"),
@@ -131,13 +153,24 @@ output$mn_data_dist_text_ui <- renderUI({
 
 
 observeEvent(input$init_monocle, {
+    req(input$mn_data)
+
+    if(input$mn_data == "Raw count") {
+        print("Raw")
+        df <- r_data$raw
+    } else {
+        print("norm")
+        df <- r_data$df
+    }
+
     sample_meta <- r_data$meta
     rownames(sample_meta) <- r_data$meta[,1]
     pd <- new("AnnotatedDataFrame", data = sample_meta)
     feature_meta <- r_data$feature_meta
     colnames(feature_meta)[1] <- "gene_short_name"
     fd <- new("AnnotatedDataFrame", data = feature_meta)
-    cellset <- monocle::newCellDataSet(as.matrix(r_data$raw),
+
+    cellset <- monocle::newCellDataSet(as.matrix(df),
                                        phenoData = pd,
                                        featureData = fd,
                                        lowerDetectionLimit = input$mn_min_expr,
@@ -196,7 +229,7 @@ output$monocle_de_ui <- renderUI({
         tags$li("Please check the background R session while running this DE analysis. If you do not see progress, please restart a fresh R session and try again."),
 
         fluidRow(
-            pivot_deGroupBy_UI("monocle", r_data$meta, width = 12, method = "deseq", model = c("condition", "condition_batch", "timecourse2"))
+            pivot_deGroupBy_UI("monocle", r_data$meta, width = 12, reduced = T, model = c("condition", "condition_batch", "custom"))
         ),
 
         uiOutput("perform_monocle_ui"),
@@ -217,7 +250,7 @@ output$monocle_de_ui <- renderUI({
     )
 })
 
-monocleModel <- callModule(pivot_deGroupBy, "monocle", r_data = r_data)
+monocleModel <- callModule(pivot_deGroupBy, "monocle", meta = r_data$meta, reduced =T)
 
 output$perform_monocle_ui <- renderUI({
     req(monocleModel())
@@ -232,18 +265,10 @@ observeEvent(input$perform_monocle_de, {
     if(!is.null(r_data$monocle_results)) {
         r_data$monocle_results <- NULL
     }
-    if(monocleModel()$design == "condition") {
-        modelFull = paste("~", monocleModel()$group_cate)
-        modelReduced = "~1"
-    } else if(monocleModel()$design == "condition_batch") {
-        modelFull = paste("~", monocleModel()$group_cate, "+", monocleModel()$batch_cate)
-        modelReduced = paste("~", monocleModel()$batch_cate)
-    } else if(monocleModel()$design == "timecourse2") {
-        modelFull = paste("~", monocleModel()$group_cate, "+", monocleModel()$time_cate)
-        modelReduced = paste("~", monocleModel()$time_cate)
-    } else {
-        return()
-    }
+
+    modelFull = Reduce(paste, deparse(monocleModel()$model$full))
+    modelReduced = Reduce(paste, deparse(monocleModel()$model$reduced))
+
     withProgress(message = 'Processing...', value = 0.8, {
         tmp_tbl <- differentialGeneTest(r_data$cellset, fullModelFormulaStr = modelFull, reducedModelFormulaStr = modelReduced, verbose = T)
         r_data$monocle_results <- tmp_tbl[order(tmp_tbl$qval),] %>% dplyr::select(status, family, pval, qval, percent_cells_expressed)

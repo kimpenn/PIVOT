@@ -92,12 +92,13 @@ feature_plot <- function(df, selected_gene, plot_by = "sample", meta = NULL, pal
         if(style == "bar") {
             g1 <- ggplot(df, aes_string(x="sample", y="expression_level"))
             g1 <- g1 + geom_bar(stat = "identity", aes_string(fill = plot_by))
-        } else if(style == "points") {
+        } else if(style %in% c("points", "box", "violin")) {
             g1 <- g1 + geom_point(position=position_jitter(w=0.1,h=0), size = pointSize, aes_string(colour = plot_by, group = plot_by))
-        } else if(style == "box") {
-            g1 <- g1 + geom_boxplot(aes_string(fill = plot_by, alpha = 0.2))
-        } else if(style == "violin") {
-            g1 <- g1 + geom_violin(aes_string(fill = plot_by, alpha = 0.2), trim = F)
+            if(style == "box") {
+                g1 <- g1 + geom_boxplot(aes_string(fill = plot_by, alpha = 0.2))
+            } else if(style == "violin") {
+                g1 <- g1 + geom_violin(aes_string(fill = plot_by, alpha = 0.2), trim = F)
+            }
         }
         g1 <- g1 + scale_color_brewer(palette = palette) +
             scale_fill_brewer(palette = palette) +

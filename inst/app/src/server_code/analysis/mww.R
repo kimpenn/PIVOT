@@ -70,7 +70,7 @@ output$mww_ui <- renderUI({
            tags$div(tags$b("General Settings:"), class = "param_setting_title"),
            fluidRow(
                column(4, pivot_dataScale_UI("mww", include = c("Counts (raw)", "Counts (normalized)", "Log10 Counts", "Standardized Counts", "Log10 & Standardized"), selected = "Log10 Counts")),
-               pivot_deGroupBy_UI("mww", r_data$meta, width = 8, method = "mww", model = c("condition"))
+               pivot_deGroupBy_UI("mww", r_data$meta, width = 8, model = c("condition"))
            ),
 
            uiOutput("mww_group_ui"),
@@ -92,12 +92,13 @@ output$mww_ui <- renderUI({
     )
 })
 
-mwwModel <- callModule(pivot_deGroupBy, "mww", r_data = r_data)
+mwwModel <- callModule(pivot_deGroupBy, "mww", meta = r_data$meta)
 
 output$mww_group_ui <- renderUI({
     req(mwwModel())
+    condVar <- all.vars(mwwModel()$model$full)
 
-    groups = unique(as.character(r_data$meta[,mwwModel()$group_cate]))
+    groups = unique(as.character(r_data$meta[,condVar]))
     names(groups) = groups
 
     list(
@@ -154,7 +155,9 @@ observeEvent(input$perform_mww, {
         return()
     }
     selected_group <- c(input$mww_group1,input$mww_group2)
-    groups <- r_data$meta[,mwwModel()$group_cate]
+
+    condVar <- all.vars(mwwModel()$model$full)
+    groups <- r_data$meta[,condVar]
     names(groups) <- r_data$meta[,1]
 
     rsList <- callModule(pivot_dataScale, "mww", r_data)
@@ -167,7 +170,7 @@ observeEvent(input$perform_mww, {
         first3col<-c("Statistic", "P.value", "adjustedP")
         r_data$mww_results <- tbl[c(first3col, setdiff(names(tbl), first3col))] # reorder
         r_data$mww_group <- c(input$mww_group1, input$mww_group2)
-        r_data$mww_cate <- mwwModel()$group_cate
+        r_data$mww_cate <- condVar
     })
 })
 

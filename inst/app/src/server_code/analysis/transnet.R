@@ -202,17 +202,6 @@ output$transnet_ui <- renderUI({
 
 })
 
-observe({
-    if(is.null(input$tf_de_select)) return()
-    if(input$tf_de_select == "scde") {
-        r_data$tf_group <- unique(r_data$scde_group)
-    } else if(input$tf_de_select == "deseq") {
-        r_data$tf_group <- unique(r_data$deseq_group)
-    } else if(input$tf_de_select == "mww") {
-        r_data$tf_group <- unique(r_data$mww_group)
-    }
-})
-
 
 output$scde_lfc_ui <- renderUI({
     if(is.null(r_data$df) || is.null(input$tf_de_select)) return()

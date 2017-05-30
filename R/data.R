@@ -35,7 +35,7 @@ init_state <- function(r_data) {
     r_data$sample_name <- NULL # This has same value as sample_key once analyze btn is pressed.
 
     r_data$feature_meta <- NULL
-    r_data$sample_meta <- NULL
+    r_data$sample_stats <- NULL
 
     r_data$norm_param <- NULL
 
@@ -120,7 +120,6 @@ clear_results <-function(r_data) {
     r_data$tf_g1 <- NULL
     r_data$tf_g2 <- NULL
     r_data$tf_neighbor_order <- NULL
-    r_data$tf_group <- NULL
 
     r_data$reg_g <- NULL
 
@@ -164,19 +163,19 @@ init_meta <- function(r_data, type = "both") {
     if(is.null(r_data$df)) return()
 
     if(type %in% c("both", "sample")) {
-        r_data$sample_meta <- data.frame(total_normalized_counts = colSums(r_data$df))
+        r_data$sample_stats <- data.frame(total_normalized_counts = colSums(r_data$df))
 
         if(r_data$norm_param$method != "None") {
-            r_data$sample_meta$total_raw_reads <- colSums(r_data$raw)
+            r_data$sample_stats$total_raw_reads <- colSums(r_data$raw)
             if(r_data$norm_param$method %in% c("DESeq", "Modified_DESeq") ) {
-                r_data$sample_meta$deseq_size_factor <- r_data$norm_param$sizeFactor[r_data$sample_name,,drop = F]$size_factor
+                r_data$sample_stats$deseq_size_factor <- r_data$norm_param$sizeFactor[r_data$sample_name,,drop = F]$size_factor
             } else if(r_data$norm_param$method %in% c("ERCC-RLM", "Census")) {
-                r_data$sample_meta$t_estimate = r_data$norm_param$t_estimate[r_data$sample_name]
-                r_data$sample_meta$expected_total_mRNAs = r_data$norm_param$expected_total_mRNAs[r_data$sample_name]
+                r_data$sample_stats$t_estimate = r_data$norm_param$t_estimate[r_data$sample_name]
+                r_data$sample_stats$expected_total_mRNAs = r_data$norm_param$expected_total_mRNAs[r_data$sample_name]
             }
         }
 
-        r_data$sample_meta$num_genes_expressed <- colSums(r_data$raw > 0)
+        r_data$sample_stats$num_genes_expressed <- colSums(r_data$raw > 0)
 
     }
 

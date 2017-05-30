@@ -122,8 +122,8 @@ output$subsetter_renormalize_ui <- renderUI({
 ### Visualize stats ###
 # A copy of sample_stats_tbl to put at sample subsetter
 output$input_sample_stats_tbl <- DT::renderDataTable({
-    if(is.null(r_data$sample_meta)) return()
-    DT::datatable(r_data$sample_meta, selection = 'single', options = list(
+    if(is.null(r_data$sample_stats)) return()
+    DT::datatable(r_data$sample_stats, selection = 'single', options = list(
         scrollX = T, scrollY = "500px", lengthMenu = c(20, 50, 100)
     )
     )
@@ -132,7 +132,7 @@ output$input_sample_stats_tbl <- DT::renderDataTable({
 output$download_sample_stats_tbl <- downloadHandler(
     filename = "sample_stats.csv",
     content = function(file) {
-        write.csv(r_data$sample_meta, file)
+        write.csv(r_data$sample_stats, file)
     }
 )
 
@@ -202,12 +202,12 @@ output$plt_subset_btn_ui <- renderUI({
 })
 
 output$sample_subset_plot <- render_Plotly({
-    if(is.null(r_data$sample_meta) || is.null(input$sample_stats_plt_type) || input$sample_stats_plt_type == "cooks") return()
+    if(is.null(r_data$sample_stats) || is.null(input$sample_stats_plt_type) || input$sample_stats_plt_type == "cooks") return()
     r_data$glb.meta
     input$sample_stats_group
     isolate({
         withProgress(message = 'Processing...', value = 0.5, {
-            tbl <- r_data$sample_meta %>% tibble::rownames_to_column("sample")
+            tbl <- r_data$sample_stats %>% tibble::rownames_to_column("sample")
             colnames(tbl)[which(colnames(tbl) == input$sample_stats_plt_type)] <- "y"
             if(!is.null(input$sample_stats_group) && input$sample_stats_group != "None") {
                 tbl$Group <- r_data$glb.meta[,input$sample_stats_group][match(tbl$sample,r_data$glb.meta[,1])]
@@ -269,12 +269,12 @@ observe({
 })
 
 output$current_sample_ui <- renderUI({
-    if(is.null(r_data$sample_meta) || is.null(input$sample_stats_plt_type)) return()
+    if(is.null(r_data$sample_stats) || is.null(input$sample_stats_plt_type)) return()
 
     if(is.null(cur_sp_range$lower) || is.null(cur_sp_range$upper)) return()
     if(input$sample_stats_plt_type == "cooks") return()
 
-    tbl <- r_data$sample_meta %>% tibble::rownames_to_column("sample")
+    tbl <- r_data$sample_stats %>% tibble::rownames_to_column("sample")
     cnts <- tbl[,which(colnames(tbl) == input$sample_stats_plt_type)]
 
     cur_sp_range$inlist <- tbl$sample[which(cnts >= cur_sp_range$lower & cnts <= cur_sp_range$upper)]

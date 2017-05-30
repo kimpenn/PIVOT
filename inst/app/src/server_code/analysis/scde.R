@@ -38,7 +38,7 @@ output$scde_ui <- renderUI({
 
             tags$div(tags$b("STEP 1: Perform Error Modeling"), class = "param_setting_title"),
             fluidRow(
-                pivot_deGroupBy_UI("scde", r_data$meta, width = 12, method = "deseq", model = c("condition", "condition_batch"))
+                pivot_deGroupBy_UI("scde", r_data$meta, width = 12, reduced = T, model = c("condition", "condition_batch"))
             ),
             fluidRow(
                 column(6,
@@ -87,7 +87,7 @@ Harvard Medical School, Department of Biomedical Informatics (Regents). ")
     )
 })
 
-scdeModel <- callModule(pivot_deGroupBy, "scde", r_data = r_data)
+scdeModel <- callModule(pivot_deGroupBy, "scde", meta = r_data$meta)
 
 output$run_scde_model_ui <- renderUI({
     req(scdeModel())
@@ -104,18 +104,39 @@ observeEvent(input$run_scde_model, {
         r_data$scde_results <- NULL
     }
 
+    designVar <- all.vars(scdeModel()$model$full)
+    cond <- designVar[1]
+    if(scdeModel()$design == "condition_batch") {
+        batch <- designVar[2]
+    } else {
+        batch = NULL
+    }
+
     scde_tmp <- list()
+    error_I <- 0
     withProgress(message = 'Processing...', value = 0.5, {
         # Future plan: Implement this to allow user to check individual model fits.
-        if(!is.null(input$ifm_with_group) && input$ifm_with_group){
-            scde_tmp$scde_ifm <- scde::scde.error.models(counts = r_data$raw, groups = r_data$meta[, scdeModel()$group_cate], n.cores = 1, threshold.segmentation = TRUE, save.crossfit.plots = F, save.model.plots = F, verbose = 1)
-        } else {
-            scde_tmp$scde_ifm <- scde::scde.error.models(counts = r_data$raw, n.cores = 1, threshold.segmentation = TRUE, save.crossfit.plots = F, save.model.plots = F, verbose = 1)
+
+        tryCatch({
+            if(!is.null(input$ifm_with_group) && input$ifm_with_group){
+                scde_tmp$scde_ifm <- scde::scde.error.models(counts = r_data$raw, groups = r_data$meta[, cond], n.cores = 1, threshold.segmentation = TRUE, save.crossfit.plots = F, save.model.plots = F, verbose = 1)
+            } else {
+                scde_tmp$scde_ifm <- scde::scde.error.models(counts = r_data$raw, n.cores = 1, threshold.segmentation = TRUE, save.crossfit.plots = F, save.model.plots = F, verbose = 1)
+            }
+        },
+            error = function(e) {
+                error_I <<- 1
+            }
+        )
+
+        if(error_I || nrow(scde_tmp$scde_ifm) == 0){
+            session$sendCustomMessage(type = "showalert", "Error modeling failed.")
+            return()
         }
 
         r_data$scde_ifm <- scde_tmp$scde_ifm[which(scde_tmp$scde_ifm$corr.a > 0), ]
 
-        r_data$scde_params <- list(design = scdeModel()$design, test = input$deseq_test_method, condition = scdeModel()$group_cate, batch = scdeModel()$batch_cate)
+        r_data$scde_params <- list(design = scdeModel()$design, condition = cond, batch = batch)
 
         r_data$scde_invalid <- (scde_tmp$scde_ifm)[which(scde_tmp$scde_ifm$corr.a <= 0),]
         r_data$scde_prior <- scde::scde.expression.prior(models = r_data$scde_ifm, counts = r_data$raw, length.out = 400, show.plot = F)

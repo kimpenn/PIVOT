@@ -4,7 +4,7 @@
 \alias{pivot_deGroupBy}
 \title{Choose the design model for DE analysis}
 \usage{
-pivot_deGroupBy(input, output, session, r_data, method = c("deseq", "scde"))
+pivot_deGroupBy(input, output, session, meta, reduced = F)
 }
 \description{
 This is the server part of the module

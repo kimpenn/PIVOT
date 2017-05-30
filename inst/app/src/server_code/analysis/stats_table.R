@@ -130,8 +130,8 @@ output$design_pie <- render_Plotly({
 })
 
 output$sample_stats_tbl <- DT::renderDataTable({
-    if(is.null(r_data$sample_meta)) return()
-    DT::datatable(r_data$sample_meta, selection = 'single', options = list(
+    if(is.null(r_data$sample_stats)) return()
+    DT::datatable(r_data$sample_stats, selection = 'single', options = list(
         scrollX = T, scrollY = "450px", lengthMenu = c(20, 50, 100)
     )
     )
@@ -140,13 +140,13 @@ output$sample_stats_tbl <- DT::renderDataTable({
 output$download_sample_stats_tbl <- downloadHandler(
     filename = "sample_stats.csv",
     content = function(file) {
-        write.csv(r_data$sample_meta, file)
+        write.csv(r_data$sample_stats, file)
     }
 )
 
 output$sample_plot_stats_ui <- renderUI({
-    req(r_data$sample_meta)
-    options <- colnames(r_data$sample_meta)
+    req(r_data$sample_stats)
+    options <- colnames(r_data$sample_stats)
     names(options) <- options
     selectInput("sample_plot_stats", "Plot Stats",
                 choices = options
@@ -162,8 +162,8 @@ output$sample_bin_width_ui <- renderUI({
 # Sample Stats Plot
 
 output$sample_stats_plot <- render_Plotly({
-    req(r_data$sample_meta,input$sample_plot_stats)
-    tbl <- r_data$sample_meta %>% tibble::rownames_to_column("sample")
+    req(r_data$sample_stats,input$sample_plot_stats)
+    tbl <- r_data$sample_stats %>% tibble::rownames_to_column("sample")
     rsList <- callModule(pivot_colorBy, "sample_stats", meta = r_data$meta)
     if(!is.null(rsList$meta)) {
         tbl$Group <- rsList$meta[,1]
@@ -199,9 +199,9 @@ output$sample_stats_plot <- render_Plotly({
 })
 
 output$sample_count_distribution <- render_Plotly({
-    req(r_data$sample_meta)
+    req(r_data$sample_stats)
     s = input$sample_stats_tbl_row_last_clicked
-    tbl<-as.data.frame(r_data$sample_meta)
+    tbl<-as.data.frame(r_data$sample_stats)
 
     if (length(s)) {
         sample <- rownames(tbl[s, , drop = FALSE])
