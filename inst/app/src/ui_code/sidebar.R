@@ -29,6 +29,12 @@ if('DESeq2' %in% r_module) {
     deseq_sub_ui <- NULL
 }
 
+if('edgeR' %in% r_module) {
+    edgeR_sub_ui <- menuSubItem("edgeR", tabName = "edgeR", icon = icon("angle-right"))
+} else {
+    edgeR_sub_ui <- NULL
+}
+
 if('scde' %in% r_module) {
     scde_sub_ui <- menuSubItem("SCDE", tabName = "scde", icon = icon("angle-right"))
 } else {
@@ -70,6 +76,7 @@ if('PIVOT.analysis' %in% r_module) {
         ),
         menuItem("Differential Expression", icon = icon("eyedropper"),
                  deseq_sub_ui,
+                 edgeR_sub_ui,
                  scde_sub_ui,
                  menuSubItem("Mann–Whitney U test", tabName = "mww", icon = icon("angle-right"))
         ),

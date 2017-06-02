@@ -4,7 +4,7 @@
 \alias{pivot_deGroupBy_UI}
 \title{Choose the design model for DE analysis}
 \usage{
-pivot_deGroupBy_UI(id, meta, width = 12, reduced = F,
+pivot_deGroupBy_UI(id, meta, width = 12, reduced = c("no", "yes", "maybe"),
   model = c("condition", "condition_batch", "custom"))
 }
 \description{

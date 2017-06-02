@@ -54,11 +54,16 @@ clear_results <-function(r_data) {
     r_data$coms <- NULL
     r_data$mst <- NULL
 
-    r_data$dds_gene <- NULL
-
+    r_data$dds <- NULL
     r_data$deseq_results <- NULL
     r_data$deseq_params <- NULL
     r_data$deseq_group <- NULL
+
+    r_data$edgeR <- NULL
+    r_data$edgeR_fit <- NULL
+    r_data$edgeR_params <- NULL
+    r_data$edgeR_group <- NULL
+    r_data$edgeR_results <- NULL
 
     r_data$scde_ifm<-NULL
     r_data$scde_invalid <- NULL

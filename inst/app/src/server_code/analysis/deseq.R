@@ -27,7 +27,7 @@ output$deseq_ui <- renderUI({
         enhanced_box(
             width = 12,
             title = "DESeq2 Differential Expression Analysis",
-            id = "deseq_results",
+            id = "deseq",
             status = "primary",
             solidHeader = T,
             collapsible = T,
@@ -36,7 +36,7 @@ output$deseq_ui <- renderUI({
             register_analysis= T,
             tags$div(tags$b("General Settings:"), class = "param_setting_title"),
             fluidRow(
-                pivot_deGroupBy_UI("deseq", r_data$meta, width = 12, reduced = F, model = c("condition", "condition_batch", "custom"))
+                pivot_deGroupBy_UI("deseq", r_data$meta, width = 12, reduced = "maybe", model = c("condition", "condition_batch", "custom"))
             ),
             fluidRow(
                 column(4, selectInput("deseq_test_method", "Test Method", choices = list("Wald" = "Wald", "LRT" = "LRT"), selected = "Wald")),
@@ -44,7 +44,7 @@ output$deseq_ui <- renderUI({
                        uiOutput("deseq_test_explain")
                 )
             ),
-            actionButton("perform_deseq", "Perform DE Analysis", class = "btn-info btn_leftAlign")
+            actionButton("perform_deseq", "Run DE", class = "btn-info btn_leftAlign")
         ),
         uiOutput("deseq_results_box"),
         enhanced_box(
@@ -74,7 +74,7 @@ output$deseq_ui <- renderUI({
 })
 
 
-deseqModel <- callModule(pivot_deGroupBy, "deseq", meta = r_data$meta, reduced = F)
+deseqModel <- callModule(pivot_deGroupBy, "deseq", meta = r_data$meta, reduced = "maybe")
 
 output$deseq_test_explain <- renderUI({
     req(input$deseq_test_method)
@@ -148,7 +148,8 @@ observeEvent(input$perform_deseq, {
 
 output$deseq_results_box <- renderUI({
     req(r_data$meta, ncol(r_data$meta) >= 2, r_data$dds)
-    options<-DESeq2::resultsNames(r_data$dds)[-1]
+    options<-DESeq2::resultsNames(r_data$dds)
+    options <- options[which(options != "Intercept")]
     names(options) <- options
 
     deseq_group_ui <- list(
@@ -170,12 +171,6 @@ output$deseq_results_box <- renderUI({
         }
 
     )
-
-    if(!is.null(r_data$batch)) {
-        deseq_batch_ui <- checkboxInput("deseq_batch_yes", "Control Batch Effects", value = F)
-    } else {
-        deseq_batch_ui <- NULL
-    }
 
     enhanced_box(
         width = 12,
@@ -245,8 +240,6 @@ observe({
     }
     withProgress(message = 'Processing...', value = 0.5, {
         if(r_data$deseq_params$test == "LRT") {
-            #assign("dds",r_data$dds, env = .GlobalEnv)
-            #assign("deseq_param", r_data$deseq_params, env = .GlobalEnv)
             res1 <- DESeq2::results(r_data$dds, test = input$deseq_pval_type,
                                     name = input$deseq_result_name,
                                     alpha = input$deseq_alpha)

@@ -229,7 +229,7 @@ output$monocle_de_ui <- renderUI({
         tags$li("Please check the background R session while running this DE analysis. If you do not see progress, please restart a fresh R session and try again."),
 
         fluidRow(
-            pivot_deGroupBy_UI("monocle", r_data$meta, width = 12, reduced = T, model = c("condition", "condition_batch", "custom"))
+            pivot_deGroupBy_UI("monocle", r_data$meta, width = 12, reduced = "yes", model = c("condition", "condition_batch", "custom"))
         ),
 
         uiOutput("perform_monocle_ui"),
@@ -250,13 +250,13 @@ output$monocle_de_ui <- renderUI({
     )
 })
 
-monocleModel <- callModule(pivot_deGroupBy, "monocle", meta = r_data$meta, reduced =T)
+monocleModel <- callModule(pivot_deGroupBy, "monocle", meta = r_data$meta, reduced = "yes")
 
 output$perform_monocle_ui <- renderUI({
     req(monocleModel())
     # examine if required monocle_sanity check are passed
     list(
-        actionButton("perform_monocle_de", "Perform DE Analysis", class = "btn-info btn_leftAlign")
+        actionButton("perform_monocle_de", "Run DE", class = "btn-info btn_leftAlign")
     )
 })
 

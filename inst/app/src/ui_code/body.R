@@ -212,6 +212,12 @@ body <- dashboardBody(
                 br()
         ),
 
+        tabItem(tabName = "edgeR",
+                uiOutput("edgeR_ui"),
+                hr(),
+                br()
+        ),
+
         tabItem(tabName = "scde",
                 uiOutput("scde_ui"),
                 hr(),

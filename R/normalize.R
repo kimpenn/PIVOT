@@ -83,7 +83,7 @@ normalize_data <- function(method, params = NULL, raw, ercc = NULL) {
         norm_param <- list(method = method, sizeFactor = y$samples %>% dplyr::select(-group))
     } else if(method == "Census") {
         if(is.null(params$expected_capture_rate)) {
-            stop("Expected capture rate required")
+            stop("Expected capture rate required.")
         }
         tryCatch({
             rpc <- relative2abs_modified(as.matrix(raw), expected_capture_rate = params$expected_capture_rate, return_all = T)

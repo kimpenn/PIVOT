@@ -38,7 +38,7 @@ output$scde_ui <- renderUI({
 
             tags$div(tags$b("STEP 1: Perform Error Modeling"), class = "param_setting_title"),
             fluidRow(
-                pivot_deGroupBy_UI("scde", r_data$meta, width = 12, reduced = T, model = c("condition", "condition_batch"))
+                pivot_deGroupBy_UI("scde", r_data$meta, width = 12, reduced = "no", model = c("condition", "condition_batch"))
             ),
             fluidRow(
                 column(6,
@@ -87,7 +87,7 @@ Harvard Medical School, Department of Biomedical Informatics (Regents). ")
     )
 })
 
-scdeModel <- callModule(pivot_deGroupBy, "scde", meta = r_data$meta)
+scdeModel <- callModule(pivot_deGroupBy, "scde", meta = r_data$meta, reduced = "no")
 
 output$run_scde_model_ui <- renderUI({
     req(scdeModel())

@@ -425,3 +425,7 @@ makeCheckboxTooltip <- function(checkboxValue, buttonLabel, Tooltip){
                             ")))
                             }
 
+#' Set shiny widgets to be inline
+#' @import shiny
+#' @export
+ inline <- function(ui, width = "150px") {div(style=paste0("display: inline-block;vertical-align:top; width: ", width, ";"), ui)}

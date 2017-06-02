@@ -394,15 +394,15 @@ output$scde_html <- downloadHandler(
 
 
 ####### DESeq ######
-# id = deseq_results
+# id = deseq
 
-observeEvent(input$deseq_results_report, {
-    r_data$rmd <- update_rmd(session, r_data$rmd, id = "deseq_results")
+observeEvent(input$deseq_report, {
+    r_data$rmd <- update_rmd(session, r_data$rmd, id = "deseq")
 })
 
-observeEvent(input$deseq_results_reg, {
+observeEvent(input$deseq_reg, {
     # First save a html output to tmp folder (how to get it go with state?)
-    id = "deseq_results"
+    id = "deseq"
     withProgress(message = 'Processing...', value = 0.6, {
         tmp_path <- generate_block_report(id, mode = "html_document")
         if(!is.null(tmp_path)){
@@ -413,13 +413,13 @@ observeEvent(input$deseq_results_reg, {
     })
 })
 
-output$deseq_results_html <- downloadHandler(
+output$deseq_html <- downloadHandler(
     filename = function() {
-        id = "deseq_results"
+        id = "deseq"
         paste0(id, ".html")
     },
     content = function(file) {
-        id = "deseq_results"
+        id = "deseq"
         generate_block_report(id, file, mode = "html_document")
     }
 )

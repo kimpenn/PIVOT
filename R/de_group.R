@@ -10,7 +10,7 @@
 #' and which meta data column should be used as the covariates.
 #'
 #' @export
-pivot_deGroupBy_UI <- function(id, meta, width = 12, reduced = F, model = c("condition", "condition_batch", "custom")) {
+pivot_deGroupBy_UI <- function(id, meta, width = 12, reduced = c("no","yes","maybe"), model = c("condition", "condition_batch", "custom")) {
     if(is.null(meta) || ncol(meta) < 2) return()
     ns<- NS(id)
     categories = colnames(meta)[-1]
@@ -28,17 +28,23 @@ pivot_deGroupBy_UI <- function(id, meta, width = 12, reduced = F, model = c("con
         models <- c(models, "Use custom design formula" = "custom")
     }
 
-    reduced_text <- ifelse(reduced, "Required", "Maybe required for some tests.")
+    if(reduced == "yes") {
+        reduced_ui <- textInput(ns("reduced_formula"), "Reduced Model Formula (e.g., ~A+B)", placeholder = "Required")
+    } else if(reduced == "maybe") {
+        reduced_ui <- textInput(ns("reduced_formula"), "Reduced Model Formula (e.g., ~A+B)", placeholder = "Required for certain test.")
+    } else {
+        reduced_ui <- NULL
+    }
 
     list(
-        column(4,
+        column(width/3,
                selectInput(ns("design_set"), "Experiment Design",
                            choices = as.list(
                                models
                            )
                )
         ),
-        column(4,
+        column(width/3,
                conditionalPanel(sprintf("input['%s'] == 'condition' || input['%s'] == 'condition_batch'", ns("design_set"), ns("design_set")),
                                 selectInput(ns("condition"), label = "Condition:", choices = options),
                                 uiOutput(ns("condition_text"))
@@ -50,13 +56,13 @@ pivot_deGroupBy_UI <- function(id, meta, width = 12, reduced = F, model = c("con
                                     shinyBS::bsModal(id = ns("formula_modal"), "Custom Formula", ns("formula_modal_btn"),
                                                      tags$p(paste("Valid terms: ", paste(c("0", "1", categories), collapse = "; "))),
                                                      textInput(ns("full_formula"), "Full Model Formula (e.g., ~A+B+A:B)", placeholder = "Required"),
-                                                     textInput(ns("reduced_formula"), "Reduced Model Formula (e.g., ~A+B)", placeholder = reduced_text),
+                                                     reduced_ui,
                                                      actionButton(ns("custom_formula_submit"), "Submit Design", class = "btn-info")
                                     )
                                 )
                )
         ),
-        column(4,
+        column(width/3,
                conditionalPanel(sprintf("input['%s'] == 'condition_batch'", ns("design_set")),
                                 selectInput(ns("batch"), label = "Batch:", choices = options),
                                 uiOutput(ns("batch_text"))
@@ -74,7 +80,7 @@ pivot_deGroupBy_UI <- function(id, meta, width = 12, reduced = F, model = c("con
 #' This is the server part of the module
 #'
 #' @export
-pivot_deGroupBy <- function(input, output, session, meta, reduced = F) {
+pivot_deGroupBy <- function(input, output, session, meta, reduced = c("no","yes","maybe")) {
     sanity <- reactiveValues()
     sanity$condition <- 1
     sanity$batch <- 1
@@ -123,13 +129,16 @@ pivot_deGroupBy <- function(input, output, session, meta, reduced = F) {
     observeEvent(input$custom_formula_submit, {
         req(input$full_formula)
 
+        if(!is.null(cformula$full)) { #Reset
+            cformula$full <- NULL
+            cformula$reduced <- NULL
+        }
+
         if(is.null(input$reduced_formula) || nchar(input$reduced_formula) == 0) {
-            if(reduced) {
+            if(reduced == "yes") {
                 session$sendCustomMessage(type = "showalert", "Reduced formula is required.")
                 return()
             }
-        } else {
-            reduced = 1
         }
 
         categories = colnames(meta)[-1]
@@ -139,7 +148,8 @@ pivot_deGroupBy <- function(input, output, session, meta, reduced = F) {
         error_I <- 0
         tryCatch({
             full_terms <- all.vars(as.formula(input$full_formula))
-            if(reduced) {
+            reduced_terms <- NULL
+            if(!is.null(input$reduced_formula) && nchar(input$reduced_formula) != 0) {
                 reduced_terms <- all.vars(as.formula(input$reduced_formula))
             }
         },
@@ -157,7 +167,7 @@ pivot_deGroupBy <- function(input, output, session, meta, reduced = F) {
             return()
         }
 
-        if(reduced) {
+        if(!is.null(reduced_terms)) {
             if(!all(reduced_terms %in% valid_terms)) {
                 session$sendCustomMessage(type = "showalert", "Your reduced model formula contain invalid terms.")
                 return()
@@ -165,13 +175,13 @@ pivot_deGroupBy <- function(input, output, session, meta, reduced = F) {
         }
 
         cformula$full <- as.formula(input$full_formula)
-        if(reduced) {
+        if(!is.null(reduced_terms)) {
             cformula$reduced <- as.formula(input$reduced_formula)
         }
     })
 
     output$custom_formula_text <- renderUI({
-        req(cformula$full)
+        if(is.null(cformula$full)) return()
         if(!is.null(cformula$reduced)) {
             tagList(
                 tags$b("Full formula:"),

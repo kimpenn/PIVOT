@@ -70,7 +70,7 @@ output$mww_ui <- renderUI({
            tags$div(tags$b("General Settings:"), class = "param_setting_title"),
            fluidRow(
                column(4, pivot_dataScale_UI("mww", include = c("Counts (raw)", "Counts (normalized)", "Log10 Counts", "Standardized Counts", "Log10 & Standardized"), selected = "Log10 Counts")),
-               pivot_deGroupBy_UI("mww", r_data$meta, width = 8, model = c("condition"))
+               pivot_deGroupBy_UI("mww", r_data$meta, width = 12, model = c("condition"), reduced = "no")
            ),
 
            uiOutput("mww_group_ui"),
@@ -92,7 +92,7 @@ output$mww_ui <- renderUI({
     )
 })
 
-mwwModel <- callModule(pivot_deGroupBy, "mww", meta = r_data$meta)
+mwwModel <- callModule(pivot_deGroupBy, "mww", meta = r_data$meta, reduced = "no")
 
 output$mww_group_ui <- renderUI({
     req(mwwModel())
