@@ -60,12 +60,23 @@ pivot_Plot1d <- function(input, output, session, type = NULL, obj = NULL, proj =
         if(input$plot1d_plt_type == "density") {
             df <- data.frame(x <- proj)
             df$group <- group
-            dens<-tapply(df[,d1], INDEX = group, function(x){density(x,adjust = input$plot1d_step)})
-            df <- data.frame(
-                x = unlist(lapply(dens, "[[", "x")),
-                y = unlist(lapply(dens, "[[", "y")),
-                Group = rep(names(dens[!sapply(dens, is.null)]), each = length(dens[[1]]$x))
+            error_I <- 0
+            # density require each group has two points, so add error handler here
+            tryCatch({
+                dens<-tapply(df[,d1], INDEX = group, function(x){density(x,adjust = input$plot1d_step)})
+                df <- data.frame(
+                    x = unlist(lapply(dens, "[[", "x")),
+                    y = unlist(lapply(dens, "[[", "y")),
+                    Group = rep(names(dens[!sapply(dens, is.null)]), each = length(dens[[1]]$x))
+                )
+            },
+            error = function(e){
+                error_I <<- 1
+            }
             )
+            if(error_I) {
+                return()
+            }
             plot1d <- plotly::plot_ly(df, x = ~x, y = ~y, color = ~Group, type  = "scatter", mode = "lines", fill = "tozeroy", colors = pal)
         } else {
             plot1d <- plotly::plot_ly(proj, x = as.formula(paste0("~", d1)), type = "histogram",
