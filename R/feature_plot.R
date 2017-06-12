@@ -75,6 +75,7 @@ feature_plot <- function(df, selected_gene, plot_by = "sample", meta = NULL, pal
     if(is.null(df) || nrow(df) == 0) {
         return()
     }
+    df$sample <- factor(df$sample, level = df$sample) # Make sure order stays the same
 
     if (is.null(meta)) {
         g1 <- ggplot(df, aes(x=sample, y=expression_level)) +

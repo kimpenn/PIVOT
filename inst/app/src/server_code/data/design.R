@@ -272,6 +272,7 @@ observeEvent(input$submit_design_upload, {
     # assign('df_tmp', df_tmp, env = .GlobalEnv)
     # Take first column as sample column
     sample_col <- df_tmp[,1]
+    assign("df_tmp",df_tmp, env = .GlobalEnv)
     matched_sp <- match(colnames(r_data$glb.raw), sample_col) # If contain NA, some sample are not found in sample_col
     if(any(is.na(matched_sp)))
     {
@@ -289,18 +290,20 @@ observeEvent(input$submit_design_upload, {
     r_data <- clear_results(r_data)
     withProgress(message = 'Processing', value = 0, {
         incProgress(0.3, detail = "Adding design info...")
+
+        r_data$glb.meta <- df_tmp[matched_sp,] # Remove any meta info for non-existing sample in the dataset
+
         if(input$sample_reorder) {
             sp_ordered<-colnames(r_data$glb.raw)[match(sample_col, colnames(r_data$glb.raw))]
             sp_ordered <- sp_ordered[!is.na(sp_ordered)]
 
             r_data$glb.raw <- r_data$glb.raw[sp_ordered]
-
+            r_data$glb.meta <- r_data$glb.meta[match(sp_ordered, r_data$glb.meta$Sample), ]
             r_data$sample_name <- sp_ordered[which(sp_ordered %in% r_data$sample_name)]
             r_data$raw <- r_data$raw[r_data$sample_name]
             r_data$df <- r_data$df[r_data$sample_name]
         }
-        # Other sanity checks? Like cols contain NA, empty cols(only spaces), cols contain only one category?
-        r_data$glb.meta <- df_tmp[matched_sp,] # Remove any meta info for non-existing sample in the dataset
+
         incProgress(0.3, detail = "Updating metadata...")
         r_data <- init_meta(r_data, type = "sample")
         setProgress(1)
@@ -331,7 +334,7 @@ output$input_design_tbl <- DT::renderDataTable({
 output$download_design_tbl <- downloadHandler(
     filename = "design_tbl.csv",
     content = function(file) {
-        write.csv(r_data$glb.meta, file)
+        write.csv(r_data$glb.meta, file, row.names = F)
     }
 )
 

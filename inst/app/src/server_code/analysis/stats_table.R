@@ -96,8 +96,8 @@ output$meta_ui <- renderUI({
 })
 
 output$meta_tbl <- DT::renderDataTable({
-    if(is.null(r_data$glb.meta)) return()
-    DT::datatable(r_data$glb.meta, selection = 'single',
+    if(is.null(r_data$meta)) return()
+    DT::datatable(r_data$meta, selection = 'single',
                   options = list(
                       scrollX = T, scrollY = "400px", lengthMenu = c(20, 50, 100)
                   )
@@ -107,7 +107,7 @@ output$meta_tbl <- DT::renderDataTable({
 output$download_meta_tbl <- downloadHandler(
     filename = "meta_tbl.csv",
     content = function(file) {
-        write.csv(r_data$glb.meta, file)
+        write.csv(r_data$meta, file)
     }
 )
 
@@ -162,6 +162,7 @@ output$sample_stats_plot <- render_Plotly({
     req(r_data$sample_stats,input$sample_plot_stats)
     tbl <- r_data$sample_stats %>% tibble::rownames_to_column("sample")
     rsList <- callModule(pivot_colorBy, "sample_stats", meta = r_data$meta)
+
     if(!is.null(rsList$meta)) {
         tbl$Group <- rsList$meta[,1]
         pal = unique(rsList$meta_color[,1])
@@ -169,6 +170,7 @@ output$sample_stats_plot <- render_Plotly({
         tbl$Group <- rep("sample", nrow(tbl))
         pal = NULL
     }
+    tbl$sample<-factor(tbl$sample, level = tbl$sample)
 
     if(input$sample_plot_type == "bar") {
         plt1 <- tbl %>%
@@ -176,7 +178,15 @@ output$sample_stats_plot <- render_Plotly({
                             source = "selectSampleStats", color = as.character(tbl$Group), colors = pal) %>%
             plotly::layout(margin = list(b=100))
     } else if(input$sample_plot_type == "density") {
-        dens<-tapply(tbl[,input$sample_plot_stats], INDEX = tbl$Group, function(x){density(x,adjust = input$sample_stats_step)})
+        error_I <- 0
+        tryCatch({
+            dens<-tapply(tbl[,input$sample_plot_stats], INDEX = tbl$Group, function(x){density(x,adjust = input$sample_stats_step)})
+        }, error = function(e){
+            error_I <<- 1
+        })
+        if(error_I) {
+            return()
+        }
         df <- data.frame(
             x = unlist(lapply(dens, "[[", "x")),
             y = unlist(lapply(dens, "[[", "y")),

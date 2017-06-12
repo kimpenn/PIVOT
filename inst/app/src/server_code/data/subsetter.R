@@ -208,6 +208,7 @@ output$sample_subset_plot <- render_Plotly({
     isolate({
         withProgress(message = 'Processing...', value = 0.5, {
             tbl <- r_data$sample_stats %>% tibble::rownames_to_column("sample")
+            tbl$sample<-factor(tbl$sample, level = tbl$sample)
             colnames(tbl)[which(colnames(tbl) == input$sample_stats_plt_type)] <- "y"
             if(!is.null(input$sample_stats_group) && input$sample_stats_group != "None") {
                 tbl$Group <- r_data$glb.meta[,input$sample_stats_group][match(tbl$sample,r_data$glb.meta[,1])]
