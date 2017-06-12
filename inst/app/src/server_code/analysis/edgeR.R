@@ -184,10 +184,6 @@ output$edgeR_results_box <- renderUI({
             )
         } else {
             list(
-                # tags$b("Brief Explanation:"),
-                # tags$p("If model does not contain intercept (formula ~0+XYZ), first group (e.g. group A) correponds to the first coefficient. Use contrast (e.g., contrast: (1)A (-1)B) for pairwise group comparison."),
-                # tags$p("Otherwise the first group will be treated as the baseline. The coefficient B will be B vs A and coefficient C will be C vs A. To compare B vs C use contrast: (1)B (-1)C."),
-                # tags$p("Please see edgeR manual for more detailed explanation."),
                 fluidRow(
                     column(4, selectInput("edgeR_target", "Test coeffcient/contrast", choices = list("Coefficient" = "coef", "Contrast" = "contrast"), selected = "coef")),
                     column(8, uiOutput("edgeR_target_text"))
@@ -203,7 +199,7 @@ output$edgeR_results_box <- renderUI({
         title = NULL,
         status = "primary",
         solidHeader = T,
-        tags$div(tags$b("Comparison Settings:"), class = "param_setting_title"),
+        tags$div(tags$b("Comparison Settings:"), pivot_help_UI("edgeR_compare", "How to compare your groups?"), class = "param_setting_title"),
         edgeR_group_ui,
         fluidRow(
             column(4,

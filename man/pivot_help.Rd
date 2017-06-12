@@ -4,7 +4,7 @@
 \alias{pivot_help}
 \title{PIVOT help modules, server}
 \usage{
-pivot_help(input, output, session, title, content)
+pivot_help(input, output, session, title, content, size = "m")
 }
 \description{
 PIVOT help modules, server

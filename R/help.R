@@ -25,11 +25,11 @@ pivot_help_UI <- function(id, title, tooltip = T){
 #' PIVOT help modules, server
 #'
 #' @export
-pivot_help <- function (input, output, session, title, content) {
+pivot_help <- function (input, output, session, title, content, size = "m") {
     observeEvent(input$pivot_help, {
         showModal(modalDialog(
             title = title,
-            size = "m",
+            size = size,
             content,
             easyClose = TRUE
         ))

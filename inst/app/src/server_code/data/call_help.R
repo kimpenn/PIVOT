@@ -59,5 +59,12 @@ callModule(pivot_help, "data_map", title ="What is a 'Data Map'", content = list
     tags$p("If you need further information, please check the PIVOT manual.")
 ))
 
-
+callModule(pivot_help, "edgeR_compare", title ="How to compare your groups?", content = list(
+    tags$b("If use exact test:"),
+    tags$p("Simply choose which pair to compare."),
+    tags$b("If use GLM model:"),
+    tags$p("If model contains intercept (formula ~0+XYZ), use contrast, e.g., contrast: (1)A (-1)B) for pairwise group comparison"),
+    tags$p("If model does not contain intercept (default), the first group will be treated as the baseline. The coefficient B will be B vs A and coefficient C will be C vs A. To compare B vs C use contrast: (1)B (-1)C."),
+    tags$p("Please see edgeR manual for more detailed explanation.")
+))
 
