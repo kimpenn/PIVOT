@@ -112,14 +112,11 @@ output$download_meta_tbl <- downloadHandler(
 )
 
 output$design_pie <- render_Plotly({
-    req(r_data$meta, ncol(r_data$meta) >= 2)
     rsList <- callModule(pivot_colorBy, "pie", meta = r_data$meta)
+    req(rsList$meta)
     tbl<-as.data.frame(table(rsList$meta))
     colnames(tbl) <- c(rsList$group_by, "sample_number")
     pal = unique(rsList$meta_color[,1])
-
-    assign("tbl", tbl, env = .GlobalEnv)
-    assign("rsList", rsList, env = .GlobalEnv)
     plotly::plot_ly(tbl, labels = as.formula(paste("~", rsList$group_by)), values = ~sample_number, type = 'pie',textposition = 'inside',
             textinfo = 'label+percent',
             insidetextfont = list(color = '#FFFFFF'),

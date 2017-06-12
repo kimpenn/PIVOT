@@ -81,7 +81,7 @@ output$data_pv_ui <- renderUI({
             fluidRow(
                 column(12,
                        DT::dataTableOutput("input_sample_stats_tbl"),
-                       downloadButton("download_sample_stats_tbl", "Download", class = "btn btn-success btn_rightAlign")
+                       downloadButton("download_input_sample_stats_tbl", "Download", class = "btn btn-success btn_rightAlign")
                 )
             )
         )

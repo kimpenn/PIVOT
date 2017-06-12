@@ -1,55 +1,25 @@
+---
+title: ''
+author: ''
+date: '2017-06-12'
+output:
+  html_document:
+    toc: true
+    number_sections: true
+    theme: default
+---
 
-# Monocle Differential Expression Analysis
+For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+You can embed an R code chunk like this:
 
-> Cole Trapnell and Davide Cacchiarelli et al (2014): The dynamics and regulators of cell fate decisions are revealed by pseudo-temporal ordering of single cells. Nature Biotechnology
-
-## Test Result
-
-```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 6}
-if(is.null(r_data$monocle_results)) {
-    return()
-} else {
-    if(input$monocle_cuttbl) {
-        tbl <- subset(r_data$monocle_results, qval <= input$monocle_alpha)
-    } else {
-        tbl <- r_data$monocle_results
-    }
-    if(nrow(tbl) == 0) return()
-    DT::datatable(tbl, selection = 'single', options = list(scrollY = "400px", lengthMenu = c(20, 50, 100), order = list(list(2, 'asc')), orderClasses = T
-    ))
-}
+```{r}
+summary(cars)
 ```
 
-* `r paste0("Total number of significant genes: ", sum(r_data$monocle_results$qval <= input$monocle_alpha, na.rm = T), ".")`
+You can also embed plots, for example:
 
-## Expression Plot 
-
-```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 6}
-
-if(is.null(r_data$monocle_results) || is.null(input$monocle_cuttbl)) {
-    return()
-} else {
-    s = input$monocle_de_result_tbl_row_last_clicked
-    if(input$monocle_cuttbl) {
-        tbl <- subset(r_data$monocle_results, qval <= input$monocle_alpha)
-    } else {
-        tbl <- r_data$monocle_results
-    }
-
-    if (length(s)) {
-        selected_gene <- rownames(tbl[s, , drop = FALSE])
-    } else {
-        return()
-    }
-
-    # Here use monocle normalized counts
-    df <- as.data.frame(exprs(r_data$cellset)/pData(r_data$cellset)$Size_Factor)
-
-    d <- as.data.frame(t(df[selected_gene,])) %>% tibble::rownames_to_column()
-    colnames(d) <- c("sample", "expression_level")
-
-    callModule(pivot_featurePlot, "monocle_gene_plt", meta = r_data$meta, df = d, gene = selected_gene)
-}
+```{r, echo=FALSE}
+plot(cars)
 ```
 
 

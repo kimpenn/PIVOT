@@ -25,7 +25,9 @@ shinyServer(function(input, output, session) {
     ip_module <- paste0("r_module")
     if (exists("r_state") && exists("r_data")) {
         r_data <- do.call(reactiveValues, r_data)
-        r_state <- r_state
+        lapply(names(r_state),
+               function(x) session$sendInputMessage(x, list(value = r_state[[x]]))
+        )
         rm(r_data, r_state, envir = .GlobalEnv)
     } else {
         r_state <- list()
@@ -54,7 +56,7 @@ shinyServer(function(input, output, session) {
                    not_pressed(input$return_btn_sc) &&
                    is.null(input$uploadState)) {
 
-                    assign(ip_inputs, reactiveValuesToList(input), envir = .GlobalEnv)
+                    assign(ip_inputs, lapply(reactiveValuesToList(input), unclass), envir = .GlobalEnv)
                     assign(ip_data, reactiveValuesToList(r_data), envir = .GlobalEnv)
                     assign(ip_module, r_module, envir = .GlobalEnv)
                     #assign(ip_dump, lubridate::now(), envir = .GlobalEnv)
@@ -69,8 +71,9 @@ shinyServer(function(input, output, session) {
     #######################################
     saveState <- function(filename) {
         isolate({
-            LiveInputs <- reactiveValuesToList(input)
-            r_state[names(LiveInputs)] <- LiveInputs
+            #LiveInputs <- reactiveValuesToList(input)
+            #r_state[names(LiveInputs)] <- LiveInputs
+            r_state <- lapply(reactiveValuesToList(input), unclass)
             r_data <- reactiveValuesToList(r_data)
             r_module <- r_module
             save(r_state, r_data, r_module, file = filename)
@@ -93,12 +96,18 @@ shinyServer(function(input, output, session) {
             isolate({
                 tmpEnv <- new.env()
                 load(inFile$datapath, envir=tmpEnv)
-                if (exists("r_data", envir=tmpEnv, inherits=FALSE))
+                if (exists("r_data", envir=tmpEnv, inherits=FALSE)){
                     assign(ip_data, tmpEnv$r_data, envir=.GlobalEnv)
-                if (exists("r_state", envir=tmpEnv, inherits=FALSE))
+                }
+                if (exists("r_state", envir=tmpEnv, inherits=FALSE)) {
                     assign(ip_inputs, tmpEnv$r_state, envir=.GlobalEnv)
-                if (exists("r_module", envir=tmpEnv, inherits=FALSE))
+                    lapply(names(r_state),
+                           function(x) session$sendInputMessage(x, list(value = r_state[[x]]))
+                    )
+                }
+                if (exists("r_module", envir=tmpEnv, inherits=FALSE)){
                     assign(ip_module, tmpEnv$r_module, envir=.GlobalEnv)
+                }
                 #assign(ip_dump, lubridate::now(), envir = .GlobalEnv)
                 rm(tmpEnv)
             })
@@ -117,7 +126,7 @@ shinyServer(function(input, output, session) {
         if(not_pressed(input$return_btn_sc) && not_pressed(input$exit_and_save)) return()
         # quit R, unless you are running an interactive session
         if(interactive()) {
-            assign("r_state", reactiveValuesToList(input), envir = .GlobalEnv)
+            assign("r_state", lapply(reactiveValuesToList(input), unclass), envir = .GlobalEnv)
             assign("r_data", reactiveValuesToList(r_data), envir = .GlobalEnv)
             assign("r_module", r_module, envir = .GlobalEnv)
             try(rm(r_env, envir = .GlobalEnv), silent = TRUE) # removing the reference to the shiny environment

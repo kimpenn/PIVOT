@@ -129,7 +129,7 @@ output$input_sample_stats_tbl <- DT::renderDataTable({
     )
 })
 
-output$download_sample_stats_tbl <- downloadHandler(
+output$download_input_sample_stats_tbl <- downloadHandler(
     filename = "sample_stats.csv",
     content = function(file) {
         write.csv(r_data$sample_stats, file)
