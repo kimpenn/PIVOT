@@ -102,7 +102,12 @@ pivot_Plot1d <- function(input, output, session, type = NULL, obj = NULL, proj =
 #' @export
 pivot_Plot2d_UI <- function(id, type) {
     ns<- NS(id)
-    biplot_select <- selectInput(ns("plot2d_package"), "Plotting package", choices = list("plotly" = "plotly"), selected = "plotly")
+    if(type == "pca") {
+        options <- list("plotly" = "plotly", "ggbiplot" = "ggbiplot")
+    } else {
+        options <- list("plotly" = "plotly")
+    }
+    biplot_select <- selectInput(ns("plot2d_package"), "Plotting package", choices = options, selected = "plotly")
     tagList(
         conditionalPanel(sprintf("input['%s'] == 'plotly'", ns("plot2d_package")),
                          plotly::plotlyOutput(ns("plotly2d"))
@@ -184,9 +189,12 @@ pivot_Plot2d <- function(input, output, session, type = NULL, obj = NULL, proj =
     })
 
     # 2d ggbiplot
-    # Not run due to ggbiplot makes installation more complicated
     output$biplot <- renderPlot({
         if(is.null(obj)) return()
+        if(!"ggbiplot" %in% rownames(installed.packages())) {
+            session$sendCustomMessage(type = "showalert", "Please install ggbiplot manually from https://github.com/vqv/ggbiplot")
+            return()
+        }
         if(!is.null(minfo$meta)){
             groups <- factor(minfo$meta[,1], levels = unique(minfo$meta[,1]))
             ggbiplot::ggbiplot(obj, groups = groups, ellipse = TRUE, circle = TRUE, varname.size = 3, labels.size=3) +
