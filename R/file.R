@@ -14,7 +14,7 @@ pivot_fileInput_UI <- function(id, format = "list"){
     colRow <- checkboxInput(ns("col_names"), 'First Row as Colnames', value = T)
     if(format == "list") {
         tagList(
-            fileInput(ns('file_in'), 'Choose file', accept=c('text/csv', 'text/comma-separated-values,text/plain', '.csv')),
+            fileInput(ns('file_in'), 'Choose file', accept=c('text/csv', 'text/comma-separated-values,text/plain', '.csv', ".xls", ".xlsx")),
             wellPanel(
                 header,
                 comment,
@@ -24,7 +24,7 @@ pivot_fileInput_UI <- function(id, format = "list"){
         )
     } else if(format == "compact"){
         tagList(
-            fileInput(ns('file_in'), 'Choose file', accept=c('text/csv', 'text/comma-separated-values,text/plain', '.csv')),
+            fileInput(ns('file_in'), 'Choose file', accept=c('text/csv', 'text/comma-separated-values,text/plain', '.csv', ".xls", ".xlsx")),
             wellPanel(
                 fluidRow(
                     column(6, header),
@@ -58,12 +58,32 @@ pivot_fileInput <- function (input, output, session, reset = FALSE, return_df = 
         # The user's data, parsed into a data frame
         result <- reactive({
             if(is.null(userFile())) return()
+            ext = tools::file_ext(userFile()$name)
+            if(ext %in% c("xls", "xlsx")) {
+                # This is an excel file
+                is_excel = T
+            } else {
+                is_excel = F
+            }
+
             error_I <- 0
             tryCatch({
-                df <- readr::read_delim(file = userFile()$datapath, skip=input$skip_header,
-                                        col_names=input$col_names, delim=input$file_sep,
-                                        comment=ifelse(input$comment=="none", "",input$comment),
-                                        escape_double = FALSE, trim_ws = TRUE)
+                if(is_excel) {
+                    if(ext == "xlsx") {
+                        df <- readxl::read_xlsx(path = userFile()$datapath, skip=input$skip_header,
+                                                col_names=input$col_names, trim_ws = TRUE)
+                    } else if(ext == "xls") {
+                        df <- readxl::read_xls(path = userFile()$datapath, skip=input$skip_header,
+                                                col_names=input$col_names, trim_ws = TRUE)
+                    }
+
+                } else {
+                    df <- readr::read_delim(file = userFile()$datapath, skip=input$skip_header,
+                                            col_names=input$col_names, delim=input$file_sep,
+                                            comment=ifelse(input$comment=="none", "",input$comment),
+                                            escape_double = FALSE, trim_ws = TRUE)
+                }
+
                 if(return_df) {
                     df <- as.data.frame(df)
                 }
