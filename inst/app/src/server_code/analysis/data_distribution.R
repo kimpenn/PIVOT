@@ -41,7 +41,7 @@ output$distribution_ui <- renderUI({
                        title = "Per-feature Standard Deviation",
                        id = "mean_sd_plot",
                        status = "info",
-                       width = 12,
+                       width = NULL,
                        solidHeader = T,
                        collapsible = T,
                        reportable = T,
@@ -55,89 +55,97 @@ output$distribution_ui <- renderUI({
                        tags$li("Wolfgang Huber, Anja von Heydebreck, Holger Sueltmann, Annemarie Poustka and Martin Vingron. Variance Stabilization Applied to Microarray Data
                                Calibration and to the Quantification of Differential Expression. Bioinformatics 18, S96-S104 (2002).", class = "citation")
                        )
-
             )
         ),
-        enhanced_box(
-            title = "Rank Frequency Plot",
-            id = "rank_frequency",
-            status = "warning",
-            width = 12,
-            solidHeader = T,
-            collapsible = T,
-            reportable = T,
-            get_html = T,
-            get_pdf = T,
-            register_analysis= T,
-            tags$div(tags$b("Plot Settings:"), class = "param_setting_title"),
-            fluidRow(
-                column(4, checkboxInput("rf_logX", label = "Log Scale for X", value = T)),
-                column(4, checkboxInput("rf_logY", label = "Log Scale for Y", value = T))
-            ),
-            plotOutput("rankfreq_plt", height = "500px")
-        ),
-        enhanced_box(
-            title = "Mean Variability Plot",
-            id = "mean_var_plot",
-            status = "success",
-            width = 12,
-            solidHeader = T,
-            collapsible = T,
-            reportable = T,
-            get_html = T,
-            register_analysis= T,
-
-            tags$div(tags$b("Plot Settings:"), class = "param_setting_title"),
-            fluidRow(
-                column(2,
-                       shinyBS::tipify(
-                           numericInput("meanvar_bins", "Number of bins", min = 1, max = 50, step = 1, value = 20),
-                           title = "Total number of bins to use in the scaled analysis", placement = "bottom", options = list(container = "body")
-                       )
-                ),
-                column(2,
-                       shinyBS::tipify(
-                           numericInput("meanvar_y_cutoff1", "Dispersion bottom cutoff", min = 1, max = 10, step = 1, value = 2),
-                           title = "E.g, Setting the cutoff to 2 identifies genes that are more than two standard deviations away from the average dispersion within a bin.", placement = "bottom", options = list(container = "body")
-                       )
-                ),
-                column(2,
-                       shinyBS::tipify(
-                           numericInput("meanvar_y_cutoff2", "Dispersion top cutoff", min = 1, max = 20, step = 1, value = 12),
-                           title = "Top cutoff on y-axis for identifying variable genes.", placement = "bottom", options = list(container = "body")
-                       )
-                ),
-                column(2,
-                       shinyBS::tipify(
-                           numericInput("meanvar_x_cutoff1", "Expression bottom cutoff", min = 1, max = 10, step = 1, value = 1),
-                           title = "Bottom cutoff on x-axis for identifying variable genes.", placement = "bottom", options = list(container = "body")
-                       )
-                ),
-                column(2,
-                       shinyBS::tipify(
-                           numericInput("meanvar_x_cutoff2", "Expression top cutoff", min = 1, max = 20, step = 1, value = 8),
-                           title = "Top cutoff on x-axis for identifying variable genes.", placement = "bottom", options = list(container = "body")
-                       )
-                )
-            ),
-
-            fluidRow(
-                column(4,
-                       tags$div(tags$b("Variably Expressed Genes:"), class = "param_setting_title"),
-                       DT::dataTableOutput("mean_var_genes"),
-                       downloadButton("download_mean_var_genes", "Download", class = "btn btn-success")
-                ),
-                column(8,
-                       tags$div(tags$p("The X-axis is the mean expression level, and Y-axis is the log(Variance/mean). The results are plotted in log-space."),
-                                pivot_help_UI("meanvar_help", "What is a mean variability plot")
+        fluidRow(
+            column(12,
+                   enhanced_box(
+                       title = "Rank Frequency Plot",
+                       id = "rank_frequency",
+                       status = "warning",
+                       width = NULL,
+                       solidHeader = T,
+                       collapsible = T,
+                       reportable = T,
+                       get_html = T,
+                       get_pdf = T,
+                       register_analysis= T,
+                       fluidRow(
+                           column(4, checkboxInput("rf_logX", label = "Log Scale for X", value = T)),
+                           column(4, checkboxInput("rf_logY", label = "Log Scale for Y", value = T))
                        ),
-                       plotOutput("mean_var_plt", height = "600px")
-                )
-            ),
-            tags$b("This plot is generated using Seurat package. Citation:"),
-            tags$li("Rahul Satija (2015). Seurat: Seurat : R toolkit for single cell genomics. R package version 1.2.1. http://www.satijalab.org/seurat.", class = "citation")
+                       plotOutput("rankfreq_plt", height = "500px")
+                   )
+            )
+        ),
+
+        fluidRow(
+            column(12,
+                   enhanced_box(
+                       title = "Mean Variability Plot",
+                       id = "mean_var_plot",
+                       status = "success",
+                       width = NULL,
+                       solidHeader = T,
+                       collapsible = T,
+                       reportable = T,
+                       get_html = T,
+                       register_analysis= T,
+
+                       tags$div(tags$b("Plot Settings:"), class = "param_setting_title"),
+                       fluidRow(
+                           column(2,
+                                  shinyBS::tipify(
+                                      numericInput("meanvar_bins", "Number of bins", min = 1, max = 50, step = 1, value = 20),
+                                      title = "Total number of bins to use in the scaled analysis", placement = "bottom", options = list(container = "body")
+                                  )
+                           ),
+                           column(2,
+                                  shinyBS::tipify(
+                                      numericInput("meanvar_y_cutoff1", "Dispersion bottom cutoff", min = 1, max = 10, step = 1, value = 2),
+                                      title = "E.g, Setting the cutoff to 2 identifies genes that are more than two standard deviations away from the average dispersion within a bin.", placement = "bottom", options = list(container = "body")
+                                  )
+                           ),
+                           column(2,
+                                  shinyBS::tipify(
+                                      numericInput("meanvar_y_cutoff2", "Dispersion top cutoff", min = 1, max = 20, step = 1, value = 12),
+                                      title = "Top cutoff on y-axis for identifying variable genes.", placement = "bottom", options = list(container = "body")
+                                  )
+                           ),
+                           column(2,
+                                  shinyBS::tipify(
+                                      numericInput("meanvar_x_cutoff1", "Expression bottom cutoff", min = 1, max = 10, step = 1, value = 1),
+                                      title = "Bottom cutoff on x-axis for identifying variable genes.", placement = "bottom", options = list(container = "body")
+                                  )
+                           ),
+                           column(2,
+                                  shinyBS::tipify(
+                                      numericInput("meanvar_x_cutoff2", "Expression top cutoff", min = 1, max = 20, step = 1, value = 8),
+                                      title = "Top cutoff on x-axis for identifying variable genes.", placement = "bottom", options = list(container = "body")
+                                  )
+                           )
+                       ),
+
+                       fluidRow(
+                           column(4,
+                                  tags$div(tags$b("Variably Expressed Genes:"), class = "param_setting_title"),
+                                  DT::dataTableOutput("mean_var_genes"),
+                                  downloadButton("download_mean_var_genes", "Download", class = "btn btn-success")
+                           ),
+                           column(8,
+                                  tags$div(tags$p("The X-axis is the mean expression level, and Y-axis is the log(Variance/mean). The results are plotted in log-space."),
+                                           pivot_help_UI("meanvar_help", "What is a mean variability plot")
+                                  ),
+                                  plotOutput("mean_var_plt", height = "600px")
+                           )
+                       ),
+                       tags$b("This plot is generated using Seurat package. Citation:"),
+                       tags$li("Rahul Satija (2015). Seurat: Seurat : R toolkit for single cell genomics. R package version 1.2.1. http://www.satijalab.org/seurat.", class = "citation")
+                   )
+            )
+            )
         )
-    )
+
 })
 
 

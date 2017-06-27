@@ -41,6 +41,9 @@ pivot()
  * URL 'http://xxx.tgz': status was '404 Not Found'
    * Call `chooseCRANmirror()` to select another CRAN mirror.
    
+ * Linux specific: Dependency openssl configuration failed
+   * Please install the latest libgdal-dev package (apt-get install libgdal-dev)
+   
  * Current Known bug:
    * Some times when user press the "launch module" or "clean session" button, new window does not show up. In such cases, please call the last command you see in Rstudio, i.e., `pivot_main()` or `pivot('clean')`
    

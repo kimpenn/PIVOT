@@ -179,7 +179,16 @@ pivot_Plot2d <- function(input, output, session, type = NULL, obj = NULL, proj =
             group = NULL
             pal = NULL
         }
-        plotly::plot_ly(proj, x = as.formula(paste0("~", dname, "1")), y = as.formula(paste0("~", dname, "2")), text = rownames(proj),
+
+        x = as.formula(paste0("~", dname, "1"))
+        y = as.formula(paste0("~", dname, "2"))
+
+        if(!is.null(input$plot2d_x)){
+            x = as.formula(paste0("~", input$plot2d_x))
+            y = as.formula(paste0("~", input$plot2d_y))
+        }
+
+        plotly::plot_ly(proj, x = x, y = y, text = rownames(proj),
                         type = "scatter", mode = "markers", color = minfo$meta[,1], colors = pal, marker = list(size = 10))
     })
 

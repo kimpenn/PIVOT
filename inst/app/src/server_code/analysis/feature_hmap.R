@@ -22,7 +22,7 @@ output$hm_ui <- renderUI({
             width = 12,
             title = "Feature Heatmap",
             id = "feature_heatmap",
-            status = "warning",
+            status = "primary",
             solidHeader = T,
             collapsible = T,
             reportable = T,
