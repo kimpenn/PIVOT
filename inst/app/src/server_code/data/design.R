@@ -272,7 +272,6 @@ observeEvent(input$submit_design_upload, {
     # assign('df_tmp', df_tmp, env = .GlobalEnv)
     # Take first column as sample column
     sample_col <- df_tmp[,1]
-    assign("df_tmp",df_tmp, env = .GlobalEnv)
     matched_sp <- match(colnames(r_data$glb.raw), sample_col) # If contain NA, some sample are not found in sample_col
     if(any(is.na(matched_sp)))
     {
@@ -298,7 +297,7 @@ observeEvent(input$submit_design_upload, {
             sp_ordered <- sp_ordered[!is.na(sp_ordered)]
 
             r_data$glb.raw <- r_data$glb.raw[sp_ordered]
-            r_data$glb.meta <- r_data$glb.meta[match(sp_ordered, r_data$glb.meta$Sample), ]
+            r_data$glb.meta <- r_data$glb.meta[match(sp_ordered, r_data$glb.meta[,1]), ]
             r_data$sample_name <- sp_ordered[which(sp_ordered %in% r_data$sample_name)]
             r_data$raw <- r_data$raw[r_data$sample_name]
             r_data$df <- r_data$df[r_data$sample_name]

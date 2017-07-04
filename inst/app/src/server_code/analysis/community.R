@@ -18,7 +18,7 @@ output$mst_ui <- renderUI({
     list(
         enhanced_box(
             width = 12,
-            title = "Minimum Spanning Tree",
+            title = "Community Detection with Minimum Spanning Tree",
             id = "community_mst",
             status = "primary",
             solidHeader = T,
@@ -26,18 +26,16 @@ output$mst_ui <- renderUI({
             reportable = T,
             get_html = T,
             register_analysis= T,
-            tags$div(tags$b("General Settings:"), class = "param_setting_title"),
+            tags$div(tags$b("Minimum Spanning Tree Settings:"), class = "param_setting_title"),
             fluidRow(
-                column(4, pivot_dataScale_UI("mst_scale", include = c("Counts (raw)", "Counts (normalized)", "Log10 Counts", "Standardized Counts", "Log10 & Standardized"), selected = "Log10 Counts"))
-                #column(4, selectInput("hclust_package", "Plotting package", choices = list("Dendexdend" = "dendextend", "networkD3" = "networkD3"), selected = "dendextend"))
+                pivot_dataScale_UI("mst_scale", include = c("Counts (raw)", "Counts (normalized)", "Log10 Counts", "Standardized Counts", "Log10 & Standardized", "Projection Matrix"), selected = "Log10 Counts", width = 12)
             ),
-            tags$div(tags$b("MST Parameter Settings:"), class = "param_setting_title"),
             fluidRow(
                 column(4, selectInput("mst_dist_method", "Distance measure", choices = list("Euclidean" = "euclidean", "Correlation Distance" = "correlation", "SCDE Adjusted Distance" = 'scde'), selected = "correlation")),
                 uiOutput('mst_corr_ui'),
                 uiOutput('mst_scde_ui')
             ),
-            tags$div(tags$b("Clustering Parameter Settings:"), class = "param_setting_title"),
+            tags$div(tags$b("Community Detection Settings:"), class = "param_setting_title"),
             fluidRow(
                 column(4, selectInput("com_algorithm", "Community Detection Algorithm", choices = list("Walktrap" = "walktrap"))),
                 column(4, numericInput("com_wt_step", "Walktrap Steps", value = 4, min = 1, max = 100, step = 1))
@@ -45,7 +43,7 @@ output$mst_ui <- renderUI({
             tags$div(tags$b("Visualization Settings:"), class = "param_setting_title"),
             fluidRow(
                 column(4, selectInput("mst_package", "Plotting package", choices = list("igraph" = "igraph", "networkD3" = "networkD3"), selected = "igraph")),
-                pivot_colorBy_UI("community", meta = r_data$meta, append_none = T, width = 8)
+                pivot_colorBy_UI("community", r_data$category, append_none = T, width = 8)
             ),
             fluidRow(
                 column(4, sliderInput("vertex_size", "Vertex size", min = 1, max = 20, value = 5)),
@@ -56,8 +54,17 @@ output$mst_ui <- renderUI({
             title = NULL,
             status = "primary",
             width = 12,
-            uiOutput("mst_plt_ui"),
-            uiOutput("down_com_ui")
+            fluidRow(
+                column(4,
+                       tags$div(tags$b("Community Detection Results"), class = "param_setting_title"),
+                       DT::dataTableOutput("community_assignment"),
+                       uiOutput("down_com_ui")
+                ),
+                column(8,
+                       tags$div(tags$b("Minimum Spanning Tree"), class = "param_setting_title"),
+                       uiOutput("mst_plt_ui")
+                )
+            )
         ),
         box(
             width = 12,
@@ -98,9 +105,10 @@ output$down_com_ui <- renderUI({
 })
 
 # Construct graph object from data
+mstList <- callModule(pivot_dataScale, "mst_scale", r_data)
 mst_graph <- reactive({
-    rsList <- callModule(pivot_dataScale, "mst_scale", r_data, ercc_iso = FALSE)
-    mst_data <- rsList$df
+    req(mstList()$df)
+    mst_data <- mstList()$df
     if(input$mst_dist_method == 'euclidean') {
         dist_mtx <- t(mst_data) %>% dist() %>% as.matrix()
     } else if(input$mst_dist_method == 'correlation') {
@@ -142,6 +150,7 @@ mst_graph <- reactive({
     cList <- callModule(pivot_colorBy, "community", meta = r_data$meta)
     rsList<-generate_mst(dist_mtx, method = input$com_algorithm, color_list = cList, step = input$com_wt_step)
     r_data$meta$community <- paste0("community_",as.character(igraph::membership(rsList$community)))
+    r_data$category <- colnames(r_data$meta)
     return(rsList) # Return the graph for plotting
 })
 
@@ -187,6 +196,12 @@ output$mst_d3 <- networkD3::renderForceNetwork({
                             opacity = .8, zoom = T,  colourScale = networkD3::JS(ColourScale))
 })
 
+
+output$community_assignment <- DT::renderDataTable({
+    req(r_data$meta$community)
+    tbl <- r_data$meta[,c("sample", "community")]
+    DT::datatable(tbl, options = list(scrollX = TRUE, scrollY = "400px", lengthMenu = c(20, 50, 100)))
+})
 
 output$download_community <- downloadHandler(
     filename = function() {

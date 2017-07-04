@@ -79,8 +79,8 @@ output$cor_ft_ui <- renderUI({
                 column(9,
                        tags$div(tags$b("Heatmap of Correlated Features:"), class = "param_setting_title"),
                        fluidRow(
-                           column(4, pivot_dataScale_UI("cor_ft_hmap_scale", include = c("Counts (raw)", "Counts (normalized)", "Log10 Counts", "Standardized Counts", "Log10 & Standardized"), selected = "Log10 Counts")),
-                           pivot_colorBy_UI("cor_ft_hmap_col", meta = r_data$meta, append_none = T)
+                           pivot_dataScale_UI("cor_ft_hmap_scale", include = c("Counts (raw)", "Counts (normalized)", "Log10 Counts", "Standardized Counts", "Log10 & Standardized"), selected = "Log10 Counts"),
+                           pivot_colorBy_UI("cor_ft_hmap_col", r_data$category, append_none = T)
                        ),
                        uiOutput("coe_ft_hmap_ui")
                 )
@@ -247,9 +247,9 @@ output$coe_ft_hmap <- renderPlot({
     tmp_data <- list()
     tmp_data$df <- r_data$df[which(rownames(r_data$df) %in% features), ]
     tmp_data$raw <-r_data$raw[which(rownames(r_data$raw) %in% features), ]
-    rsList <- callModule(pivot_dataScale, "cor_ft_hmap_scale", tmp_data)
-    hm_data <- rsList$df
-
+    coeftList <- callModule(pivot_dataScale, "cor_ft_hmap_scale", tmp_data)
+    hm_data <- coeftList()$df
+    req(hm_data)
     rsList <- callModule(pivot_colorBy, "cor_ft_hmap_col", meta = r_data$meta)
     if(!is.null(rsList$meta)) {
         group <- rsList$meta[,1]

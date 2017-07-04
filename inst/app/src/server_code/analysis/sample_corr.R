@@ -28,7 +28,7 @@ output$cor_sp_ui <- renderUI({
 
         tags$div(tags$b("General and Heatmap Settings:"), class = "param_setting_title"),
         fluidRow(
-            column(4, pivot_dataScale_UI("cor_sp_scale", include = c("Counts (raw)", "Counts (normalized)", "Log10 Counts", "Standardized Counts", "Log10 & Standardized"), selected = "Log10 Counts")),
+            pivot_dataScale_UI("cor_sp_scale", include = c("Counts (raw)", "Counts (normalized)", "Log10 Counts", "Standardized Counts", "Log10 & Standardized"), selected = "Log10 Counts"),
             #column(3, selectInput("cor_sp_dist", label = "Distance measure", choices = list("Correlation Distance (1-r)" = "corr"))),
             column(4, selectInput("cor_sp_method", label = "Correlation method", choices = list("pearson" = "pearson","spearman" = "spearman", "kendall" = "kendall"), selected = "pearson")),
             column(4, selectInput("cor_sp_agglo_method", "Agglomeration method", choices = list("Ward.D" = "ward.D", "Ward.D2" = "ward.D2","Single"= "single", "Complete"="complete", "Average"= "average", "Mcquitty"="mcquitty", "Median"= "median", "Centroid" = "centroid"), selected = "complete"))
@@ -37,7 +37,7 @@ output$cor_sp_ui <- renderUI({
         fluidRow(
             column(3, selectInput("cor_sp_package", label = "Plotting package", choices = list("gplots"="gplots", "heatmaply"="heatmaply"), multiple = F)),
             column(3, selectInput("cor_sp_hmcolor", label = "Heatmap color", choices = c(get_brewer_set("sequential"), list("viridis" = "viridis", "magma" = "magma", "plasma" = "plasma", "inferno" = "inferno")), multiple = F)),
-            pivot_colorBy_UI("cor_sp", meta = r_data$meta, append_none = T, width = 6)
+            pivot_colorBy_UI("cor_sp", r_data$category, append_none = T, width = 6)
         ),
         tags$hr(),
         conditionalPanel("input.cor_sp_package == 'gplots'", plotOutput("cor_sp_gplot", height = "700px")),
@@ -46,11 +46,10 @@ output$cor_sp_ui <- renderUI({
     )
 })
 
-
+corspList <- callModule(pivot_dataScale, "cor_sp_scale", r_data)
 output$cor_sp_gplot <- renderPlot({
-    rsList <- callModule(pivot_dataScale, "cor_sp_scale", r_data, ercc_iso = FALSE)
-    sp_data <- rsList$df
-    if(is.null(sp_data)) return()
+    sp_data <- corspList()$df
+    req(sp_data)
     sample_cor <- cor(sp_data, method = input$cor_sp_method)
     distfun1 = function(c) as.dist(1 - c)
     hclustfun1 = function(x, method=input$cor_sp_agglo_method, ...) hclust(x, method=method, ...)
@@ -89,9 +88,8 @@ output$cor_sp_gplot <- renderPlot({
 # })
 
 output$cor_sp_plotly <- plotly::renderPlotly({
-    rsList <- callModule(pivot_dataScale, "cor_sp_scale", r_data, ercc_iso = FALSE)
-    sp_data <- rsList$df
-    if(is.null(sp_data)) return()
+    sp_data <- corspList()$df
+    req(sp_data)
     sample_cor <- cor(sp_data, method = input$cor_sp_method)
     distfun1 = function(c) as.dist(1 - c)
     hclustfun1 = function(x, method=input$cor_sp_agglo_method, ...) hclust(x, method=method, ...)

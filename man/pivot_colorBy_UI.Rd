@@ -4,7 +4,7 @@
 \alias{pivot_colorBy_UI}
 \title{Choose which meta column to be used as coloring group}
 \usage{
-pivot_colorBy_UI(id, meta, append_sample = F, append_none = F,
+pivot_colorBy_UI(id, category, append_sample = T, append_none = F,
   multiple = F, choose_color = T, bset = "qualitative", width = 8)
 }
 \description{

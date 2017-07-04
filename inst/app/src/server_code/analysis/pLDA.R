@@ -32,7 +32,7 @@ output$plda_ui <- renderUI({
             register_analysis= T,
             tags$div(tags$b("penalizedLDA Settings:"), class = "param_setting_title"),
             fluidRow(
-                column(4, pivot_dataScale_UI("plda", include = c("Counts (raw)", "Counts (normalized)", "Log10 Counts", "Standardized Counts", "Log10 & Standardized"), selected = "Log10 Counts")),
+                pivot_dataScale_UI("plda", include = c("Counts (raw)", "Counts (normalized)", "Log10 Counts", "Standardized Counts", "Log10 & Standardized"), selected = "Log10 Counts"),
                 column(4, selectInput("plda_select_feature", label = "Perform PenalizedLDA on", choices = list("All features" = "all", "Custom feature list" = "custom"))),
                 column(4, numericInput("plda_L", "Lasso penality tuning parameter",
                                        min = 0.01,
@@ -45,7 +45,7 @@ output$plda_ui <- renderUI({
                 column(7, uiOutput("plda_feature_upload_text"))
             ),
             fluidRow(
-                pivot_colorBy_UI("plda", meta = r_data$meta, multiple = F, width = 8),
+                pivot_colorBy_UI("plda", r_data$category, multiple = F, width = 8, append_sample = F),
                 column(4, uiOutput("plda_K_ui"))
             ),
             actionButton("run_plda", "Run", class = "btn-info"),
@@ -201,7 +201,7 @@ observeEvent(input$run_plda, {
     }
 
     rsList <- callModule(pivot_dataScale, "plda", r_data)
-    plda_data <- rsList$df
+    plda_data <- rsList()$df
     req(plda_data)
     if(input$plda_select_feature == "custom") {
         if(is.null(r_data$plda_flist)) {

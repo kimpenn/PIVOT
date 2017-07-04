@@ -5,12 +5,13 @@
 
 ```{r echo = FALSE, warning=FALSE, message = FALSE}
 # k-means
+    kmeansList() <- callModule(pivot_dataScale, "kmeans", r_data)
 km1 <- reactive({
     req(input$km_centers)
     req(input$km_nstart)
     set.seed(input$kmeans_seed)
-    rsList <- callModule(pivot_dataScale, "kmeans", r_data)
-    kmeans_data <- rsList$df
+
+    kmeans_data <- kmeansList()$df
     kmeans(t(kmeans_data), centers = input$km_centers, nstart = input$km_nstart)
 })
 ```

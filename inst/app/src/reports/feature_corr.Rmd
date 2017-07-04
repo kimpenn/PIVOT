@@ -63,8 +63,8 @@ if(input$cor_ft_package == 'gplots') {
     tmp_data <- list()
     tmp_data$df <- r_data$df[which(rownames(r_data$df) %in% features), ]
     tmp_data$raw <-r_data$raw[which(rownames(r_data$raw) %in% features), ]
-    rsList <- callModule(pivot_dataScale, "cor_ft_hmap_scale", tmp_data)
-    hm_data <- rsList$df
+    rsList() <- callModule(pivot_dataScale, "cor_ft_hmap_scale", tmp_data)
+    hm_data <- rsList()$df
 
     rsList <- callModule(pivot_colorBy, "cor_ft_hmap_col", meta = r_data$meta)
     if(!is.null(rsList$meta)) {

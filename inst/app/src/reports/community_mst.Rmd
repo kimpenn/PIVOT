@@ -9,8 +9,8 @@
 
 ```{r echo = FALSE, warning=FALSE, message = FALSE}
 mst_graph <- reactive({
-    rsList <- callModule(pivot_dataScale, "mst_scale", r_data, ercc_iso = FALSE)
-    mst_data <- rsList$df
+    rsList() <- callModule(pivot_dataScale, "mst_scale", r_data)
+    mst_data <- rsList()$df
     if(input$mst_dist_method == 'euclidean') {
         dist_mtx <- t(mst_data) %>% dist() %>% as.matrix()
     } else if(input$mst_dist_method == 'correlation') {
@@ -52,6 +52,7 @@ mst_graph <- reactive({
     cList <- callModule(pivot_colorBy, "community", meta = r_data$meta)
     rsList<-generate_mst(dist_mtx, method = input$com_algorithm, color_list = cList, step = input$com_wt_step)
     r_data$meta$community <- paste0("community_",as.character(igraph::membership(rsList$community)))
+    r_data$category <- colnames(r_data$meta)
     return(rsList) # Return the graph for plotting
 })
 ```

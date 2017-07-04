@@ -31,12 +31,12 @@ output$tsne_ui <- renderUI({
                        register_analysis= T,
                        tags$div(tags$b("t-SNE Settings:"), class = "param_setting_title"),
                        fluidRow(
-                           column(4, pivot_dataScale_UI("tsne", include = c("Counts (raw)", "Counts (normalized)", "Log10 Counts", "Standardized Counts", "Log10 & Standardized"), selected = "Log10 Counts")),
+                           pivot_dataScale_UI("tsne", include = c("Counts (raw)", "Counts (normalized)", "Log10 Counts", "Standardized Counts", "Log10 & Standardized"), selected = "Log10 Counts"),
                            column(4, numericInput("tsne_perplexity", label = "Perplexity", min = 1, max = 50, value = 1, step = 1)),
                            column(4, numericInput("tsne_seed", label = "Set Seed", min = 1, max = 50, value = 1, step = 1))
                        ),
                        fluidRow(
-                           pivot_colorBy_UI("tsne", meta = r_data$meta, append_none = T, multiple = F, width = 8),
+                           uiOutput("tsne_color_by_ui"),
                            column(4, radioButtons("tsne_pca", label = "Perform initial PCA step?", choices = list("Yes" = "TRUE", "No" = "FALSE"), selected = "TRUE", inline = TRUE))
                        )
                    )
@@ -91,18 +91,26 @@ output$tsne_ui <- renderUI({
 
 })
 
+output$tsne_color_by_ui <- renderUI({
+    pivot_colorBy_UI("tsne", r_data$category, append_none = T, multiple = F, width = 8)
+})
+
+tsneList <- callModule(pivot_dataScale, "tsne", r_data)
 
 observe({
-    req(r_data$df)
-    rsList <- callModule(pivot_dataScale, "tsne", r_data)
-    tsne_data <- rsList$df
-
+    tsne_data <- tsneList()$df
     req(tsne_data, input$tsne_seed, input$tsne_pca)
     tryCatch({
         set.seed(input$tsne_seed)
         tsne_1d <- Rtsne::Rtsne(t(tsne_data),perplexity = input$tsne_perplexity, theta = 0, dims = 1, pca = as.logical(input$tsne_pca))
         tsne_2d <- Rtsne::Rtsne(t(tsne_data),perplexity = input$tsne_perplexity, theta = 0, dims = 2, pca = as.logical(input$tsne_pca))
         tsne_3d <- Rtsne::Rtsne(t(tsne_data),perplexity = input$tsne_perplexity, theta = 0, dims = 3, pca = as.logical(input$tsne_pca))
+        tsne_1d <- as.data.frame(tsne_1d$Y)
+        tsne_2d <- as.data.frame(tsne_2d$Y)
+        tsne_3d <- as.data.frame(tsne_3d$Y)
+        rownames(tsne_1d) <- colnames(tsne_data)
+        rownames(tsne_2d) <- colnames(tsne_data)
+        rownames(tsne_3d) <- colnames(tsne_data)
         r_data$tsne <- list(tsne_1d = tsne_1d, tsne_2d = tsne_2d, tsne_3d = tsne_3d)
     },
     error = function(e) {
@@ -115,17 +123,31 @@ tsne_minfo<- reactive(callModule(pivot_colorBy, "tsne", meta = r_data$meta))
 
 observe({
     req(tsne_minfo(), r_data$tsne)
-    callModule(pivot_Plot1d, "tsne_plot1d", type = "tsne", obj = NULL, proj = as.data.frame(r_data$tsne$tsne_1d$Y), minfo = tsne_minfo())
+    callModule(pivot_Plot1d, "tsne_plot1d", type = "tsne", obj = NULL, proj = r_data$tsne$tsne_1d, minfo = tsne_minfo())
+})
+
+tsne_selected_sample <- reactiveValues()
+
+observe({
+    req(tsne_minfo(), r_data$tsne)
+    drag <-reactive(plotly::event_data("plotly_selected", source = "tsne_drag"))
+
+    obj <- callModule(pivot_Plot2d, "tsne_plot2d", type = "tsne", obj = NULL, proj = r_data$tsne$tsne_2d, minfo = tsne_minfo(),
+                      source = "tsne_drag", event = drag, selected = tsne_selected_sample)
+    isolate({
+        if(!is.null(obj$group)) {
+            if(is.null(r_data$meta$tsne_group)) {
+                r_data$meta$tsne_group <- rep("not specified", nrow(r_data$meta))
+                r_data$category <- colnames(r_data$meta)
+            }
+            r_data$meta$tsne_group[match(obj$group, r_data$meta$sample)] <- names(obj$group)[1]
+        }
+    })
 })
 
 observe({
     req(tsne_minfo(), r_data$tsne)
-    callModule(pivot_Plot2d, "tsne_plot2d", type = "tsne", obj = NULL, proj = as.data.frame(r_data$tsne$tsne_2d$Y), minfo = tsne_minfo())
-})
-
-observe({
-    req(tsne_minfo(), r_data$tsne)
-    callModule(pivot_Plot3d, "tsne_plot3d", type = "tsne", obj = NULL, proj = as.data.frame(r_data$tsne$tsne_3d$Y), minfo = tsne_minfo())
+    callModule(pivot_Plot3d, "tsne_plot3d", type = "tsne", obj = NULL, proj = r_data$tsne$tsne_3d, minfo = tsne_minfo())
 })
 
 

@@ -29,6 +29,7 @@ init_state <- function(r_data) {
 
     r_data$glb.meta <- NULL # META table
     r_data$meta <- NULL # META table of the activated dataset
+    r_data$category <- NULL
     r_data$design_pv <- NULL # Temporary design input preview table
 
     r_data$feature_list <- NULL # This contains the filtered feature list used for analysis, every time the user choose a different feature set, the analyzer will grab that set of data using this key
@@ -50,10 +51,6 @@ init_state <- function(r_data) {
 #'
 #' @export
 clear_results <-function(r_data) {
-    r_data$community <- NULL
-    r_data$coms <- NULL
-    r_data$mst <- NULL
-
     r_data$dds <- NULL
     r_data$deseq_results <- NULL
     r_data$deseq_params <- NULL
@@ -77,6 +74,8 @@ clear_results <-function(r_data) {
     r_data$scde_rw <- NULL
     r_data$scde_mrw <- NULL
     r_data$scde_results <- NULL
+
+    r_data$kmeans <- NULL
 
     r_data$pca <- NULL
     r_data$pca_var <- NULL
@@ -149,7 +148,8 @@ clear_design <- function(r_data) {
     }
 
     r_data$glb.meta <- data.frame(sample = colnames(r_data$glb.raw))
-
+    r_data$meta <- r_data$glb.meta[match(r_data$sample_name, r_data$glb.meta[,1]),, drop = F]
+    r_data$category <- colnames(r_data$meta)
     r_data <- clear_results(r_data)
     return(r_data)
 }
@@ -198,6 +198,7 @@ init_meta <- function(r_data, type = "both") {
     }
 
     r_data$meta <- r_data$glb.meta[match(r_data$sample_name, r_data$glb.meta[,1]),, drop = F]
+    r_data$category <- colnames(r_data$meta)
     return(r_data)
 }
 

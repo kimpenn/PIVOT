@@ -122,18 +122,15 @@ feature_plot <- function(df, selected_gene, plot_by = "sample", meta = NULL, pal
 #' This is the UI part of the module
 #'
 #' @export
-pivot_colorBy_UI <- function(id, meta, append_sample = F, append_none = F, multiple = F, choose_color = T, bset ="qualitative", width = 8) {
-    if(is.null(meta) || ncol(meta) < 2) return()
+pivot_colorBy_UI <- function(id, category, append_sample = T, append_none = F, multiple = F, choose_color = T, bset ="qualitative", width = 8) {
+    if(is.null(category)) return()
     ns<- NS(id)
-    categories = colnames(meta)[-1]
+    categories = category
     names(categories) <- categories
+    if(!append_sample) {
+        categories <- categories[categories != "sample"]
+    }
     options <- as.list(categories)
-    if(append_sample) {
-        options <- c("sample" = "sample", options)
-    }
-    if(append_none) {
-        options <- c(options, "none" = "none")
-    }
     if(choose_color) {
         list(
             column(width/2, selectInput(ns("group_by"), label = "Group by", choices = options, multiple = multiple)),
@@ -193,7 +190,7 @@ pivot_colorBy <- function(input, output, session, meta) {
 pivot_featurePlot_UI <- function(id, meta, ids = NULL) {
     ns<- NS(id)
     if(!is.null(meta)) {
-        color_ui <- pivot_colorBy_UI(ns("tbl_plt"), meta = meta, append_sample = T, bset = c("qualitative","diverging"), width = 6)
+        color_ui <- pivot_colorBy_UI(ns("tbl_plt"), category = colnames(meta), append_sample = T, bset = c("qualitative","diverging"), width = 6)
         style_ui <- column(3, selectInput(ns("plt_style"), "Plot type", choices = list("Plot points" = "points", "Bar plot" = "bar", "Box plot" = "box", "Violin plot" = "violin")))
     } else {
         color_ui <-  NULL

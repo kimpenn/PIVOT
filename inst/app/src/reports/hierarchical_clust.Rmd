@@ -7,9 +7,9 @@
 
 ```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 6}
 # distance measure
+rsList() <- callModule(pivot_dataScale, "hc_scale", r_data)
 hclust0 <- reactive({
-    rsList <- callModule(pivot_dataScale, "hc_scale", r_data, ercc_iso = FALSE)
-    hc_data <- rsList$df
+    hc_data <- rsList()$df
     if(!(input$hc_dist_method %in% c('scde', 'corr'))) {
         t(hc_data) %>% dist(method = input$hc_dist_method) %>% hclust(method = input$hc_agglo_method)
     } else if(input$hc_dist_method == 'corr') {

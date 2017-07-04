@@ -69,7 +69,7 @@ output$mww_ui <- renderUI({
 
            tags$div(tags$b("General Settings:"), class = "param_setting_title"),
            fluidRow(
-               column(4, pivot_dataScale_UI("mww", include = c("Counts (raw)", "Counts (normalized)", "Log10 Counts", "Standardized Counts", "Log10 & Standardized"), selected = "Log10 Counts")),
+               pivot_dataScale_UI("mww", include = c("Counts (raw)", "Counts (normalized)", "Log10 Counts", "Standardized Counts", "Log10 & Standardized"), selected = "Log10 Counts", width = 3),
                pivot_deGroupBy_UI("mww", r_data$meta, width = 12, model = c("condition"), reduced = "no")
            ),
 
@@ -161,7 +161,7 @@ observeEvent(input$perform_mww, {
     names(groups) <- r_data$meta[,1]
 
     rsList <- callModule(pivot_dataScale, "mww", r_data)
-    df <- rsList$df
+    df <- rsList()$df
     withProgress(message = 'Processing...', value = 0.8, {
         sp1 <- names(groups[groups == input$mww_group1])
         sp2 <- names(groups[groups == input$mww_group2])

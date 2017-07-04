@@ -26,23 +26,40 @@ output$hclust_ui <- renderUI({
             reportable = T,
             get_html = T,
             register_analysis= T,
-            tags$div(tags$b("General Settings:"), class = "param_setting_title"),
+            tags$div(tags$b("Clustering Settings:"), class = "param_setting_title"),
             fluidRow(
-                column(4, pivot_dataScale_UI("hc_scale", include = c("Counts (raw)", "Counts (normalized)", "Log10 Counts", "Standardized Counts", "Log10 & Standardized"), selected = "Log10 Counts"))
+                pivot_dataScale_UI("hc_scale", include = c("Counts (raw)", "Counts (normalized)", "Log10 Counts", "Standardized Counts", "Log10 & Standardized", "Projection Matrix"), selected = "Log10 Counts", width = 9)
             ),
-            tags$div(tags$b("Clustering Parameter Settings:"), class = "param_setting_title"),
             fluidRow(
-                column(4, selectInput("hc_dist_method", "Distance measure", choices = list("Euclidean" = "euclidean", "Maximum" = "maximum", "Manhattan" = "manhattan", "Canberra" = "canberra", "Binary" = "binary", "Correlation Distance" = "corr", "SCDE Adjusted Distance" = 'scde'), selected = "euclidean")),
-                column(4, uiOutput("hclust_corr_ui"),  uiOutput("hclust_scde_ui")),
-                column(4, selectInput("hc_agglo_method", "Agglomeration method", choices = list("Ward.D" = "ward.D", "Ward.D2" = "ward.D2","Single"= "single", "Complete"="complete", "Average"= "average", "Mcquitty"="mcquitty", "Median"= "median", "Centroid" = "centroid"), selected = "complete"))
+                column(3, selectInput("hc_dist_method", "Distance measure", choices = list("Euclidean" = "euclidean", "Maximum" = "maximum", "Manhattan" = "manhattan", "Canberra" = "canberra", "Binary" = "binary", "Correlation Distance" = "corr", "SCDE Adjusted Distance" = 'scde'), selected = "euclidean")),
+                uiOutput("hclust_corr_ui"),  uiOutput("hclust_scde_ui"),
+                column(3, selectInput("hc_agglo_method", "Agglomeration method", choices = list("Ward.D" = "ward.D", "Ward.D2" = "ward.D2","Single"= "single", "Complete"="complete", "Average"= "average", "Mcquitty"="mcquitty", "Median"= "median", "Centroid" = "centroid"), selected = "complete")),
+                column(3, numericInput("hclust_num", label = "Number of Clusters", min = 2, max = length(r_data$sample_name) - 1, value = 2, step = 1))
             ),
             tags$div(tags$b("Visualization Settings:"), class = "param_setting_title"),
             fluidRow(
-                column(4, selectInput("hclust_package", "Plotting package", choices = list("Dendexdend" = "dendextend", "networkD3" = "networkD3"), selected = "dendextend")),
-                pivot_colorBy_UI("hclust", meta = r_data$meta, multiple = T)
+                column(3, selectInput("hclust_package", "Plotting Package", choices = list("Dendexdend" = "dendextend", "networkD3" = "networkD3"), selected = "dendextend")),
+                pivot_colorBy_UI("hclust", r_data$category, multiple = T, width = 6),
+                column(3, tags$br(), checkboxInput("hclust_show", "Show Cluster", value = T))
             ),
             uiOutput("dend_hclust"),
-            uiOutput("d3_hclust")
+            uiOutput("d3_hclust"),
+            hr(),
+            fluidRow(
+                column(6,
+                       tags$div(tags$b("Confusion Matrix"), class = "param_setting_title"),
+                       fluidRow(
+                           pivot_colorBy_UI("hclust2", r_data$category, append_none = T, choose_color = F, width = 12)
+                       ),
+                       DT::dataTableOutput("hclust_tbl"),
+                       plotOutput("hclust_conf_plot")
+                ),
+                column(6,
+                       tags$div(tags$b("Clustering Results"), class = "param_setting_title"),
+                       DT::dataTableOutput("hclust_assignment"),
+                       downloadButton("hclust_download", "Download", class = "btn btn-success")
+                )
+            )
         )
     )
 })
@@ -55,12 +72,12 @@ output$dend_hclust<-renderUI({
 
 output$hclust_corr_ui <- renderUI({
     if (input$hc_dist_method != 'corr') return()
-    selectInput("hclust_cor_method", label = "Correlation method", choices = list("Pearson" = "pearson","Spearman" = "spearman", "Kendall" = "kendall"), selected = "pearson")
+    column(3, selectInput("hclust_cor_method", label = "Correlation method", choices = list("Pearson" = "pearson","Spearman" = "spearman", "Kendall" = "kendall"), selected = "pearson"))
 })
 
 output$hclust_scde_ui <- renderUI({
     if (input$hc_dist_method != 'scde') return()
-    selectInput("hclust_scde_dist_method", "SCDE distance", choices = list("Direct drop-out" = "ddo", "Reciprocal weighting" = "rw", "Mode-relative weighting" = "mrw"), selected = "rw")
+    column(3, selectInput("hclust_scde_dist_method", "SCDE distance", choices = list("Direct drop-out" = "ddo", "Reciprocal weighting" = "rw", "Mode-relative weighting" = "mrw"), selected = "rw"))
 })
 
 output$d3_hclust <- renderUI({
@@ -82,10 +99,10 @@ output$d3_hclust <- renderUI({
 
 
 # distance measure
+hcList <- callModule(pivot_dataScale, "hc_scale", r_data)
 hclust0 <- reactive({
-    rsList <- callModule(pivot_dataScale, "hc_scale", r_data, ercc_iso = FALSE)
-    req(rsList$df)
-    hc_data <- rsList$df
+    req(hcList()$df)
+    hc_data <- hcList()$df
     if(!(input$hc_dist_method %in% c('scde', 'corr'))) {
         t(hc_data) %>% dist(method = input$hc_dist_method) %>% hclust(method = input$hc_agglo_method)
     } else if(input$hc_dist_method == 'corr') {
@@ -134,6 +151,8 @@ output$hclust_plot <- renderPlot({
     # get max height of the tree, this will be used to adjust the group bar height
     max_height <- max(hc0$height)
     hc1 <- hc0 %>% as.dendrogram()
+    # Cut tree to get cluster
+    r_data$meta$hierarchical_cluster <- dendextend::cutree(hc1, k = input$hclust_num)
 
     rsList <- callModule(pivot_colorBy, "hclust", meta = r_data$meta)
     if(is.null(rsList$meta)) {
@@ -166,7 +185,9 @@ output$hclust_plot <- renderPlot({
             session$sendCustomMessage(type = "showalert", "Unable to plot more than 5 categories.")
             return()
         }
-
+    }
+    if(input$hclust_show){
+        hc1 %>% dendextend::rect.dendrogram(k=input$hclust_num, border = 8, lty = 5, lwd = 2)
     }
 })
 
@@ -191,4 +212,72 @@ output$hclust.d3 <- networkD3::renderDendroNetwork({
         networkD3::dendroNetwork(Root, fontSize = 15, textColour = selected_color, treeOrientation = input$hc_dd_ori, linkColour = 'navyblue', nodeColour = 'grey', textOpacity = 1, opacity = 1,  zoom = T, linkType = input$hc_dd_link_type)
     }
 })
+
+
+
+output$hclust_tbl <- DT::renderDataTable({
+    req(r_data$meta$hierarchical_cluster)
+    gList <- callModule(pivot_colorBy, "hclust2", meta = r_data$meta)
+
+    if(is.null(gList$meta) || length(unique(gList$meta[,1])) < 2)
+    {
+        tbl <- as.data.frame(table(r_data$meta$hierarchical_cluster))
+        colnames(tbl) <- c("Group", "Number of samples assigned")
+        DT::datatable(tbl, options = list(paging = FALSE, searching = FALSE))
+    } else {
+        sample_gp <- gList$meta[,1]
+        names(sample_gp) <- r_data$sample_name
+        tbl <- as.data.frame.matrix(table(r_data$meta$hierarchical_cluster, sample_gp))
+        colnam <- names(tbl)
+        names(tbl) <- sapply(colnam, function(x) paste("Is", x))
+        rownam <- rownames(tbl)
+        rownames(tbl) <- sapply(rownam, function(x) paste("Allocated to cluster", x))
+        DT::datatable(tbl, options = list(paging = FALSE, searching = FALSE))
+    }
+})
+
+output$hclust_conf_plot <- renderPlot({
+    req(r_data$meta$hierarchical_cluster)
+    gList <- callModule(pivot_colorBy, "hclust2", meta = r_data$meta)
+
+    if(is.null(gList$meta) || length(unique(gList$meta[,1])) < 2)
+    {
+        return()
+    } else {
+        sample_gp <- gList$meta[,1]
+        names(sample_gp) <- r_data$sample_name
+        tbl <- as.data.frame.matrix(table(r_data$meta$hierarchical_cluster, sample_gp))
+        plot(as.factor(sample_gp), as.factor(r_data$meta$hierarchical_cluster), xlab="Group", ylab = "Cluster")
+    }
+
+})
+
+hclust_assign_tbl <- reactive({
+    req(r_data$meta$hierarchical_cluster)
+    gList <- callModule(pivot_colorBy, "hclust2", meta = r_data$meta)
+
+    if(is.null(gList$meta) || length(unique(gList$meta[,1])) == 0)
+    {
+        tbl <- r_data$meta[,c("sample", "hierarchical_cluster")]
+    } else {
+        actual_group <- gList$meta[,1]
+        names(actual_group) <- r_data$sample_name
+        tbl <- data.frame(actual_group)
+        tbl$assigned_cluster <- r_data$meta$hierarchical_cluster
+    }
+    tbl
+})
+
+output$hclust_assignment <- DT::renderDataTable({
+    DT::datatable(hclust_assign_tbl(), options = list(scrollX = TRUE, scrollY = "400px", lengthMenu = c(20, 50, 100)))
+})
+
+output$hclust_download <- downloadHandler(
+    filename = function() {
+        "hierarchical_clustering_assigment.csv"
+    },
+    content = function(file) {
+        write.csv(hclust_assign_tbl(), file)
+    }
+)
 

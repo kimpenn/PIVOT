@@ -3,8 +3,8 @@
 
 ```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 10, fig.height = 8}
 if(input$cor_sp_package == 'gplots') {
-    rsList <- callModule(pivot_dataScale, "cor_sp_scale", r_data, ercc_iso = FALSE)
-    sp_data <- rsList$df
+    rsList <- callModule(pivot_dataScale, "cor_sp_scale", r_data)
+    sp_data <- rsList()$df
     if(is.null(sp_data)) return()
     sample_cor <- cor(sp_data, method = input$cor_sp_method)
     distfun1 = function(c) as.dist(1 - c)
@@ -27,8 +27,8 @@ if(input$cor_sp_package == 'gplots') {
                           trace="none", col=get_heatmap_color(input$cor_sp_hmcolor), key.par=list(cex.axis=1), key.title=NA, key.xlab="  ", key.ylab=NA, keysize=1, density.info="density", revC=T, margins=c(8,6))
     }
 } else {
-    rsList <- callModule(pivot_dataScale, "cor_sp_scale", r_data, ercc_iso = FALSE)
-    sp_data <- rsList$df
+    rsList <- callModule(pivot_dataScale, "cor_sp_scale", r_data)
+    sp_data <- rsList()$df
     if(is.null(sp_data)) return()
     sample_cor <- cor(sp_data, method = input$cor_sp_method)
     distfun1 = function(c) as.dist(1 - c)

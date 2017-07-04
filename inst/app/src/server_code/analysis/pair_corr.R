@@ -36,7 +36,7 @@ output$pairwise_box <- renderUI({
                     tags$li("Pairwise correlation is performed using log10 transformed raw counts with function from the SCDE package. "),
                     tags$li("If you have specified group infomation, the comparison will be performed group-wise. Otherwise all sample pairs will be compared.")
                 ),
-                pivot_colorBy_UI("paircor", meta = r_data$meta, append_none = T, choose_color = F, width = 4),
+                pivot_colorBy_UI("paircor", r_data$category, append_none = T, choose_color = F, width = 4),
                 column(2,  br(), actionButton("run_corr", "Run", class = "btn btn-info"))
             ),
             hr(),

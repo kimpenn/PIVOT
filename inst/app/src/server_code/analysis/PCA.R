@@ -30,9 +30,9 @@ output$pca_ui <- renderUI({
                        register_analysis= T,
                        tags$div(tags$b("General Settings:"), class = "param_setting_title"),
                        fluidRow(
-                           column(3, pivot_dataScale_UI("pca", include = c("Counts (raw)", "Counts (normalized)", "Log10 Counts"), selected = "Log10 Counts")),
+                           pivot_dataScale_UI("pca", include = c("Counts (raw)", "Counts (normalized)", "Log10 Counts"), selected = "Log10 Counts", width = 3),
                            column(3, selectInput("pca_scale", label = "PCA Scale", choices = list("Scale to Unit Varience" = T, "None" = F))),
-                           pivot_colorBy_UI("pca", meta = r_data$meta, append_none = T, multiple = F, width = 6)
+                           pivot_colorBy_UI("pca", r_data$category, append_none = T, multiple = F, width = 6)
                        )
                    )
             )
@@ -109,12 +109,11 @@ output$pca_ui <- renderUI({
     )
 })
 
-
+pcaList <- callModule(pivot_dataScale, "pca", r_data)
 
 observe({
-    req(r_data$df)
-    rsList <- callModule(pivot_dataScale, "pca", r_data)
-    pca_data <- rsList$df
+    req(r_data$df, r_data$meta)
+    pca_data <- pcaList()$df
     req(pca_data, input$pca_scale)
 
     tryCatch({
@@ -126,21 +125,36 @@ observe({
     })
 })
 
+
 pca_minfo<- reactive(callModule(pivot_colorBy, "pca", meta = r_data$meta))
 
 observe({
     req(pca_minfo(), r_data$pca)
-    callModule(pivot_Plot1d, "pca_plot1d", type = "pca", r_data$pca, as.data.frame(r_data$pca$x), minfo = pca_minfo())
+    callModule(pivot_Plot1d, "pca_plot1d", type = "pca", r_data$pca, proj = as.data.frame(r_data$pca$x), minfo = pca_minfo())
+})
+
+
+pca_selected_sample <- reactiveValues()
+
+observe({
+    req(pca_minfo(), r_data$pca)
+    drag <-reactive(plotly::event_data("plotly_selected", source = "pca_drag"))
+    obj <- callModule(pivot_Plot2d, "pca_plot2d", type = "pca", r_data$pca, proj = as.data.frame(r_data$pca$x), minfo = pca_minfo(),
+                      source = "pca_drag", event = drag, selected = pca_selected_sample)
+    isolate({
+        if(!is.null(obj$group)) {
+            if(is.null(r_data$meta$pca_group)) {
+                r_data$meta$pca_group <- rep("not specified", nrow(r_data$meta))
+                r_data$category <- colnames(r_data$meta)
+            }
+            r_data$meta$pca_group[match(obj$group, r_data$meta$sample)] <- names(obj$group)[1]
+        }
+    })
 })
 
 observe({
     req(pca_minfo(), r_data$pca)
-    callModule(pivot_Plot2d, "pca_plot2d", type = "pca", r_data$pca, as.data.frame(r_data$pca$x), minfo = pca_minfo())
-})
-
-observe({
-    req(pca_minfo(), r_data$pca)
-    callModule(pivot_Plot3d, "pca_plot3d", type = "pca", r_data$pca, as.data.frame(r_data$pca$x), minfo = pca_minfo())
+    callModule(pivot_Plot3d, "pca_plot3d", type = "pca", r_data$pca, proj = as.data.frame(r_data$pca$x), minfo = pca_minfo())
 })
 
 

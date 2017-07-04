@@ -2,10 +2,8 @@
 # Data Table
 
 ```{r echo = FALSE, warning=FALSE, message = FALSE}
-rs_table <- reactive({
-    rsList <- callModule(pivot_dataScale, "table_scale", r_data, order_by = input$tbl_order)
+rs_table <- callModule(pivot_dataScale, "table_scale", r_data, order_by = input$tbl_order)
     #assign("rList", rsList, env = .GlobalEnv)
-})
 ```
 
 **Scale:** `r rs_table()$scale`

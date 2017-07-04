@@ -6,7 +6,8 @@
 \usage{
 pivot_dataScale_UI(id, include = c("Counts (raw)", "Counts (normalized)",
   "Relative Frequency", "Log10 Counts", "Standardized Counts",
-  "Log10 & Standardized"), selected = "Counts (normalized)")
+  "Log10 & Standardized", "Projection Matrix"),
+  selected = "Counts (normalized)", width = 4)
 }
 \description{
 Controls which transformed data should be used as input for analysis modules, this is the UI part of the module.

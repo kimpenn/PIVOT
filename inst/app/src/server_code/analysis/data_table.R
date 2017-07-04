@@ -32,9 +32,7 @@ output$table_box_ui <- renderUI({
 
             tags$div(tags$b("General Settings:"), class = "param_setting_title"),
             fluidRow(
-                column(6,
-                       pivot_dataScale_UI("table_scale")
-                ),
+                pivot_dataScale_UI("table_scale", width = 6),
                 column(6,
                        selectInput("tbl_order", label = "Order features by", choices = list("None" = "none", "Variance" = "variance", "Fano Factor" = "fano_factor", "Row Average" = "row_average", "Row Median" = "row_median"), selected = "none")
                 )
@@ -60,10 +58,8 @@ output$table_box_ui <- renderUI({
 
 })
 
-rs_table <- reactive({
-    rsList <- callModule(pivot_dataScale, "table_scale", r_data, order_by = input$tbl_order)
-    #assign("rList", rsList, env = .GlobalEnv)
-})
+rs_table <- callModule(pivot_dataScale, "table_scale", r_data, order_by = input$tbl_order)
+
 # Normalized Data
 output$data_tbl <- DT::renderDataTable({
     req(rs_table())

@@ -31,9 +31,9 @@ output$mds_ui <- renderUI({
             register_analysis= T,
             tags$div(tags$b("General Settings:"), class = "param_setting_title"),
             fluidRow(
-                column(3, pivot_dataScale_UI("mds", include = c("Counts (raw)", "Counts (normalized)", "Log10 Counts"), selected = "Log10 Counts")),
+                pivot_dataScale_UI("mds", include = c("Counts (raw)", "Counts (normalized)", "Log10 Counts"), selected = "Log10 Counts", width = 3),
                 column(3, selectInput("mds_dist", "Distance measure", choices = list("Euclidean" = "euclidean", "Maximum" = "maximum", "Manhattan" = "manhattan", "Canberra" = "canberra", "Binary" = "binary"), selected = "euclidean")),
-                pivot_colorBy_UI("mds", meta = r_data$meta, append_none = T, multiple = F, width = 6)
+                pivot_colorBy_UI("mds", r_data$category, append_none = T, multiple = F, width = 6)
             ),
             fluidRow(
                 column(6,
@@ -58,9 +58,9 @@ output$mds_ui <- renderUI({
             register_analysis= T,
             tags$div(tags$b("General Settings:"), class = "param_setting_title"),
             fluidRow(
-                column(3, pivot_dataScale_UI("nds", include = c("Counts (raw)", "Counts (normalized)", "Log10 Counts"), selected = "Log10 Counts")),
+                pivot_dataScale_UI("nds", include = c("Counts (raw)", "Counts (normalized)", "Log10 Counts"), selected = "Log10 Counts", width = 3),
                 column(3, selectInput("nds_dist", "Distance measure", choices = list("Euclidean" = "euclidean", "Maximum" = "maximum", "Manhattan" = "manhattan", "Canberra" = "canberra", "Binary" = "binary"), selected = "euclidean")),
-                pivot_colorBy_UI("nds", meta = r_data$meta, append_none = T, multiple = F, width = 6)
+                pivot_colorBy_UI("nds", r_data$category, append_none = T, multiple = F, width = 6)
             ),
             fluidRow(
                 column(6,
@@ -79,16 +79,15 @@ output$mds_ui <- renderUI({
 })
 
 # Metric MDS
-
+mdsList <- callModule(pivot_dataScale, "mds", r_data)
 observe({
-    req(r_data$df)
-    rsList <- callModule(pivot_dataScale, "mds", r_data)
-    mds_data <- rsList$df
+    req(r_data$df, r_data$meta)
+    mds_data <- mdsList()$df
     req(mds_data, input$mds_dist)
 
     tryCatch({
-        mds_2d <- cmdscale(dist(t(mds_data), method = input$mds_dist),eig=F, k=2)
-        mds_3d <- cmdscale(dist(t(mds_data), method = input$mds_dist),eig=F, k=3)
+        mds_2d <- as.data.frame(cmdscale(dist(t(mds_data), method = input$mds_dist),eig=F, k=2))
+        mds_3d <- as.data.frame(cmdscale(dist(t(mds_data), method = input$mds_dist),eig=F, k=3))
         r_data$mds <- list(mds_2d = mds_2d, mds_3d = mds_3d)
     },
     error = function(e) {
@@ -99,23 +98,37 @@ observe({
 
 mds_minfo<- reactive(callModule(pivot_colorBy, "mds", meta = r_data$meta))
 
-observe({
-    req(mds_minfo(), r_data$mds)
-    callModule(pivot_Plot2d, "mds_plot2d", type = "mds", obj = NULL, proj = as.data.frame(r_data$mds$mds_2d), minfo = mds_minfo())
-})
+mds_selected_sample <- reactiveValues()
 
 observe({
     req(mds_minfo(), r_data$mds)
-    callModule(pivot_Plot3d, "mds_plot3d", type = "mds", obj = NULL, proj = as.data.frame(r_data$mds$mds_3d), minfo = mds_minfo())
+    drag <-reactive(plotly::event_data("plotly_selected", source = "mds_drag"))
+    obj <- callModule(pivot_Plot2d, "mds_plot2d", type = "mds",  obj = NULL, proj = r_data$mds$mds_2d, minfo = mds_minfo(),
+                      source = "mds_drag", event = drag, selected = mds_selected_sample)
+    isolate({
+        if(!is.null(obj$group)) {
+            if(is.null(r_data$meta$mds_group)) {
+                r_data$meta$mds_group <- rep("not specified", nrow(r_data$meta))
+                r_data$category <- colnames(r_data$meta)
+            }
+            r_data$meta$mds_group[match(obj$group, r_data$meta$sample)] <- names(obj$group)[1]
+        }
+    })
+})
+
+
+observe({
+    req(mds_minfo(), r_data$mds)
+    callModule(pivot_Plot3d, "mds_plot3d", type = "mds", obj = NULL, proj = r_data$mds$mds_3d, minfo = mds_minfo())
 })
 
 
 # Nonmetric MDS
+ndsList <- callModule(pivot_dataScale, "nds", r_data)
 
 observe({
     req(r_data$df)
-    rsList <- callModule(pivot_dataScale, "nds", r_data)
-    nds_data <- rsList$df
+    nds_data <- ndsList()$df
     req(nds_data, input$nds_dist)
 
     tryCatch({
@@ -131,9 +144,22 @@ observe({
 
 nds_minfo<- reactive(callModule(pivot_colorBy, "nds", meta = r_data$meta))
 
+nds_selected_sample <- reactiveValues()
+
 observe({
     req(nds_minfo(), r_data$nds)
-    callModule(pivot_Plot2d, "nds_plot2d", type = "nds", obj = NULL, proj = as.data.frame(r_data$nds$nds_2d$points), minfo = nds_minfo())
+    drag <-reactive(plotly::event_data("plotly_selected", source = "nds_drag"))
+    obj <- callModule(pivot_Plot2d, "nds_plot2d", type = "nds", obj = NULL, proj = as.data.frame(r_data$nds$nds_2d$points), minfo = nds_minfo(),
+                      source = "nds_drag", event = drag, selected = nds_selected_sample)
+    isolate({
+        if(!is.null(obj$group)) {
+            if(is.null(r_data$meta$nonmetric_mds_group)) {
+                r_data$meta$nonmetric_mds_group <- rep("not specified", nrow(r_data$meta))
+                r_data$category <- colnames(r_data$meta)
+            }
+            r_data$meta$nonmetric_mds_group[match(obj$group, r_data$meta$sample)] <- names(obj$group)[1]
+        }
+    })
 })
 
 observe({

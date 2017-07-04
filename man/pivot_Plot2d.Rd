@@ -5,7 +5,7 @@
 \title{a wrapper module for plot in 2D}
 \usage{
 pivot_Plot2d(input, output, session, type = NULL, obj = NULL, proj = NULL,
-  minfo = NULL)
+  minfo = NULL, source = NULL, event = NULL, selected = NULL)
 }
 \description{
 This is the server part of the module.

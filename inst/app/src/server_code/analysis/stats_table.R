@@ -27,7 +27,7 @@ output$meta_ui <- renderUI({
                          ),
                          column(5,
                                 fluidRow(
-                                    pivot_colorBy_UI("pie", meta = r_data$meta, append_none = F, multiple = F, width = 12)
+                                    pivot_colorBy_UI("pie", r_data$category, append_none = F, multiple = F, width = 12)
                                 ),
                                 br(),
                                 plotly::plotlyOutput("design_pie")
@@ -75,7 +75,7 @@ output$meta_ui <- renderUI({
                                             choices = c("Bar Plot" = "bar", "Histogram" = "histogram", "Density Plot" = "density"),
                                             selected = "bar")
                          ),
-                         pivot_colorBy_UI("sample_stats", meta = r_data$meta, append_none = T, multiple = F, width = 4),
+                         pivot_colorBy_UI("sample_stats", r_data$category, append_none = T, multiple = F, width = 4),
                          column(2, uiOutput("sample_bin_width_ui"))
                      ),
                      plotly::plotlyOutput("sample_stats_plot")

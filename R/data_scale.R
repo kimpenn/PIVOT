@@ -14,14 +14,30 @@ generateRelativeFreq <- function(raw){
 #' Controls which transformed data should be used as input for analysis modules, this is the UI part of the module.
 #'
 #' @export
-pivot_dataScale_UI <- function(id, include = c("Counts (raw)", "Counts (normalized)", "Relative Frequency", "Log10 Counts", "Standardized Counts", "Log10 & Standardized"), selected = "Counts (normalized)") {
+pivot_dataScale_UI <- function(id, include = c("Counts (raw)", "Counts (normalized)", "Relative Frequency", "Log10 Counts", "Standardized Counts", "Log10 & Standardized", "Projection Matrix"), selected = "Counts (normalized)", width = 4) {
     ns<- NS(id)
     names(include) <- include
-    tagList(
-        selectInput(ns("data_scale"), label = "Data Scale",
-                    choices = as.list(include), selected = selected)
-    )
-
+    proj_lists <- c("PCA", "t-SNE", "MDS", "Nonmetric-MDS")
+    names(proj_lists) <- proj_lists
+    if("Projection Matrix" %in% include) {
+        tagList(
+            column(width = width/3, selectInput(ns("data_scale"), label = "Data Input",
+                                              choices = as.list(include), selected = selected)),
+            column(width = width/3,
+                   conditionalPanel(sprintf("input['%s'] == 'Projection Matrix'", ns("data_scale")),
+                                    selectInput(ns("proj_matrix"), label = "Choose Projection", choices = proj_lists)
+                   )
+            ),
+            column(width = width/3,
+                   uiOutput(ns("pc_choice"))
+            )
+        )
+    } else {
+        tagList(
+            column(width = width, selectInput(ns("data_scale"), label = "Data Input",
+                                              choices = as.list(include), selected = selected))
+        )
+    }
 }
 
 
@@ -32,69 +48,136 @@ pivot_dataScale_UI <- function(id, include = c("Counts (raw)", "Counts (normaliz
 #'
 #' @import dplyr tibble
 #' @export
-pivot_dataScale <- function(input, output, session, r_data, order_by = NULL, keep_stats = FALSE, ercc_iso = FALSE) {
-    data0 <- reactive({
-        if(is.null(input$data_scale) || is.null(r_data$df)) return(NULL)
-        raw <- r_data$raw
-        df <- r_data$df
-        log <- log10(df + 1)
-        nm <- as.data.frame(t(scale(t(df))))
-        log_nm <- as.data.frame(t(scale(t(log10(df + 1)))))
+pivot_dataScale <- function(input, output, session, r_data, order_by = NULL, keep_stats = FALSE) {
 
-        if(input$data_scale == "Counts (normalized)")
-            new_df <- df
-        else if(input$data_scale == "Log10 Counts")
-            new_df <- log
-        else if(input$data_scale == "Standardized Counts")
-            new_df <- nm
-        else if(input$data_scale == "Log10 & Standardized")
-            new_df <- log_nm
-        else if(input$data_scale == "Counts (raw)")
-            new_df <- raw
-        else if(input$data_scale == "Relative Frequency")
-            new_df <- generateRelativeFreq(raw)
-
-        if(!is.null(order_by) && order_by != "custom") {
-            if(order_by == "none") {
-                new_df <- new_df %>% tibble::rownames_to_column("feature")
-            } else if(order_by == "variance") {
-                new_df <- new_df %>%
-                    tibble::rownames_to_column("feature") %>%
-                    dplyr::mutate(variance = apply(new_df,1,var)) %>% # Compute variance of feature across sample
-                    dplyr::arrange(desc(variance))
-            } else if(order_by == "row_average") {
-                new_df <- new_df %>%
-                    tibble::rownames_to_column("feature") %>%
-                    dplyr::mutate(average = apply(new_df,1,mean)) %>%
-                    dplyr::arrange(desc(average))
-            } else if(order_by == "fano_factor"){
-                new_df <- new_df %>%
-                    tibble::rownames_to_column("feature") %>%
-                    dplyr::mutate(average = apply(new_df,1,mean)) %>%
-                    dplyr::mutate(variance = apply(new_df,1,var)) %>% # Compute variance of feature across sample
-                    dplyr::mutate(fano_factor = variance/average) %>%
-                    dplyr::arrange(desc(fano_factor))
-            } else if(order_by == "row_median") {
-                new_df <- new_df %>%
-                    tibble::rownames_to_column("feature") %>%
-                    dplyr::mutate(median = apply(new_df,1,median)) %>%
-                    dplyr::arrange(desc(median))
-            }
-
-            rownames(new_df) <- new_df$feature
-            new_df <- new_df %>% dplyr::select(-feature)
-            if(!keep_stats) {
-                new_df <- new_df[,!(colnames(new_df)%in%c("variance", "average", "fano_factor", "median"))]
-            }
+    output$pc_choice <- renderUI({
+        req(r_data$pca,input$data_scale == "Projection Matrix")
+        if(input$proj_matrix == "PCA") {
+            pcs<-colnames(r_data$pca$x)
+            names(pcs) <- pcs
+            selectInput(session$ns("pca_pcs"), label = "Choose PC", choices = pcs, multiple = T)
+        } else {
+            dims<-c("2D", "3D")
+            names(dims) <- dims
+            selectInput(session$ns("dims"), label = "Choose Dimension", choices = dims)
         }
-        return(new_df)
     })
 
-    return(list(
+    data0 <- reactive({
+        if(is.null(input$data_scale) || is.null(r_data$df)) return(NULL)
+        if(input$data_scale != "Projection Matrix") {
+            raw <- r_data$raw
+            df <- r_data$df
+            log <- log10(df + 1)
+            nm <- as.data.frame(t(scale(t(df))))
+            log_nm <- as.data.frame(t(scale(t(log10(df + 1)))))
+
+            if(input$data_scale == "Counts (normalized)")
+                new_df <- df
+            else if(input$data_scale == "Log10 Counts")
+                new_df <- log
+            else if(input$data_scale == "Standardized Counts")
+                new_df <- nm
+            else if(input$data_scale == "Log10 & Standardized")
+                new_df <- log_nm
+            else if(input$data_scale == "Counts (raw)")
+                new_df <- raw
+            else if(input$data_scale == "Relative Frequency")
+                new_df <- generateRelativeFreq(raw)
+
+            if(!is.null(order_by) && order_by != "custom") {
+                if(order_by == "none") {
+                    new_df <- new_df %>% tibble::rownames_to_column("feature")
+                } else if(order_by == "variance") {
+                    new_df <- new_df %>%
+                        tibble::rownames_to_column("feature") %>%
+                        dplyr::mutate(variance = apply(new_df,1,var)) %>% # Compute variance of feature across sample
+                        dplyr::arrange(desc(variance))
+                } else if(order_by == "row_average") {
+                    new_df <- new_df %>%
+                        tibble::rownames_to_column("feature") %>%
+                        dplyr::mutate(average = apply(new_df,1,mean)) %>%
+                        dplyr::arrange(desc(average))
+                } else if(order_by == "fano_factor"){
+                    new_df <- new_df %>%
+                        tibble::rownames_to_column("feature") %>%
+                        dplyr::mutate(average = apply(new_df,1,mean)) %>%
+                        dplyr::mutate(variance = apply(new_df,1,var)) %>% # Compute variance of feature across sample
+                        dplyr::mutate(fano_factor = variance/average) %>%
+                        dplyr::arrange(desc(fano_factor))
+                } else if(order_by == "row_median") {
+                    new_df <- new_df %>%
+                        tibble::rownames_to_column("feature") %>%
+                        dplyr::mutate(median = apply(new_df,1,median)) %>%
+                        dplyr::arrange(desc(median))
+                }
+
+                rownames(new_df) <- new_df$feature
+                new_df <- new_df %>% dplyr::select(-feature)
+                if(!keep_stats) {
+                    new_df <- new_df[,!(colnames(new_df)%in%c("variance", "average", "fano_factor", "median"))]
+                }
+            }
+            return(new_df)
+        } else {
+            if(input$proj_matrix == "PCA") {
+                if(is.null(r_data$pca)) {
+                    session$sendCustomMessage(type = "showalert", "Please run PCA first.")
+                    return()
+                } else {
+                    if(is.null(input$pca_pcs)) {
+                        return(as.data.frame(t(r_data$pca$x)))
+                    } else {
+                        return(as.data.frame(t(r_data$pca$x[,input$pca_pcs])))
+                    }
+                }
+            } else if(input$proj_matrix == "t-SNE") {
+                if(is.null(r_data$tsne)) {
+                    session$sendCustomMessage(type = "showalert", "Please run t-SNE first.")
+                    return()
+                } else {
+                    req(input$dims)
+                    if(input$dims == "2D") {
+                        return(t(r_data$tsne$tsne_2d))
+                    } else {
+                        return(t(r_data$tsne$tsne_3d))
+                    }
+                }
+            } else if(input$proj_matrix == "MDS") {
+                if(is.null(r_data$mds)) {
+                    session$sendCustomMessage(type = "showalert", "Please run MDS first.")
+                    return()
+                } else {
+                    req(input$dims)
+                    if(input$dims == "2D") {
+                        return(t(r_data$mds$mds_2d))
+                    } else {
+                        return(t(r_data$mds$mds_3d))
+                    }
+                }
+            } else if(input$proj_matrix == "Nonmetric-MDS") {
+                if(is.null(r_data$nds)) {
+                    session$sendCustomMessage(type = "showalert", "Please run nonmetric-MDS first.")
+                    return()
+                } else {
+                    req(input$dims)
+                    if(input$dims == "2D") {
+                        return(t(as.data.frame(r_data$nds$nds_2d$points)))
+                    } else {
+                        return(t(as.data.frame(r_data$nds$nds_3d$points)))
+                    }
+                }
+            } else {
+                return()
+            }
+        }
+    })
+
+    return(reactive(list(
         df = data0(),
         scale = input$data_scale,
         order = order_by
-    ))
+    )))
 }
 
 #' a wrapper module for scaling and range selection for heatmap
@@ -113,7 +196,7 @@ pivot_dataScaleRange_UI <- function(id, bound = 500, value = 100, include = c("C
 
     tagList(
         fluidRow(
-            column(3, pivot_dataScale_UI(ns("hm_scale"), include = include, selected = "Log10 Counts")),
+            pivot_dataScale_UI(ns("hm_scale"), include = include, selected = "Log10 Counts", width = 3),
             column(3, selectInput(ns("rank_method"), label = "Select features by", choices = list("None" = "none", "Variance" = "variance", "Fano Factor" = "fano_factor", "Row Average" = "row_average", "Row Median" = "row_median", "Custom feature list" = "custom"), selected = "fano_factor")),
             column(6, sliderInput(ns("feature_range"), label = "Rank Range", min = 1, max = max_bound, value = c(1, value), step = 1))
         ),
@@ -175,10 +258,11 @@ pivot_dataScaleRange <- function(input, output, session, r_data, keep_stats = FA
         }
     })
 
+    hmapList <- callModule(pivot_dataScale, "hm_scale", r_data, keep_stats = keep_stats, order_by = input$rank_method)
+
     data0 <- reactive({
         #flist <- callModule(pivot_featureInputModal, "ft_hmap", r_data = r_data)
-        rsList <- callModule(pivot_dataScale, "hm_scale", r_data, ercc_iso = FALSE, keep_stats = keep_stats, order_by = input$rank_method)
-        hm_data <- rsList$df
+        hm_data <- hmapList()$df
 
         if(input$rank_method == "custom") {
             flist <- callModule(pivot_featureInputModal, "ft_hmap", r_data = r_data)
