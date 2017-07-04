@@ -58,14 +58,6 @@ output$edgeR_ui <- renderUI({
             actionButton("perform_edgeR", "Run Modeling", class = "btn-info btn_leftAlign")
         ),
         uiOutput("edgeR_results_box"),
-
-        enhanced_box(
-            width = 12,
-            title = NULL,
-            status = "primary",
-            solidHeader = F,
-            pivot_featurePlot_UI("edgeR_gene", meta = r_data$meta)
-        ),
         box(
             width = 12,
             title = "Citation",
@@ -119,6 +111,7 @@ observeEvent(input$perform_edgeR, {
         r_data$edgeR_params <- NULL
         r_data$edgeR_group <- NULL
         r_data$edgeR_fit <- NULL
+        r_data$edgeR_test <- NULL
         r_data$edgeR_results <- NULL
     }
 
@@ -216,10 +209,24 @@ output$edgeR_results_box <- renderUI({
             column(4, tags$br(), checkboxInput("edgeR_cuttbl", "Only show significant genes", value = T))
         ),
         hr(),
-        tags$div(tags$b("Results Table:"), class = "param_setting_title"),
-        uiOutput("edgeR_result_text"),
-        DT::dataTableOutput("edgeR_result_tbl"),
-        downloadButton("download_edgeR_result","Download", class = "btn-success btn_rightAlign")
+        fluidRow(
+            column(6,
+                   tags$div(tags$b("Results Table:"), class = "param_setting_title"),
+                   uiOutput("edgeR_result_text"),
+                   DT::dataTableOutput("edgeR_result_tbl"),
+                   uiOutput("edgeR_sig_genes"),
+                   downloadButton("download_edgeR_result","Download", class = "btn-success btn_rightAlign")
+            ),
+            column(6,
+                   tags$div(tags$b("Mean-Difference Plot:"), class = "param_setting_title"),
+                   fluidRow(
+                       column(6, numericInput("edgeR_MD_fc", "Hightlight Fold Change", value = 1, min = 0, max = 10, step = 1)),
+                       column(6, uiOutput("edgeR_MD_colui"))
+                   ),
+                   plotOutput("edgeR_MD")
+            )
+        ),
+        pivot_featurePlot_UI("edgeR_gene", meta = r_data$meta)
     )
 })
 
@@ -300,6 +307,7 @@ observe({
             session$sendCustomMessage(type = "showalert", "edgeR DE failed.")
             return()
         }
+        r_data$edgeR_test <- et
         r_data$edgeR_results <- edgeR::topTags(et, n = nrow(r_data$raw),
                                         adjust.method = input$edgeR_p_method,
                                         p.value = ifelse(input$edgeR_cuttbl, input$edgeR_alpha, 1))
@@ -329,19 +337,42 @@ output$download_edgeR_result <- downloadHandler(
     }
 )
 
-# output$edgeR_sig_genes <- renderUI({
-#     req(r_data$edgeR_results)
-#     sm <- capture.output(edgeR::summary.edgeRResults(r_data$edgeR_results))
-#     list(
-#         tags$h4("Summary"),
-#         tags$li(paste0("Total number of significant genes: ", sum(r_data$edgeR_results$padj < input$edgeR_alpha, na.rm = T), ".")),
-#         tags$li(sm[4]),
-#         tags$li(sm[5]),
-#         tags$li(sm[6]),
-#         tags$li(paste(sm[7], sm[8]))
-#     )
-# })
-#
+output$edgeR_sig_genes <- renderUI({
+    req(r_data$edgeR_results)
+    error_I <- 0
+    tryCatch({
+        gstatus<-edgeR::decideTestsDGE(r_data$edgeR_test, adjust.method = input$edgeR_p_method,
+                                p.value = input$edgeR_alpha)
+    }, error = function(e) {
+        error_I <<- 1
+    })
+    if(error_I) return()
+
+    up <- sum(gstatus > 0)
+    down <- sum(gstatus < 0)
+    list(
+        tags$li(paste0("Total number of significant genes: ", nrow(r_data$edgeR_results), ".")),
+        tags$li(paste0("Up-regulation: ", up, ".")),
+        tags$li(paste0("Down-regulation: ", down, "."))
+    )
+})
+
+
+output$edgeR_MD <- renderPlot({
+    req(r_data$edgeR_test)
+    error_I <- 0
+    tryCatch({
+        limma::plotMD(r_data$edgeR_test, status = edgeR::decideTestsDGE(r_data$edgeR_test, adjust.method = input$edgeR_p_method,
+                                                                 p.value = input$edgeR_alpha))
+    }, error = function(e) {
+        error_I <<- 1
+    })
+    if(error_I) return()
+
+    if(input$edgeR_MD_fc) {
+        abline(h=c(-input$edgeR_MD_fc,input$edgeR_MD_fc), col="blue")
+    }
+})
 
 
 observe({
