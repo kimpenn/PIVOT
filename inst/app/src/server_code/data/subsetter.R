@@ -114,6 +114,7 @@ output$subsetter_renormalize_ui <- renderUI({
                 options = list(container = "body")
             )
         ),
+        width = "120%",
         value = FALSE
     )
 })

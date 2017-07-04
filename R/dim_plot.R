@@ -205,7 +205,7 @@ pivot_Plot2d <- function(input, output, session, type = NULL, obj = NULL, proj =
             plt1 <- plt1 + ggplot2::geom_point(shape=19, alpha=0.8, size = 2, color = 'steelblue')
         } else {
             plt1 <- plt1 +
-                ggplot2::geom_point(shape=19, alpha=0.8, size = 2, aes(color = group)) +
+                ggplot2::geom_point(shape=19, alpha=0.8, size = 2, ggplot2::aes(color = group)) +
                 ggplot2::scale_color_manual(values = pal)
         }
         #assign("plt1", plt1, env =.GlobalEnv)

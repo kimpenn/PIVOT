@@ -143,13 +143,15 @@ clear_design <- function(r_data) {
 
     if(!is.null(r_data$glb.raw)) {
         r_data$design_pv <- data.frame(Sample = colnames(r_data$glb.raw))
+        r_data$glb.meta <- data.frame(sample = colnames(r_data$glb.raw))
+        r_data$meta <- r_data$glb.meta[match(r_data$sample_name, r_data$glb.meta[,1]),, drop = F]
+        r_data$category <- colnames(r_data$meta)
     } else {
         r_data$design_pv <- NULL
+        r_data$glb.meta <- NULL
+        r_data$meta <- NULL
+        r_data$category <- NULL
     }
-
-    r_data$glb.meta <- data.frame(sample = colnames(r_data$glb.raw))
-    r_data$meta <- r_data$glb.meta[match(r_data$sample_name, r_data$glb.meta[,1]),, drop = F]
-    r_data$category <- colnames(r_data$meta)
     r_data <- clear_results(r_data)
     return(r_data)
 }
