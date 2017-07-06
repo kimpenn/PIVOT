@@ -239,7 +239,7 @@ output$monocle_de_ui <- renderUI({
                    tags$div(tags$b("Monocle DE Test Result"), class = "param_setting_title"),
                    fluidRow(
                        column(6, numericInput_1("monocle_alpha", "Adjusted-P cutoff", value = 0.1, min = 0, max = 0.5, step = 0.001)),
-                       column(6, checkboxInput("monocle_cuttbl", "Only show significant genes", value = F))
+                       column(6, checkboxInput("monocle_cuttbl", "Only show significant genes", value = T))
                    ),
                    DT::dataTableOutput("monocle_de_result_tbl"),
                    downloadButton("download_monocle_de_result", "Download", class = "btn btn-success"),

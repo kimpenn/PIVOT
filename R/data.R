@@ -126,6 +126,8 @@ clear_results <-function(r_data) {
     r_data$tf_g2 <- NULL
     r_data$tf_neighbor_order <- NULL
 
+    r_data$gsea <- NULL
+
     r_data$reg_g <- NULL
 
     r_data$venn_list <- NULL

@@ -64,7 +64,7 @@ output$mww_ui <- renderUI({
             fluidRow(
                 column(4, selectInput("mww_p_method", "P adjustment method", choices = list("Bonferroni correction" = "bonferroni", "False discovery rate" = "fdr", "Holm (1979)" = "holm", "Hochberg (1988)" = "hochberg","Hommel (1988)" = "hommel", "Benjamini & Yekutieli (2001)" = "BY", "None" = "none"), selected = "fdr")),
                 column(4, numericInput("mww_alpha", "Adjusted-P cutoff", value = 0.1, min = 0, max = 0.5, step = 0.001)),
-                column(4, checkboxInput("mww_cuttbl", "Only show significant genes", value = F))
+                column(4, checkboxInput("mww_cuttbl", "Only show significant genes", value = T))
             )
         )
     )

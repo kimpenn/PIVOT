@@ -325,8 +325,8 @@ body <- dashboardBody(
         ),
 
         # Network visulization
-        tabItem(tabName = "network",
-                uiOutput("network_ui"),
+        tabItem(tabName = "gsea",
+                uiOutput("gsea_ui"),
                 hr(),
                 br()
         ),

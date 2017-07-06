@@ -223,8 +223,8 @@ pivot_featureInputModal <- function(input, output, session, r_data, match_rdata 
             }
 
 
-            if(length(flist) > 5000) {
-                session$sendCustomMessage(type = "showalert", "Exceed maximum number of features (5000) allowed.")
+            if(length(flist) > 50000) {
+                session$sendCustomMessage(type = "showalert", "Exceed maximum number of features (50000) allowed.")
                 return()
             }
 

@@ -10,69 +10,73 @@ output$biomart_ui <- renderUI({
         solidHeader = T,
         tags$div(tags$b("Load Ensembl Database:"), class = "param_setting_title"),
         fluidRow(
-            column(3, uiOutput("biomart_species_ui")),
+            #column(4, selectInput("bmart_mode", "Query mode", choices = list("Advanced Query" = "advanced", "Name/ID Conversion" = "simple"))),
+            column(4, uiOutput("biomart_species_ui")),
             column(2,
                    tags$br(),
                    actionButton("bmart_load_db", "Load Database", class = "btn btn-info btn_alignLeft")
             ),
-            column(1, tags$br(), uiOutput("bmart_loaded_png"))
+            column(2, tags$br(), uiOutput("bmart_loaded_png"))
         ),
-        tags$p("Assume you have a list of HGNC gene symbol, and want to find corresponding entrez gene ids, then do the following:"),
-        tags$li("Select filter, hgnc_symbol in the filters table."),
-        tags$li("Upload HGNC gene symbol lists by clicking the hgnc_symbol button."),
-        tags$li("Choose hgnc_symbol, entrezgene in the attribute table, and press the query button."),
-        tags$li("See https://bioconductor.org/packages/release/bioc/vignettes/biomaRt/inst/doc/biomaRt.html for more examples."),
-        tags$hr(),
-        fluidRow(
-            column(6,
-                   tags$div(tags$b("Select Filters:"), class = "param_setting_title"),
-                   DT::dataTableOutput("bmart_filters")
-            ),
-            column(6,
-                   tags$div(tags$b("Select Attributes:"), class = "param_setting_title"),
-                   DT::dataTableOutput("bmart_attributes")
-            )
-        ),
-        tags$hr(),
-        fluidRow(
-            column(6,
-                   fluidRow(
-                       column(4,
-                              tags$b("Selected Filters:"),
-                              tags$br(),
-                              tags$br(),
-                              uiOutput("bmart_filter_btns")
-                       ),
-                       column(8,
-                              tags$b("Filter features:"),
-                              tags$br(),
-                              tags$br(),
-                              uiOutput("bmart_lists")
-                       )
-                   )
-            ),
-            column(6,
-                   tags$b("Requested Attributes:"),
-                   tags$br(),
-                   tags$br(),
-                   uiOutput("bmart_attribute_btns"),
-                   tags$hr(),
-                   tags$p("Press this button when you have input your filters and selected the attributes."),
-                   actionButton("bmart_query", "Query Biomart", class = "btn-primary"),
-                   tags$br(),
-                   tags$br(),
-                   tags$p("Press this button to reset all query."),
-                   actionButton("bmart_reset", "Reset All", class = "btn-danger")
-            )
-        ),
-        tags$br(),
-        tags$br(),
-        tags$div(tags$b("Query Result:"), class = "param_setting_title"),
-        DT::dataTableOutput("bmart_result"),
-        downloadButton("download_bmart_result", "Download", class = "btn-success btn_rightAlign")
+        # conditionalPanel("input.bmart_mode == 'advanced'",
+                         tags$p("Assume you have a list of HGNC gene symbol, and want to find corresponding entrez gene ids, then do the following:"),
+                         tags$li("Select filter, hgnc_symbol in the filters table."),
+                         tags$li("Upload HGNC gene symbol lists by clicking the hgnc_symbol button."),
+                         tags$li("Choose hgnc_symbol, entrezgene in the attribute table, and press the query button."),
+                         tags$li("See https://bioconductor.org/packages/release/bioc/vignettes/biomaRt/inst/doc/biomaRt.html for more examples."),
+                         tags$hr(),
+                         fluidRow(
+                             column(6,
+                                    tags$div(tags$b("Select Filters:"), class = "param_setting_title"),
+                                    DT::dataTableOutput("bmart_filters")
+                             ),
+                             column(6,
+                                    tags$div(tags$b("Select Attributes:"), class = "param_setting_title"),
+                                    DT::dataTableOutput("bmart_attributes")
+                             )
+                         ),
+                         tags$hr(),
+                         fluidRow(
+                             column(6,
+                                    fluidRow(
+                                        column(4,
+                                               tags$b("Selected Filters:"),
+                                               tags$br(),
+                                               tags$br(),
+                                               uiOutput("bmart_filter_btns")
+                                        ),
+                                        column(8,
+                                               tags$b("Filter features:"),
+                                               tags$br(),
+                                               tags$br(),
+                                               uiOutput("bmart_lists")
+                                        )
+                                    )
+                             ),
+                             column(6,
+                                    tags$b("Requested Attributes:"),
+                                    tags$br(),
+                                    tags$br(),
+                                    uiOutput("bmart_attribute_btns"),
+                                    tags$hr(),
+                                    tags$p("Press this button when you have input your filters and selected the attributes."),
+                                    actionButton("bmart_query", "Query Biomart", class = "btn-primary"),
+                                    tags$br(),
+                                    tags$br(),
+                                    tags$p("Press this button to reset all query."),
+                                    actionButton("bmart_reset", "Reset All", class = "btn-danger")
+                             )
+                         ),
+                         tags$br(),
+                         tags$br(),
+                         tags$div(tags$b("Query Result:"), class = "param_setting_title"),
+                         DT::dataTableOutput("bmart_result"),
+                         downloadButton("download_bmart_result", "Download", class = "btn-success btn_rightAlign")
+        # ),
+        # conditionalPanel("input.bmart_mode == 'nameid'",
+        #     tags$p("ADD here")
+        # )
     )
-
-
 })
 
 

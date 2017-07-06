@@ -76,12 +76,14 @@ pivot_Plot1d <- function(input, output, session, type = NULL, obj = NULL, proj =
             if(error_I) {
                 return()
             }
+
             plot1d <- plotly::plot_ly(df, x = ~x, y = ~y, color = ~Group, type  = "scatter", mode = "lines", fill = "tozeroy", colors = pal)
         } else {
             plot1d <- plotly::plot_ly(proj, x = as.formula(paste0("~", d1)), type = "histogram",
                                       xbins=list(start = min(proj), end = max(proj), size = (max(proj) - min(proj))*input$plot1d_step/2), autobinx=F,
                                       color = minfo$meta[,1], colors = pal)
         }
+        #assign("p1d", plot1d, env = .GlobalEnv)
         plot1d
     })
     output$plotly1d <- plotly::renderPlotly({

@@ -581,7 +581,6 @@ output$tf_de_tbl_show <- DT::renderDataTable({
             tbl <- r_data$scde_results %>% tibble::rownames_to_column("gene") %>%
                 dplyr::select(gene, lfc_or_es = ce, pval = p.values, padj = p.values.adj)
         }
-
     } else if(input$tf_de_select == "deseq") {
         if(is.null(r_data$deseq_results)) return()
         tbl <- as.data.frame(r_data$deseq_results) %>% tibble::rownames_to_column("gene") %>%

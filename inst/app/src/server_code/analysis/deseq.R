@@ -184,7 +184,7 @@ output$deseq_results_box <- renderUI({
                    uiOutput("deseq_test_method_text")
             ),
             column(4, numericInput("deseq_alpha", "FDR cutoff", value = 0.1, min = 0, max = 0.5, step = 0.001)),
-            column(4, checkboxInput("deseq_cuttbl", "Only show significant genes", value = F))
+            column(4, checkboxInput("deseq_cuttbl", "Only show significant genes", value = T))
         ),
         DT::dataTableOutput("deseq_result_tbl"),
         uiOutput("download_deseq_result_ui"),

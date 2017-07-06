@@ -98,7 +98,7 @@ if('PIVOT.analysis' %in% r_module) {
                  menuSubItem("MDS", tabName = "mds", icon = icon("angle-right")),
                  menuSubItem("penalizedLDA", tabName = "plda", icon = icon("angle-right"))
         ),
-
+        menuItem("Enrichment Analysis", tabName = "gsea", icon = icon("flask")),
         network_side_ui,
         toolkit_side_ui
     )

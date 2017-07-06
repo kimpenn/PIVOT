@@ -25,7 +25,7 @@ output$filter_ui <- renderUI({
         ),
         fluidRow(
             column(6,
-                   selectInput("feature_filter_type", label = "Filter based on", choices = list("Expression" = "range", "Feature List" = "marker"))
+                   selectInput("feature_filter_type", label = "Filter based on", choices = list("Expression" = "range", "Feature List" = "marker", "P value" = "pval"))
             ),
             column(6,
                    selectInput("is_neg_filter", label = "Keep/Delete Feature", choices = list("Keep Selected" = FALSE, "Delete Selected" = TRUE), selected = FALSE)
@@ -53,8 +53,10 @@ output$filter_ui <- renderUI({
 
         hr(),
         fluidRow(
-            column(9),
-            column(3, actionButton('undo_filter_feature', label = "Undo Filter", icon = icon("times"), class = "btn btn-danger"))
+            column(12,
+                   actionButton('undo_filter_feature', label = "Undo Filter", icon = icon("times"), class = "btn btn-danger btn_rightAlign"),
+                   uiOutput("filter_wt_list_ui")
+            )
         )
     )
 })
@@ -95,9 +97,9 @@ output$filters <- renderUI({
             wellPanel(
                 fluidRow(
                     column(8, uiOutput("min_express_cells_ui")),
-                    column(4, uiOutput("min_express_cells_percent"))
-                ),
-                uiOutput("express_filter_btn_ui")
+                    column(2, uiOutput("min_express_cells_percent")),
+                    column(2, tags$br(), uiOutput("express_filter_btn_ui"))
+                )
             )
         )
     } else if(input$feature_filter_type == "marker") {
@@ -109,8 +111,7 @@ output$filters <- renderUI({
                 column(6,
                        wellPanel(
                            tags$b("Upload Feature List:"),
-                           pivot_fileInput_UI("marker_filter"),
-                           uiOutput("mk_submit_ui")
+                           pivot_fileInput_UI("marker_filter")
                        )
                 ),
                 column(6,
@@ -118,6 +119,15 @@ output$filters <- renderUI({
                        pivot_filePreview_UI("marker_pv")
                 )
             )
+        )
+    } else if(input$feature_filter_type == "pval") {
+        list(
+            tags$div(tags$b("P-Value Filter:"), class = "param_setting_title"),
+            fluidRow(
+                pivot_featureList_UI("filter", include = c("deseq", "edgeR", "scde", "monocle", "mwu"), selected = "deseq", width = 12)
+            ),
+            tags$div(tags$b("Loaded feature table:"), class = "param_setting_title"),
+            DT::dataTableOutput("filter_de_preview")
         )
     } else {
         return()
@@ -255,7 +265,7 @@ observeEvent(input$range_filter_btn, {
     }
 
     withProgress(message = 'Filtering', value = 0, {
-        r_data <- clear_results(r_data)
+        #r_data <- clear_results(r_data)
 
         incProgress(0.3, detail = "Getting new feature list...")
         r_data$f_range <- c(input$min_cnt, input$max_cnt)
@@ -301,12 +311,12 @@ observeEvent(input$range_filter_btn, {
         slist <- r_data$sample_name
 
         if(negf) {
-            tmpText <- "Remove"
+            keep_or_remove <- "Remove"
         } else {
-            tmpText <- "Keep"
+            keep_or_remove <- "Keep"
         }
 
-        actionText <- paste(tmpText, "features in range:", input$min_cnt, "≤", input$filter_type1, input$filter_type2, "counts", "≤", input$max_cnt)
+        actionText <- paste(keep_or_remove, "features in range:", input$min_cnt, "≤", input$filter_type1, input$filter_type2, "counts", "≤", input$max_cnt)
 
         r_data <- create_subset(r_data, input, flist, slist, keep_filter = input$keep_filter, renorm = F, erccStds = erccStds, actionType = "Filter", actionText = actionText)
 
@@ -328,7 +338,7 @@ observeEvent(input$express_filter_btn, {
     }
 
     withProgress(message = 'Filtering', value = 0, {
-        r_data <- clear_results(r_data)
+        #r_data <- clear_results(r_data)
         new_raw <- filter_data()$raw
 
         express <- rowSums(filter_data()$raw > 0)
@@ -349,12 +359,12 @@ observeEvent(input$express_filter_btn, {
         slist <- r_data$sample_name # No change for samples
 
         if(negf) {
-            tmpText <- "Remove"
+            keep_or_remove <- "Remove"
         } else {
-            tmpText <- "Keep"
+            keep_or_remove <- "Keep"
         }
 
-        actionText <- paste(tmpText, "features expressed in more than", input$min_express_cells, "cells")
+        actionText <- paste(keep_or_remove, "features expressed in more than", input$min_express_cells, "cells")
 
         r_data <- create_subset(r_data, input, flist, slist, keep_filter = input$keep_filter, renorm = F, erccStds = erccStds, actionType = "Filter", actionText = actionText)
 
@@ -369,7 +379,7 @@ observeEvent(input$express_filter_btn, {
 # Press the undo filtering has the same effect of filtering larger than 0
 observeEvent(input$undo_filter_feature, {
     withProgress(message = 'Processing...', value = 0, {
-        r_data <- clear_results(r_data)
+        #r_data <- clear_results(r_data)
         callModule(pivot_fileInput, "marker_filter", reset = TRUE)
         callModule(pivot_filePreview, "marker_pv", NULL)
 
@@ -392,13 +402,15 @@ observeEvent(input$undo_filter_feature, {
 })
 
 
-output$mk_submit_ui <- renderUI({
+output$filter_wt_list_ui <- renderUI({
+    req(input$feature_filter_type)
+    if(input$feature_filter_type == "range") return()
     if(!is.null(input$is_neg_filter)) {
         negf <- as.logical(input$is_neg_filter)
         if(!negf) {
-            actionButton('submit_marker', label = "Select", class = "btn btn-info")
+            actionButton('filter_wt_list', label = "Select", class = "btn btn-info btn_rightAlign")
         } else if(negf) {
-            actionButton('submit_marker', label = "Delete", class = "btn btn-info")
+            actionButton('filter_wt_list', label = "Delete", class = "btn btn-info btn_rightAlign")
         }
     }
 })
@@ -407,32 +419,31 @@ output$mk_submit_ui <- renderUI({
 
 observe({
     df <- callModule(pivot_fileInput, "marker_filter")
-    callModule(pivot_filePreview, "marker_pv", df$df)
+    callModule(pivot_filePreview, "marker_pv", df$df, height = "250px")
 })
 
 
 # get marker_feature list when the user click submit button
-observeEvent(input$submit_marker, {
+observeEvent(input$filter_wt_list, {
+    req(input$feature_filter_type)
     negf <- as.logical(input$is_neg_filter)
-    inFile <- callModule(pivot_fileInput, "marker_filter")
-    marker_tbl <- as.data.frame(inFile$df)
-    # First process the marker feature file and get the list
-
-    marker_names <- make.names(as.character(unique(marker_tbl[,1])))
-
     cur_flist <- rownames(filter_data()$raw)
+    if(negf) {
+        keep_or_remove <- "Remove"
+    } else {
+        keep_or_remove <- "Keep"
+    }
 
-
-    flist <- cur_flist[match(toupper(marker_names), toupper(cur_flist))]
-    flist <- flist[!is.na(flist)]
-    found_num <- length(marker_names) - length(flist)
-    dup_num <- sum(duplicated(flist))
-    flist <- flist[!duplicated(flist)] # remove duplicated
-
-    # Some feature in the list may have been filtered out due to < threshold counts,
-    withProgress(message = 'Filtering...', value = 0, {
-        r_data <- clear_results(r_data)
-
+    if(input$feature_filter_type == "marker") {
+        feature_type = "marker features"
+        inFile <- callModule(pivot_fileInput, "marker_filter")
+        marker_tbl <- as.data.frame(inFile$df)
+        # First process the marker feature file and get the list
+        marker_names <- make.names(as.character(unique(marker_tbl[,1])))
+        flist <- cur_flist[match(toupper(marker_names), toupper(cur_flist))]
+        flist <- flist[!is.na(flist)]
+        dup_num <- sum(duplicated(flist))
+        flist <- flist[!duplicated(flist)] # remove duplicated
         if(length(flist) != length(marker_names)) {
             message_gl <- paste0(length(marker_names) - length(flist)," features in your marker list (", length(marker_names),") are not found in the current dataset.")
             if(dup_num) {
@@ -440,28 +451,45 @@ observeEvent(input$submit_marker, {
             }
             session$sendCustomMessage(type = "showalert", message_gl)
         }
+    } else if (input$feature_filter_type == "pval") {
+        feature_type = "DE features"
+        if(is.null(filter_feature_tbl()) || nrow(filter_feature_tbl()) == 0) {
+            session$sendCustomMessage(type = "showalert", "Feature set not detected. Please run corresponding DE tests first.")
+            return()
+        }
+        delist <-filter_feature_tbl()$gene
+        flist <- delist[which(delist %in% cur_flist)]
+        if(length(flist) != length(delist)) {
+            session$sendCustomMessage(type = "showalert", paste(length(delist) - length(flist), "DE genes are not found in the current dataset"))
+        }
+    }
 
+
+
+    # Some feature in the list may have been filtered out due to < threshold counts,
+    withProgress(message = 'Filtering...', value = 0, {
+        #r_data <- clear_results(r_data)
         neglist <- cur_flist[!cur_flist%in%flist]
-
         if(negf) {
             flist <- neglist
         }
-
         if(length(flist) < 2) {
             session$sendCustomMessage(type = "showalert", "Too few features left!")
             return()
         }
-
-        slist <- r_data$sample_name
-
-        if(negf) {
-            tmpText <- "Remove"
-        } else {
-            tmpText <- "Keep"
-        }
-        actionText <- paste(tmpText, length(flist), "marker features")
-        r_data <- create_subset(r_data, input, flist, slist, keep_filter = input$keep_filter, renorm = F, erccStds = erccStds, actionType = "Filter", actionText = actionText)
-
-        setProgress(1)
+        actionText <- paste(keep_or_remove, length(flist), feature_type)
+        r_data <- create_subset(r_data, input, flist = flist, slist = r_data$sample_name, keep_filter = input$keep_filter, renorm = F, erccStds = erccStds, actionType = "Filter", actionText = actionText)
     })
 })
+
+filter_feature_tbl <- callModule(pivot_featureList, "filter", r_data = r_data)
+
+output$filter_de_preview <- DT::renderDataTable({
+    req(filter_feature_tbl())
+    DT::datatable(filter_feature_tbl(), options = list(scrollX = TRUE, scrollY = "250px"))
+})
+
+
+
+
+

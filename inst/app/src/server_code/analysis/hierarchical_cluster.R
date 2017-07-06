@@ -152,7 +152,7 @@ output$hclust_plot <- renderPlot({
     max_height <- max(hc0$height)
     hc1 <- hc0 %>% as.dendrogram()
     # Cut tree to get cluster
-    r_data$meta$hierarchical_cluster <- dendextend::cutree(hc1, k = input$hclust_num)
+    r_data$meta$hierarchical_cluster <- as.character(dendextend::cutree(hc1, k = input$hclust_num))
 
     rsList <- callModule(pivot_colorBy, "hclust", meta = r_data$meta)
     if(is.null(rsList$meta)) {
