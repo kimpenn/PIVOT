@@ -4,7 +4,7 @@
 ## Metric MDS Projection Plots
 
 ```{r echo = FALSE, warning=FALSE, message = FALSE}
-    mds_minfo<- reactive(callModule(pivot_colorBy, "mds", meta = r_data$meta))
+    mds_minfo<- reactive(callModule(pivot_groupBy, "mds", meta = r_data$meta))
 ```
 
 ### 2D Projection

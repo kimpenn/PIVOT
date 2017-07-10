@@ -35,7 +35,7 @@ if (is.null(r_data$pca)) return()
 ## PCA Projection Plots
 
 ```{r echo = FALSE, warning=FALSE, message = FALSE}
-    pca_minfo<- reactive(callModule(pivot_colorBy, "pca", meta = r_data$meta))
+    pca_minfo<- reactive(callModule(pivot_groupBy, "pca", meta = r_data$meta))
 ```
 
 ### 1D Projection

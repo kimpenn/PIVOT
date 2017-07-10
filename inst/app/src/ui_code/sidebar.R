@@ -66,6 +66,12 @@ if('PIVOT.toolkit' %in% r_module) {
     toolkit_side_ui <- NULL
 }
 
+if('caret' %in% r_module) {
+    caret_side_ui <- menuItem("Classification", tabName = "caret", icon = icon("delicious"))
+} else {
+    caret_side_ui <- NULL
+}
+
 if('PIVOT.analysis' %in% r_module) {
     side_ui <- list(
         menuItem("Basic Statistics", icon = icon("area-chart"),
@@ -100,16 +106,24 @@ if('PIVOT.analysis' %in% r_module) {
         ),
         menuItem("Enrichment Analysis", tabName = "gsea", icon = icon("flask")),
         network_side_ui,
+        caret_side_ui,
         toolkit_side_ui
     )
 } else {
+    if(is.null(c(deseq_sub_ui, edgeR_sub_ui, scde_sub_ui))) {
+        de_ui <- NULL
+    } else {
+        de_ui <- menuItem("Differential Expression", icon = icon("eyedropper"),
+                                  deseq_sub_ui,
+                                  edgeR_sub_ui,
+                                  scde_sub_ui
+        )
+    }
     side_ui <- list(
-        menuItem("Differential Expression", icon = icon("eyedropper"),
-                 deseq_sub_ui,
-                 scde_sub_ui
-        ),
+        de_ui,
         monocle_side_ui,
         network_side_ui,
+        caret_side_ui,
         toolkit_side_ui
     )
 }

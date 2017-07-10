@@ -20,7 +20,7 @@ km1 <- reactive({
 ```{r echo = FALSE, warning=FALSE, message = FALSE}
 km_assign_tbl <- reactive({
     req(km1())
-    gList <- callModule(pivot_colorBy, "kmeans", meta = r_data$meta)
+    gList <- callModule(pivot_groupBy, "kmeans", meta = r_data$meta)
 
     if(is.null(gList$meta) || length(unique(gList$meta[,1])) == 0)
     {
@@ -42,7 +42,7 @@ DT::datatable(km_assign_tbl(), options = list(scrollX = TRUE, scrollY = "400px",
 ## Confusion Matrix
 
 ```{r echo = FALSE, warning=FALSE, message = FALSE}
-    gList <- callModule(pivot_colorBy, "kmeans", meta = r_data$meta)
+    gList <- callModule(pivot_groupBy, "kmeans", meta = r_data$meta)
 
     if(is.null(gList$meta) || length(unique(gList$meta[,1])) < 2)
     {
@@ -62,7 +62,7 @@ DT::datatable(km_assign_tbl(), options = list(scrollX = TRUE, scrollY = "400px",
 ```
 
 ```{r echo = FALSE, warning=FALSE, message = FALSE}
-    gList <- callModule(pivot_colorBy, "kmeans", meta = r_data$meta)
+    gList <- callModule(pivot_groupBy, "kmeans", meta = r_data$meta)
 
     if(is.null(gList$meta) || length(unique(gList$meta[,1])) < 2)
     {

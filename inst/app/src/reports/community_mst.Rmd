@@ -49,7 +49,7 @@ mst_graph <- reactive({
         }
     }
 
-    cList <- callModule(pivot_colorBy, "community", meta = r_data$meta)
+    cList <- callModule(pivot_groupBy, "community", meta = r_data$meta)
     rsList<-generate_mst(dist_mtx, method = input$com_algorithm, color_list = cList, step = input$com_wt_step)
     r_data$meta$community <- paste0("community_",as.character(igraph::membership(rsList$community)))
     r_data$category <- colnames(r_data$meta)

@@ -39,7 +39,7 @@ output$hclust_ui <- renderUI({
             tags$div(tags$b("Visualization Settings:"), class = "param_setting_title"),
             fluidRow(
                 column(3, selectInput("hclust_package", "Plotting Package", choices = list("Dendexdend" = "dendextend", "networkD3" = "networkD3"), selected = "dendextend")),
-                pivot_colorBy_UI("hclust", r_data$category, multiple = T, width = 6),
+                pivot_groupBy_UI("hclust", r_data$category, multiple = T, width = 6),
                 column(3, tags$br(), checkboxInput("hclust_show", "Show Cluster", value = T))
             ),
             uiOutput("dend_hclust"),
@@ -49,7 +49,7 @@ output$hclust_ui <- renderUI({
                 column(6,
                        tags$div(tags$b("Confusion Matrix"), class = "param_setting_title"),
                        fluidRow(
-                           pivot_colorBy_UI("hclust2", r_data$category, append_none = T, choose_color = F, width = 12)
+                           pivot_groupBy_UI("hclust2", r_data$category, append_none = T, choose_color = F, width = 12)
                        ),
                        DT::dataTableOutput("hclust_tbl"),
                        plotOutput("hclust_conf_plot")
@@ -154,7 +154,7 @@ output$hclust_plot <- renderPlot({
     # Cut tree to get cluster
     r_data$meta$hierarchical_cluster <- as.character(dendextend::cutree(hc1, k = input$hclust_num))
 
-    rsList <- callModule(pivot_colorBy, "hclust", meta = r_data$meta)
+    rsList <- callModule(pivot_groupBy, "hclust", meta = r_data$meta)
     if(is.null(rsList$meta)) {
         plot(hc1)
     } else {
@@ -195,7 +195,7 @@ output$hclust.d3 <- networkD3::renderDendroNetwork({
     if(is.null(hclust0())) return ()
     Root <- hclust0()
 
-    rsList <- callModule(pivot_colorBy, "hclust", meta = r_data$meta)
+    rsList <- callModule(pivot_groupBy, "hclust", meta = r_data$meta)
     if(is.null(rsList$meta)) {
         networkD3::dendroNetwork(Root, fontSize = 15, treeOrientation = input$hc_dd_ori, linkColour = 'navyblue', nodeColour = 'grey', textOpacity = 1, opacity = 1, zoom = T, linkType = input$hc_dd_link_type)
     } else {
@@ -217,7 +217,7 @@ output$hclust.d3 <- networkD3::renderDendroNetwork({
 
 output$hclust_tbl <- DT::renderDataTable({
     req(r_data$meta$hierarchical_cluster)
-    gList <- callModule(pivot_colorBy, "hclust2", meta = r_data$meta)
+    gList <- callModule(pivot_groupBy, "hclust2", meta = r_data$meta)
 
     if(is.null(gList$meta) || length(unique(gList$meta[,1])) < 2)
     {
@@ -238,7 +238,7 @@ output$hclust_tbl <- DT::renderDataTable({
 
 output$hclust_conf_plot <- renderPlot({
     req(r_data$meta$hierarchical_cluster)
-    gList <- callModule(pivot_colorBy, "hclust2", meta = r_data$meta)
+    gList <- callModule(pivot_groupBy, "hclust2", meta = r_data$meta)
 
     if(is.null(gList$meta) || length(unique(gList$meta[,1])) < 2)
     {
@@ -246,7 +246,6 @@ output$hclust_conf_plot <- renderPlot({
     } else {
         sample_gp <- gList$meta[,1]
         names(sample_gp) <- r_data$sample_name
-        tbl <- as.data.frame.matrix(table(r_data$meta$hierarchical_cluster, sample_gp))
         plot(as.factor(sample_gp), as.factor(r_data$meta$hierarchical_cluster), xlab="Group", ylab = "Cluster")
     }
 
@@ -254,7 +253,7 @@ output$hclust_conf_plot <- renderPlot({
 
 hclust_assign_tbl <- reactive({
     req(r_data$meta$hierarchical_cluster)
-    gList <- callModule(pivot_colorBy, "hclust2", meta = r_data$meta)
+    gList <- callModule(pivot_groupBy, "hclust2", meta = r_data$meta)
 
     if(is.null(gList$meta) || length(unique(gList$meta[,1])) == 0)
     {

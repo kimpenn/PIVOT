@@ -27,7 +27,7 @@ output$meta_ui <- renderUI({
                          ),
                          column(5,
                                 fluidRow(
-                                    pivot_colorBy_UI("pie", r_data$category, append_none = F, multiple = F, width = 12)
+                                    pivot_groupBy_UI("pie", r_data$category, append_none = F, multiple = F, width = 12)
                                 ),
                                 br(),
                                 plotly::plotlyOutput("design_pie")
@@ -75,7 +75,7 @@ output$meta_ui <- renderUI({
                                             choices = c("Bar Plot" = "bar", "Histogram" = "histogram", "Density Plot" = "density"),
                                             selected = "bar")
                          ),
-                         pivot_colorBy_UI("sample_stats", r_data$category, append_none = T, multiple = F, width = 4),
+                         pivot_groupBy_UI("sample_stats", r_data$category, append_none = T, multiple = F, width = 4),
                          column(2, uiOutput("sample_bin_width_ui"))
                      ),
                      plotly::plotlyOutput("sample_stats_plot")
@@ -112,7 +112,7 @@ output$download_meta_tbl <- downloadHandler(
 )
 
 output$design_pie <- render_Plotly({
-    rsList <- callModule(pivot_colorBy, "pie", meta = r_data$meta)
+    rsList <- callModule(pivot_groupBy, "pie", meta = r_data$meta)
     req(rsList$meta)
     tbl<-as.data.frame(table(rsList$meta))
     colnames(tbl) <- c(rsList$group_by, "sample_number")
@@ -161,7 +161,7 @@ output$sample_bin_width_ui <- renderUI({
 output$sample_stats_plot <- render_Plotly({
     req(r_data$sample_stats,input$sample_plot_stats)
     tbl <- r_data$sample_stats %>% tibble::rownames_to_column("sample")
-    rsList <- callModule(pivot_colorBy, "sample_stats", meta = r_data$meta)
+    rsList <- callModule(pivot_groupBy, "sample_stats", meta = r_data$meta)
 
     if(!is.null(rsList$meta)) {
         tbl$Group <- rsList$meta[,1]

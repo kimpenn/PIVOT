@@ -23,13 +23,13 @@ pivot_dataScale_UI <- function(id, include = c("Counts (raw)", "Counts (normaliz
         tagList(
             column(width = width/3, selectInput(ns("data_scale"), label = "Data Input",
                                               choices = as.list(include), selected = selected)),
-            column(width = width/3,
-                   conditionalPanel(sprintf("input['%s'] == 'Projection Matrix'", ns("data_scale")),
+            conditionalPanel(sprintf("input['%s'] == 'Projection Matrix'", ns("data_scale")),
+                             column(width = width/3,
                                     selectInput(ns("proj_matrix"), label = "Choose Projection", choices = proj_lists)
-                   )
-            ),
-            column(width = width/3,
-                   uiOutput(ns("pc_choice"))
+                             ),
+                             column(width = width/3,
+                                    uiOutput(ns("pc_choice"))
+                             )
             )
         )
     } else {
@@ -51,7 +51,7 @@ pivot_dataScale_UI <- function(id, include = c("Counts (raw)", "Counts (normaliz
 pivot_dataScale <- function(input, output, session, r_data, order_by = NULL, keep_stats = FALSE) {
 
     output$pc_choice <- renderUI({
-        req(r_data$pca,input$data_scale == "Projection Matrix")
+        req(input$data_scale == "Projection Matrix")
         if(input$proj_matrix == "PCA") {
             pcs<-colnames(r_data$pca$x)
             names(pcs) <- pcs
@@ -128,7 +128,7 @@ pivot_dataScale <- function(input, output, session, r_data, order_by = NULL, kee
                     if(is.null(input$pca_pcs)) {
                         return(as.data.frame(t(r_data$pca$x)))
                     } else {
-                        return(as.data.frame(t(r_data$pca$x[,input$pca_pcs])))
+                        return(as.data.frame(t(r_data$pca$x[,input$pca_pcs, drop = F])))
                     }
                 }
             } else if(input$proj_matrix == "t-SNE") {

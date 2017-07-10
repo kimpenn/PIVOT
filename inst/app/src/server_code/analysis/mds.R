@@ -33,7 +33,7 @@ output$mds_ui <- renderUI({
             fluidRow(
                 pivot_dataScale_UI("mds", include = c("Counts (raw)", "Counts (normalized)", "Log10 Counts"), selected = "Log10 Counts", width = 3),
                 column(3, selectInput("mds_dist", "Distance measure", choices = list("Euclidean" = "euclidean", "Maximum" = "maximum", "Manhattan" = "manhattan", "Canberra" = "canberra", "Binary" = "binary"), selected = "euclidean")),
-                pivot_colorBy_UI("mds", r_data$category, append_none = T, multiple = F, width = 6)
+                pivot_groupBy_UI("mds", r_data$category, append_none = T, multiple = F, width = 6)
             ),
             fluidRow(
                 column(6,
@@ -60,7 +60,7 @@ output$mds_ui <- renderUI({
             fluidRow(
                 pivot_dataScale_UI("nds", include = c("Counts (raw)", "Counts (normalized)", "Log10 Counts"), selected = "Log10 Counts", width = 3),
                 column(3, selectInput("nds_dist", "Distance measure", choices = list("Euclidean" = "euclidean", "Maximum" = "maximum", "Manhattan" = "manhattan", "Canberra" = "canberra", "Binary" = "binary"), selected = "euclidean")),
-                pivot_colorBy_UI("nds", r_data$category, append_none = T, multiple = F, width = 6)
+                pivot_groupBy_UI("nds", r_data$category, append_none = T, multiple = F, width = 6)
             ),
             fluidRow(
                 column(6,
@@ -96,7 +96,7 @@ observe({
     })
 })
 
-mds_minfo<- reactive(callModule(pivot_colorBy, "mds", meta = r_data$meta))
+mds_minfo<- reactive(callModule(pivot_groupBy, "mds", meta = r_data$meta))
 
 mds_selected_sample <- reactiveValues()
 
@@ -142,7 +142,7 @@ observe({
     })
 })
 
-nds_minfo<- reactive(callModule(pivot_colorBy, "nds", meta = r_data$meta))
+nds_minfo<- reactive(callModule(pivot_groupBy, "nds", meta = r_data$meta))
 
 nds_selected_sample <- reactiveValues()
 

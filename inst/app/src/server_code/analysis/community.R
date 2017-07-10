@@ -43,7 +43,7 @@ output$mst_ui <- renderUI({
             tags$div(tags$b("Visualization Settings:"), class = "param_setting_title"),
             fluidRow(
                 column(4, selectInput("mst_package", "Plotting package", choices = list("igraph" = "igraph", "networkD3" = "networkD3"), selected = "igraph")),
-                pivot_colorBy_UI("community", r_data$category, append_none = T, width = 8)
+                pivot_groupBy_UI("community", r_data$category, append_none = T, width = 8)
             ),
             fluidRow(
                 column(4, sliderInput("vertex_size", "Vertex size", min = 1, max = 20, value = 5)),
@@ -147,7 +147,7 @@ mst_graph <- reactive({
         }
     }
 
-    cList <- callModule(pivot_colorBy, "community", meta = r_data$meta)
+    cList <- callModule(pivot_groupBy, "community", meta = r_data$meta)
     rsList<-generate_mst(dist_mtx, method = input$com_algorithm, color_list = cList, step = input$com_wt_step)
     r_data$meta$community <- paste0("community_",as.character(igraph::membership(rsList$community)))
     r_data$category <- colnames(r_data$meta)

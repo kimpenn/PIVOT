@@ -10,7 +10,7 @@ if(input$cor_sp_package == 'gplots') {
     distfun1 = function(c) as.dist(1 - c)
     hclustfun1 = function(x, method=input$cor_sp_agglo_method, ...) hclust(x, method=method, ...)
 
-    rsList <- callModule(pivot_colorBy, "cor_sp", meta = r_data$meta)
+    rsList <- callModule(pivot_groupBy, "cor_sp", meta = r_data$meta)
 
     if(!is.null(rsList$meta)) {
         gplots::heatmap.2(sample_cor, scale="none", Rowv=T, symm = T,dendrogram="both",

@@ -32,7 +32,7 @@ output$pca_ui <- renderUI({
                        fluidRow(
                            pivot_dataScale_UI("pca", include = c("Counts (raw)", "Counts (normalized)", "Log10 Counts"), selected = "Log10 Counts", width = 3),
                            column(3, selectInput("pca_scale", label = "PCA Scale", choices = list("Scale to Unit Varience" = T, "None" = F))),
-                           pivot_colorBy_UI("pca", r_data$category, append_none = T, multiple = F, width = 6)
+                           pivot_groupBy_UI("pca", r_data$category, append_none = T, multiple = F, width = 6)
                        )
                    )
             )
@@ -126,7 +126,7 @@ observe({
 })
 
 
-pca_minfo<- reactive(callModule(pivot_colorBy, "pca", meta = r_data$meta))
+pca_minfo<- reactive(callModule(pivot_groupBy, "pca", meta = r_data$meta))
 
 observe({
     req(pca_minfo(), r_data$pca)

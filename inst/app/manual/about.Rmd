@@ -27,8 +27,6 @@ output: html_document
     
     <a href="mailto:mugdhak@mail.med.upenn.edu" class="btn btn-primary">Mugdha Khaladkar</a> (Modified DESeq)
     
-    <a href="mailto:youngji@sas.upenn.edu" class="btn btn-primary">Young-Ji Na</a> (sparseLDA)
-    
     <a href="mailto:qinzhu@outlook.com" class="btn btn-primary">Qin Zhu</a> (GUI, interactivity)
     
 * Principal Investigator:

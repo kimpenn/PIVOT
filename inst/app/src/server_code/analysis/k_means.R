@@ -49,7 +49,7 @@ output$kmeans_ui <- renderUI({
                 column(6,
                        tags$div(tags$b("Confusion Matrix"), class = "param_setting_title"),
                        fluidRow(
-                           pivot_colorBy_UI("kmeans", r_data$category, append_none = T, choose_color = F, width = 12)
+                           pivot_groupBy_UI("kmeans", r_data$category, append_none = T, choose_color = F, width = 12)
                        ),
                        DT::dataTableOutput("km_tbl"),
                        plotOutput("km_conf_plot")
@@ -79,7 +79,7 @@ observe({
 
 output$km_tbl <- DT::renderDataTable({
     req(r_data$kmeans)
-    gList <- callModule(pivot_colorBy, "kmeans", meta = r_data$meta)
+    gList <- callModule(pivot_groupBy, "kmeans", meta = r_data$meta)
 
     if(is.null(gList$meta) || length(unique(gList$meta[,1])) < 2)
     {
@@ -100,7 +100,7 @@ output$km_tbl <- DT::renderDataTable({
 
 output$km_conf_plot <- renderPlot({
     req(r_data$kmeans)
-    gList <- callModule(pivot_colorBy, "kmeans", meta = r_data$meta)
+    gList <- callModule(pivot_groupBy, "kmeans", meta = r_data$meta)
 
     if(is.null(gList$meta) || length(unique(gList$meta[,1])) < 2)
     {
@@ -116,7 +116,7 @@ output$km_conf_plot <- renderPlot({
 
 km_assign_tbl <- reactive({
     req(r_data$kmeans)
-    gList <- callModule(pivot_colorBy, "kmeans", meta = r_data$meta)
+    gList <- callModule(pivot_groupBy, "kmeans", meta = r_data$meta)
 
     if(is.null(gList$meta) || length(unique(gList$meta[,1])) == 0)
     {

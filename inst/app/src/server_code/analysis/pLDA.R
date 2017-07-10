@@ -45,7 +45,7 @@ output$plda_ui <- renderUI({
                 column(7, uiOutput("plda_feature_upload_text"))
             ),
             fluidRow(
-                pivot_colorBy_UI("plda", r_data$category, multiple = F, width = 8, append_sample = F),
+                pivot_groupBy_UI("plda", r_data$category, multiple = F, width = 8, append_sample = F),
                 column(4, uiOutput("plda_K_ui"))
             ),
             actionButton("run_plda", "Run", class = "btn-info"),
@@ -128,7 +128,7 @@ output$plda_feature_upload_text <- renderUI({
 })
 
 output$plda_K_ui <- renderUI({
-    plda_minfo<-callModule(pivot_colorBy, "plda", meta = r_data$meta)
+    plda_minfo<-callModule(pivot_groupBy, "plda", meta = r_data$meta)
     numericInput("plda_K", "Number of discriminant vectors",
                  min = 1, max = length(unique(plda_minfo$meta[,1])) - 1, step = 1,
                  value = length(unique(plda_minfo$meta[,1])) - 1)
@@ -194,7 +194,7 @@ observeEvent(input$plda_list_submit, {
 
 observeEvent(input$run_plda, {
     if(is.null(r_data$meta)) return()
-    plda_minfo<-callModule(pivot_colorBy, "plda", meta = r_data$meta)
+    plda_minfo<-callModule(pivot_groupBy, "plda", meta = r_data$meta)
     if(input$plda_K > length(unique(plda_minfo$meta[,1])) - 1) {
         session$sendCustomMessage(type = "showalert", "The number of discriminant vectors must be no greater than (number of classes - 1).")
         return()

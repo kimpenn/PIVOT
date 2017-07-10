@@ -52,7 +52,7 @@ par(mar=c(8, 8, 8, 8), cex = 1, xpd=TRUE)
     max_height <- max(hc0$height)
     hc1 <- hc0 %>% as.dendrogram()
 
-    rsList <- callModule(pivot_colorBy, "hclust", meta = r_data$meta)
+    rsList <- callModule(pivot_groupBy, "hclust", meta = r_data$meta)
     if(is.null(rsList$meta)) {
         plot(hc1)
     } else {
@@ -88,7 +88,7 @@ par(mar=c(8, 8, 8, 8), cex = 1, xpd=TRUE)
         if(is.null(hclust0())) return ()
     Root <- hclust0()
 
-    rsList <- callModule(pivot_colorBy, "hclust", meta = r_data$meta)
+    rsList <- callModule(pivot_groupBy, "hclust", meta = r_data$meta)
     if(is.null(rsList$meta)) {
         networkD3::dendroNetwork(Root, fontSize = 15, treeOrientation = input$hc_dd_ori, linkColour = 'navyblue', nodeColour = 'grey', textOpacity = 1, opacity = 1, zoom = T, linkType = input$hc_dd_link_type)
     } else {

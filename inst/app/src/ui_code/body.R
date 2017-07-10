@@ -338,19 +338,28 @@ body <- dashboardBody(
                 br()
         ),
 
+        # Caret classifier
+        tabItem(tabName = "caret",
+                uiOutput("caret_ui"),
+                hr(),
+                br()
+        ),
+
+        # Venn Diagram (Toolkit)
         tabItem(tabName = "venn",
                 uiOutput("venn_ui"),
                 hr(),
                 br()
         ),
 
+        # Biomart Query (Toolkit)
         tabItem(tabName = "biomart",
                 uiOutput("biomart_ui"),
                 hr(),
                 br()
         ),
 
-
+        # Report module
         tabItem(tabName = "report",
                 uiOutput("report_ui")
 

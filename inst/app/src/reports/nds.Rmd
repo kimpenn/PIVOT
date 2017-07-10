@@ -4,7 +4,7 @@
 ## Nonmetric MDS Projection Plots
 
 ```{r echo = FALSE, warning=FALSE, message = FALSE}
-    nds_minfo<- reactive(callModule(pivot_colorBy, "nds", meta = r_data$meta))
+    nds_minfo<- reactive(callModule(pivot_groupBy, "nds", meta = r_data$meta))
 ```
 
 ### 2D Projection

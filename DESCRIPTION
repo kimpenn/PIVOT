@@ -50,6 +50,7 @@ Imports:
     biomaRt,
     MASS,
     readxl,
+    caret,
     org.Hs.eg.db,
     org.Mm.eg.db
 License: http://kim.bio.upenn.edu/software/LICENSE

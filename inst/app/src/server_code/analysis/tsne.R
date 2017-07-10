@@ -33,7 +33,7 @@ output$tsne_ui <- renderUI({
                        fluidRow(
                            pivot_dataScale_UI("tsne", include = c("Counts (raw)", "Counts (normalized)", "Log10 Counts", "Standardized Counts", "Log10 & Standardized"), selected = "Log10 Counts"),
                            column(4, numericInput("tsne_perplexity", label = "Perplexity", min = 1, max = 50, value = 1, step = 1)),
-                           column(4, numericInput("tsne_seed", label = "Set Seed", min = 1, max = 50, value = 1, step = 1))
+                           column(4, numericInput("tsne_seed", label = "Set Seed", min = 1, max = 5000, value = 1, step = 1))
                        ),
                        fluidRow(
                            uiOutput("tsne_color_by_ui"),
@@ -92,7 +92,7 @@ output$tsne_ui <- renderUI({
 })
 
 output$tsne_color_by_ui <- renderUI({
-    pivot_colorBy_UI("tsne", r_data$category, append_none = T, multiple = F, width = 8)
+    pivot_groupBy_UI("tsne", r_data$category, append_none = T, multiple = F, width = 8)
 })
 
 tsneList <- callModule(pivot_dataScale, "tsne", r_data)
@@ -119,7 +119,7 @@ observe({
     })
 })
 
-tsne_minfo<- reactive(callModule(pivot_colorBy, "tsne", meta = r_data$meta))
+tsne_minfo<- reactive(callModule(pivot_groupBy, "tsne", meta = r_data$meta))
 
 observe({
     req(tsne_minfo(), r_data$tsne)

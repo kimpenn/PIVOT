@@ -122,7 +122,7 @@ feature_plot <- function(df, selected_gene, plot_by = "sample", meta = NULL, pal
 #' This is the UI part of the module
 #'
 #' @export
-pivot_colorBy_UI <- function(id, category, append_sample = T, append_none = F, multiple = F, choose_color = T, bset ="qualitative", width = 8) {
+pivot_groupBy_UI <- function(id, category, append_sample = T, append_none = F, multiple = F, choose_color = T, bset ="qualitative", width = 8) {
     if(is.null(category)) return()
     ns<- NS(id)
     categories = category
@@ -149,7 +149,7 @@ pivot_colorBy_UI <- function(id, category, append_sample = T, append_none = F, m
 #' This is the server part of the module
 #'
 #' @export
-pivot_colorBy <- function(input, output, session, meta) {
+pivot_groupBy <- function(input, output, session, meta) {
     if(is.null(input$group_by) || any(input$group_by %in% c("sample", "none"))) {
         meta <- NULL
     } else {
@@ -190,7 +190,7 @@ pivot_colorBy <- function(input, output, session, meta) {
 pivot_featurePlot_UI <- function(id, meta, ids = NULL) {
     ns<- NS(id)
     if(!is.null(meta)) {
-        color_ui <- pivot_colorBy_UI(ns("tbl_plt"), category = colnames(meta), append_sample = T, bset = c("qualitative","diverging"), width = 6)
+        color_ui <- pivot_groupBy_UI(ns("tbl_plt"), category = colnames(meta), append_sample = T, bset = c("qualitative","diverging"), width = 6)
         style_ui <- column(3, selectInput(ns("plt_style"), "Plot type", choices = list("Plot points" = "points", "Bar plot" = "bar", "Box plot" = "box", "Violin plot" = "violin")))
     } else {
         color_ui <-  NULL
@@ -231,7 +231,7 @@ pivot_featurePlot_UI <- function(id, meta, ids = NULL) {
 #' @export
 pivot_featurePlot <- function(input, output, session, meta, df, gene, ids = NULL) {
     plotObj <- reactive({
-        rsList <- callModule(pivot_colorBy, "tbl_plt", meta = meta)
+        rsList <- callModule(pivot_groupBy, "tbl_plt", meta = meta)
         meta <- rsList$meta
         if(!is.null(input$plt_all)) {
             req(ids)

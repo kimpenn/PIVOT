@@ -51,7 +51,7 @@ if(input$hmap_package == 'gplots'){ # heatmap.2
         dend1 <- 'none'
     }
 
-    rsList <- callModule(pivot_colorBy, "hmap", meta = r_data$meta)
+    rsList <- callModule(pivot_groupBy, "hmap", meta = r_data$meta)
 
     if(!is.null(rsList$meta)) {
         group <- rsList$meta[,1]

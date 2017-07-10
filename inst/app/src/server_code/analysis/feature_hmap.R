@@ -44,7 +44,7 @@ output$hm_ui <- renderUI({
             fluidRow(
                 column(3, selectInput("hmap_package", label = "Plotting package", choices = list("gplots"="gplots", "heatmaply"="heatmaply"), multiple = F)),
                 column(3, selectInput("hmap_hmcolor", label = "Heatmap color", choices = c(get_brewer_set("sequential"), list("viridis" = "viridis", "magma" = "magma", "plasma" = "plasma", "inferno" = "inferno")), multiple = F)),
-                pivot_colorBy_UI("hmap", r_data$category, append_none = T, width = 6)
+                pivot_groupBy_UI("hmap", r_data$category, append_none = T, width = 6)
             ),
             tags$hr(),
             conditionalPanel(
@@ -151,7 +151,7 @@ output$ft_hmap_gplots <- renderPlot({
         dend1 <- 'none'
     }
 
-    rsList <- callModule(pivot_colorBy, "hmap", meta = r_data$meta)
+    rsList <- callModule(pivot_groupBy, "hmap", meta = r_data$meta)
 
     if(!is.null(rsList$meta)) {
         group <- rsList$meta[,1]

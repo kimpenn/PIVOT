@@ -37,7 +37,7 @@ output$cor_sp_ui <- renderUI({
         fluidRow(
             column(3, selectInput("cor_sp_package", label = "Plotting package", choices = list("gplots"="gplots", "heatmaply"="heatmaply"), multiple = F)),
             column(3, selectInput("cor_sp_hmcolor", label = "Heatmap color", choices = c(get_brewer_set("sequential"), list("viridis" = "viridis", "magma" = "magma", "plasma" = "plasma", "inferno" = "inferno")), multiple = F)),
-            pivot_colorBy_UI("cor_sp", r_data$category, append_none = T, width = 6)
+            pivot_groupBy_UI("cor_sp", r_data$category, append_none = T, width = 6)
         ),
         tags$hr(),
         conditionalPanel("input.cor_sp_package == 'gplots'", plotOutput("cor_sp_gplot", height = "700px")),
@@ -54,7 +54,7 @@ output$cor_sp_gplot <- renderPlot({
     distfun1 = function(c) as.dist(1 - c)
     hclustfun1 = function(x, method=input$cor_sp_agglo_method, ...) hclust(x, method=method, ...)
 
-    rsList <- callModule(pivot_colorBy, "cor_sp", meta = r_data$meta)
+    rsList <- callModule(pivot_groupBy, "cor_sp", meta = r_data$meta)
 
     if(!is.null(rsList$meta)) {
         gplots::heatmap.2(sample_cor, scale="none", Rowv=T, symm = T,dendrogram="both",
