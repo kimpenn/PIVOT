@@ -96,7 +96,7 @@ output$caret_ui <- renderUI({
                        )
                 ),
                 column(4,
-                       box(title = "Test result (confusionMatrix)",
+                       box(title = "Test Result (Confusion Matrix)",
                            width = NULL,
                            status = "warning",
                            DT::dataTableOutput("caret_conf_tbl"),
@@ -104,7 +104,7 @@ output$caret_ui <- renderUI({
                        )
                 ),
                 column(4,
-                       box(title = "Test result (assignment)",
+                       box(title = "Test Result (Assignment)",
                            width = NULL,
                            status = "success",
                            DT::dataTableOutput("caret_test_result_tbl"),

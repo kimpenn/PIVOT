@@ -50,9 +50,7 @@ Imports:
     biomaRt,
     MASS,
     readxl,
-    caret,
-    org.Hs.eg.db,
-    org.Mm.eg.db
+    caret
 License: http://kim.bio.upenn.edu/software/LICENSE
 Encoding: UTF-8
 LazyData: true
