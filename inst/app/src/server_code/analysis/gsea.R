@@ -93,10 +93,12 @@ output$gsea_feature_pv_tbl <- DT::renderDataTable({
     DT::datatable(gsea_feature_tbl())
 })
 
+gsea_bg_custom <- callModule(pivot_featureInputModal, "gsea_bg", r_data = r_data, match_rdata = F)
 gsea_bg <- reactive({
     req(input$gsea_bg_type)
     if(input$gsea_bg_type == "custom") {
-        bg <- callModule(pivot_featureInputModal, "gsea_bg", r_data = r_data, match_rdata = F)
+        req(gsea_bg_custom())
+        bg <- gsea_bg_custom()
     } else if(input$gsea_bg_type == "expressed"){
         bg <- rownames(r_data$df)
     } else if(input$gsea_bg_type == "all") {

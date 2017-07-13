@@ -33,10 +33,10 @@ body <- dashboardBody(
                                                               choices = list("Counts Directory" = "dir", "Counts Table" = "single", "PIVOT State" = "state"),
                                                               selected = "single")
                                            ),
-                                           column(4,
+                                           column(3,
                                                   uiOutput("proc_method_ui")
                                            ),
-                                           column(2, uiOutput("gene_length_ui")),
+                                           column(3, uiOutput("gene_length_ui")),
                                            column(3, tags$br(), uiOutput("norm_details_ui"))
                                        ),
                                        uiOutput("norm_params_ui"),

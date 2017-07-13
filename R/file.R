@@ -238,7 +238,7 @@ pivot_featureInputModal <- function(input, output, session, r_data, match_rdata 
     })
 
 
-    return(flist())
+    return(flist)
 }
 
 

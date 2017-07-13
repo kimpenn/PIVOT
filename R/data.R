@@ -255,10 +255,14 @@ create_subset <- function(r_data, input, flist, slist, keep_filter = F, renorm =
     if(actionType == "Subset") {
         if(renorm) {
             error_I <- 0
+            error_msg <- NULL
             tryCatch({
                 result <- normalize_data(method = input$proc_method,
                                          params = list(
                                              gene_length = r_data$gene_len,
+                                             control_gene = r_data$control_gene,
+                                             ruvg_k = input$ruvg_k,
+                                             ruvg_round = input$ruvg_round,
                                              deseq_threshold = input$deseq_threshold/100,
                                              expected_capture_rate = input$expected_capture_rate,
                                              ercc_added = input$norm_ercc_added,
@@ -269,11 +273,12 @@ create_subset <- function(r_data, input, flist, slist, keep_filter = F, renorm =
                                          ),
                                          raw = r_data$glb.raw[flist,slist], ercc = r_data$ercc[, slist, drop = F])
             }, error = function(e){
+                error_msg <<- e
                 error_I <<- 1
             })
 
             if(error_I) {
-                stop("Normalization failed")
+                stop(paste0("Normalization failed with the following error message: ", error_msg))
             } else {
                 r_data$df <- result$df
                 r_data$norm_param <- result$norm_param

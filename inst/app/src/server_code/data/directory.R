@@ -152,10 +152,15 @@ observeEvent(input$submit_dir, {
         incProgress(0.1, detail = "Perform data normalization...")
 
         error_I <- 0
+        error_msg <- NULL
+
         tryCatch({
             result<-normalize_data(method = input$proc_method,
                                    params = list(
                                        gene_length = r_data$gene_len,
+                                       control_gene = r_data$control_gene,
+                                       ruvg_k = input$ruvg_k,
+                                       ruvg_round = input$ruvg_round,
                                        deseq_threshold = input$deseq_threshold/100,
                                        expected_capture_rate = input$expected_capture_rate,
                                        ercc_added = input$norm_ercc_added,
@@ -167,12 +172,13 @@ observeEvent(input$submit_dir, {
                                    raw = r_data$glb.raw, ercc = r_data$ercc)
         }, error = function(e){
             error_I <<- 1
+            error_msg <<- e
         })
 
         if(error_I) {
             r_data <- init_state(r_data)
             r_data <- clear_design(r_data)
-            session$sendCustomMessage(type = "showalert", "Normalization failed! Please recheck.")
+            session$sendCustomMessage(type = "showalert", paste0("Error detected: ", error_msg, "Please recheck format/try different normalization procedure."))
             return()
         }
 

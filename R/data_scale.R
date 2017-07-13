@@ -259,17 +259,16 @@ pivot_dataScaleRange <- function(input, output, session, r_data, keep_stats = FA
     })
 
     hmapList <- callModule(pivot_dataScale, "hm_scale", r_data, keep_stats = keep_stats, order_by = input$rank_method)
+    flist <- callModule(pivot_featureInputModal, "ft_hmap", r_data = r_data)
 
     data0 <- reactive({
-        #flist <- callModule(pivot_featureInputModal, "ft_hmap", r_data = r_data)
         hm_data <- hmapList()$df
 
         if(input$rank_method == "custom") {
-            flist <- callModule(pivot_featureInputModal, "ft_hmap", r_data = r_data)
-            if(is.null(flist)){
+            if(is.null(flist())){
                 return(NULL)
             }
-            rs<-hm_data[flist,]
+            rs<-hm_data[flist(),]
         } else {
             if(is.null(hm_data) || is.null(input$feature_range)) return()
             if(input$feature_range[2] > nrow(hm_data)) {
@@ -369,7 +368,7 @@ pivot_featureList <- function(input, output, session, r_data) {
                 dplyr::select(gene, pval = pval, padj = qval) %>% dplyr::filter(padj <= input$feature_alpha)
         } else if(input$feature_input == "custom") {
             res <- callModule(pivot_featureInputModal, "custom_modal", r_data = r_data)
-            tbl <- data.frame(gene = res)
+            tbl <- data.frame(gene = res())
         }
         tbl
     })

@@ -28,6 +28,7 @@ output$proc_method_ui <- renderUI({
                                    "Transcripts per Million (TPM)" = "TPM",
                                    "ERCC normalization with robust linear regression" = "ERCC-RLM",
                                    "Census normalization" = "Census",
+                                   "RUVg" = "RUVg",
                                    "None" = "none"),
                     selected = "DESeq")
     } else {
@@ -64,6 +65,8 @@ output$norm_text_ui <- renderUI({
         tags$p("Input: Relative expression values such as RPKM/TPM containing ERCC (in every sample). Data is transformed to mRNAs per cell (RPC, absolute counts). ")
     } else if(input$proc_method == "Census") {
         tags$p("For single-cell RNA Seq data. Suggests relative expression value such as RPKM/TPM. Data is transformed to mRNAs per cell (RPC, absolute counts). ")
+    } else if(input$proc_method == "RUVg") {
+        tags$p("Requires raw read counts and a set of control genes. The data will be normalized using the RUVg function in the RUVSeq package. ")
     } else if(input$proc_method == "none") {
         tags$p("Input does NOT need to be raw counts, can be any data that are suitable for direct analysis (PIVOT will assume the data has already been normalized by the user).")
     }
@@ -102,6 +105,13 @@ output$norm_params_ui <- renderUI({
                 )
             )
         )
+    } else if(input$proc_method == "RUVg") {
+        list(
+            fluidRow(
+                column(6, numericInput("ruvg_k", label = "#factors of unwanted variation", value = 1, min = 0, max = 10, step = 1)),
+                column(6, tags$br(), checkboxInput("ruvg_round", label = "Round to pseudo-counts?", value = T))
+            )
+        )
     }
 
 })
@@ -124,6 +134,11 @@ output$gene_length_ui <- renderUI({
                 numericInput("expected_capture_rate", "RNA capture rate", min = 0.01, max = 1, step = 0.01, value = 0.25),
                 title = "the expected fraction of RNA molecules in the lysate that will be captured as cDNAs during reverse transcription",
                 placement = "right", options = list(container = "body")
+            )
+        } else if(input$proc_method %in% c("RUVg")) {
+            list(
+                tags$br(),
+                pivot_featureInputModal_UI("RUVg", "Set Control Genes")
             )
         }
 
@@ -226,6 +241,11 @@ observeEvent(input$gene_length_list_submit, {
     r_data$gene_len <- gene_len
 })
 
+control_g <- callModule(pivot_featureInputModal, "RUVg", r_data=r_data, match_rdata = F)
+observe({
+    req(control_g())
+    r_data$control_gene <- control_g()
+})
 
 # Switch to normalization details
 output$norm_details_ui <- renderUI({

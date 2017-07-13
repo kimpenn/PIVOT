@@ -144,6 +144,7 @@ observe({
     req(bmart$selected_filters)
     flists <-lapply(bmart$selected_filters, function(x){
         res<-callModule(pivot_featureInputModal, x, r_data = r_data, match_rdata = F)
+        return(res())
     })
     names(flists) <- bmart$selected_filters
     bmart$flists <- flists

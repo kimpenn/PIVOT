@@ -117,6 +117,23 @@ normalize_data <- function(method, params = NULL, raw, ercc = NULL) {
             error_I <<- 1
         }
         )
+    } else if(method == "RUVg") {
+        if(is.null(params$control_gene)) {
+            stop("Contorl genes required.")
+        }
+        if(is.null(params$ruvg_k) || is.null(params$ruvg_round)) {
+            stop("Missing required parameters.")
+        }
+        # samplesAll <- data.frame(row.names=colnames(raw), celltype=rep("nt",length(colnames(raw))))
+        # set <- EDASeq::newSeqExpressionSet(as.matrix(raw), phenoData = data.frame(samplesAll, row.names=colnames(raw)))
+        cgene = params$control_gene[which(params$control_gene %in% rownames(raw))]
+        if(length(cgene) <= 2) {
+            stop("Too few control genes.")
+        }
+        counts <- BiocGenerics::counts # Import the counts function
+        set <- RUVSeq::RUVg(as.matrix(raw), cgene, k=params$ruvg_k, round = params$ruvg_round)
+        df <- as.data.frame(set$normalizedCounts)
+        norm_param <- list(method = method)
     } else if(method == "none") {
         norm_param <- list(method = method)
         df <- raw
