@@ -142,8 +142,10 @@ sidebar <- dashboardSidebar(
                 menuItem("Data Input",  icon = icon("table"), tabName="data_input"),
                 side_ui,
                 menuItem("Report", tabName = "report", icon = icon("file-text")),
-                #menuItem("User Manual", tabName = "manual_file", icon=icon("mortar-board")),
-                menuItem("About", tabName = "about", icon = icon("font"))
+                menuItem("About", icon=icon("font"),
+                         menuSubItem("User Manual", tabName = "manual_file", icon = icon("angle-right")),
+                         menuItem("About PIVOT", tabName = "about", icon = icon("angle-right"))
+                )
     ),
 
 

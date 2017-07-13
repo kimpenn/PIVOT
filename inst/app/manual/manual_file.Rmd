@@ -1,15 +1,26 @@
 ---
 title: "PIVOT User Manual"
-author: "Junhyong Kim Lab, University of Pennsylvania"
-date: "Dec 9th, 2015"
+author: "Qin Zhu, Junhyong Kim Lab, University of Pennsylvania"
+date: "July 10th, 2015"
 output:
-  html_vignette:
+  html_document:
+    theme: united
     number_sections: yes
-    toc: yes
+    toc: true
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
   pdf_document:
     number_sections: yes
     toc: yes
 ---
+
+# Introduction
+
+This program is developed based on the Shiny framework, a set of R packages and a collection of scripts written by members of Junhyong Kim Lab at University of Pennsylvania. Its goal is to facilitate fast and interactive RNA-Seq data analysis and visualization. Current version of PIVOT supports routine RNA-Seq data analysis including normalization, differential expression analysis, dimension reduction, correlation analysis, clustering and classification. Users can complete workflows of DESeq2, monocle and scde package with just a few button clicks. All analysis reports can be exported, and the program state can be saved, loaded and shared.
+
+See http://kim.bio.upenn.edu/software/pivot.shtml for more details.
+
 
 # Data Management
 

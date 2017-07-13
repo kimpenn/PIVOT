@@ -367,7 +367,8 @@ body <- dashboardBody(
 
 
         tabItem(tabName = "manual_file",
-                includeMarkdown("./manual/manual_file.Rmd")
+                HTML("<iframe src='manual_file.html', width='100%', height='1000'>PIVOT Manual</iframe>"),
+                downloadButton("download_pivot_manual", label = "Download Manual", class = "btn btn-success btn_rightAlign")
         ),
 
 

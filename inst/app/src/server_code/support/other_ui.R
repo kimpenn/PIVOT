@@ -143,7 +143,14 @@ output$input_feature_stats_tbl <- DT::renderDataTable({
 })
 
 
-
+output$download_pivot_manual <- downloadHandler(
+    filename = "pivot_manual.html",
+    content = function(file) {
+        #fileConn<-file("www/tmp.rmd")
+        file.copy("www/manual_file.html", file)
+    },
+    contentType = "application/zip"
+)
 
 
 
