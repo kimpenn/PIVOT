@@ -193,7 +193,7 @@ output$download_featurevar <- downloadHandler(
     },
     content = function(file) {
         rsList <- callModule(pivot_dataScaleRange, "ft_hmap", r_data, keep_stats = T)
-        hm_data <- rsList$df
+        hm_data <- rsList()$df
         write.csv(hm_data, file, row.names = T)
     }
 )
