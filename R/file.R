@@ -12,6 +12,7 @@ pivot_fileInput_UI <- function(id, format = "list"){
     comment <- selectInput(ns("comment"), 'Comment', c("None"="none","#"="#", "%"="%", "//"="//"), selected = "none")
     seperator <- radioButtons(ns("file_sep"), 'Separator', c(Comma=',', Semicolon=';', Tab='\t', Space = ' '), selected = ',', inline = TRUE)
     colRow <- checkboxInput(ns("col_names"), 'First Row as Colnames', value = T)
+    transpose <- checkboxInput(ns("transpose"), 'Transpose table', value = F)
     if(format == "list") {
         tagList(
             fileInput(ns('file_in'), 'Choose file', accept=c('text/csv', 'text/comma-separated-values,text/plain', '.csv', ".xls", ".xlsx")),
@@ -32,7 +33,8 @@ pivot_fileInput_UI <- function(id, format = "list"){
                 ),
                 fluidRow(
                     column(6, seperator),
-                    column(6, colRow)
+                    column(3, colRow),
+                    column(3, transpose)
                 )
             )
         )
@@ -83,7 +85,11 @@ pivot_fileInput <- function (input, output, session, reset = FALSE, return_df = 
                                             comment=ifelse(input$comment=="none", "",input$comment),
                                             escape_double = FALSE, trim_ws = TRUE)
                 }
-
+                if(input$transpose) {
+                    rnames <- df[[1]]
+                    df <- t(df[,-1]) %>% as.data.frame() %>% tibble::rownames_to_column()
+                    colnames(df) <- c("rownames", rnames)
+                }
                 if(return_df) {
                     df <- as.data.frame(df)
                 }
@@ -117,7 +123,8 @@ pivot_fileInput <- function (input, output, session, reset = FALSE, return_df = 
 pivot_filePreview_UI <- function(id){
     ns<- NS(id)
     tagList(
-        DT::dataTableOutput(ns("tbl_preview"))
+        DT::dataTableOutput(ns("tbl_preview")),
+        uiOutput(ns("preview_limit_msg"))
     )
 }
 
@@ -127,7 +134,17 @@ pivot_filePreview_UI <- function(id){
 pivot_filePreview <- function (input, output, session, df, height = "350px", search = FALSE) {
     output$tbl_preview <- DT::renderDataTable({
         if(is.null(df)) return()
-        DT::datatable(df, rownames=F, options = list(scrollX = TRUE, scrollY = height, lengthMenu = c(20, 50, 100), searching = search))
+        if(ncol(df) > 100) {
+            DT::datatable(df[,1:100], rownames=F, options = list(scrollX = TRUE, scrollY = height, lengthMenu = c(20, 50, 100), searching = search))
+        } else {
+            DT::datatable(df, rownames=F, options = list(scrollX = TRUE, scrollY = height, lengthMenu = c(20, 50, 100), searching = search))
+        }
+    })
+
+    output$preview_limit_msg <- renderUI({
+        if(ncol(df) > 100) {
+            tags$p("Note: Table preview only shows first 100 columns.")
+        }
     })
 }
 
