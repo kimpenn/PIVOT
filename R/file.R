@@ -85,7 +85,7 @@ pivot_fileInput <- function (input, output, session, reset = FALSE, return_df = 
                                             comment=ifelse(input$comment=="none", "",input$comment),
                                             escape_double = FALSE, trim_ws = TRUE)
                 }
-                if(input$transpose) {
+                if(!is.null(input$transpose) && input$transpose) {
                     rnames <- df[[1]]
                     df <- t(df[,-1]) %>% as.data.frame() %>% tibble::rownames_to_column()
                     colnames(df) <- c("rownames", rnames)
@@ -96,6 +96,7 @@ pivot_fileInput <- function (input, output, session, reset = FALSE, return_df = 
             },
             error = function(e){
                 error_I <<- 1
+                print(e)
             })
             if(error_I) {
                 session$sendCustomMessage(type = "showalert", "File format not recogonized.")
@@ -142,6 +143,7 @@ pivot_filePreview <- function (input, output, session, df, height = "350px", sea
     })
 
     output$preview_limit_msg <- renderUI({
+        if(is.null(df)) return()
         if(ncol(df) > 100) {
             tags$p("Note: Table preview only shows first 100 columns.")
         }

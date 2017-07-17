@@ -167,6 +167,7 @@ output$caret_train_gp_ui <- renderUI({
 
 observe({
     req(caret$category)
+    assign("caret", reactiveValuesToList(caret),env = .GlobalEnv)
     caret$data <- caretList()$df
     req(caret$data)
     selected_train_group <- input$caret_train_gp

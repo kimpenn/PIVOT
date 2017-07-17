@@ -3,16 +3,16 @@ title: "PIVOT User Manual"
 author: "Qin Zhu, Junhyong Kim Lab, University of Pennsylvania"
 date: "July 10th, 2015"
 output:
-  html_document:
-    theme: united
-    number_sections: yes
-    toc: true
-    toc_float:
-      collapsed: false
-      smooth_scroll: false
   pdf_document:
     number_sections: yes
     toc: yes
+  html_document:
+    number_sections: yes
+    theme: united
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: no
 ---
 
 # Introduction
@@ -21,33 +21,64 @@ This program is developed based on the Shiny framework, a set of R packages and 
 
 See http://kim.bio.upenn.edu/software/pivot.shtml for more details.
 
+# Launch PIVOT
+
+In R, use command `library(PIVOT)` to attach the package. Once loaded, you can use one of the following methods to launch PIVOT.
+
+## Launch with PIVOT Launcher
+
+<img src="figures/launcher.png" align = "left" style= "margin-right: 20px" width="350px"/>
+
+* By calling `pivot()`, you will see the window like the left image. This launcher serves as a gateway to multiple pivot modules you can use. Just check the boxes of modules that you want to load, and then press launch module. 
+
+* It is recommended that a user only launch needed modules, because using too many modules will lead to too many loaded DLLs (current R only support up to 100 DLLs per session) and potential namespace conflicts. The launcher also serves as a DLL monitor and cleaner. Simply press the clean DLLs button when there are too many DLLs loaded. Note that the best way to clean loaded DLLs is using Rstudio -> Session -> Restart R.
+
+<p style="clear:both;">
+
+## Launch using R command
+
+* `pivot_module()` command will list out current available modules in PIVOT. Use` pivot(#ID_vector))` such as `pivot(c(1,3,5))` to launch selected modules.
 
 # Data Management
 
 ## File Input
 
-* The input file format can be a set of count files in a folder (choose "directory"), or a single file containing all counts (choose "counts table").
+The input file format can be a set of count files in a folder (choose "directory"), or a single file containing all counts (choose "counts table").
 
-* If your data has already been processed by DESeq or other methods, please specify "none" in the normalization method. If DESeq failed on your data, one possibility is that you have low counts samples, which leads to all the genes contain at least one 0 in the counts matrix. You can either find out and remove these samples, or choose the "modified DESeq" normalization method. 
+### Input gene expression matrix
 
-    ![alt text](figures/file_in.png)
+PIVOT support expression matrix in csv, txt, xls or xlsx formats. Choose proper settings on the left file input panel until the right "Loaded File Preview" correctly shows the data frame.
+
+<img src="figures/file_in.png" width="100%"/>
+
+you need to make sure that the data table:
+
+    + *Contains no NA or non-numeric values.*
+    
+    + *Does not have duplicated feature or sample names (PIVOT will alert the user if it detects any).*
+
+    + *Sample names are column names (first row) and gene names are row names (first column). (Check transpose matrix if necessary)*
+
+
+Then, set proper normalization method and feature filtering criteria before pressing the submit button. 
+
+* If your data has already been processed by DESeq or other methods, please specify "none" in the normalization method. 
+
+* If DESeq failed on your data, one possibility is that you have low counts samples, which leads to all the genes contain at least one 0 in the counts matrix. You can either find out and remove these samples, or choose the "modified DESeq" normalization method. 
+
+
     
 * If you specifies `directory`, then the next step is to choose which files you want to upload.
     + You can type key words in the filter to quickly select those files you are interested in.
     
     ![alt text](figures/file_filter.png)
     
-* If you choose to upload a `single file` containing the raw counts table, you need to make sure that the data table are organized as follows:
-
-    + *Sample names are column names (first row) and gene names are row names (first column).*
-
-    + *No NA value is allowed.*
+* If you choose to upload a `single file` containing the raw counts table, 
     
     + *Illegal R strings (e.g., sample-A(2)) are not allowed to be used as names.*
 
     + *The file must be a csv/txt file.*
-    
-    ![alt text](figures/single_upload.png)
+
 
 * Before submitting data, please check the threshold. The program will first filter input counts based on row means or row sums, and then apply normalization. By default features with zero count will be filtered out.
 
