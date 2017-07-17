@@ -9,3 +9,4 @@ generateRelativeFreq(raw)
 \description{
 PIVOT generate relative frequency table given counts data
 }
+

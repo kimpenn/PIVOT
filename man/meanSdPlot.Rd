@@ -10,3 +10,4 @@ meanSdPlot(x, ranks = TRUE, xlab = ifelse(ranks, "rank(mean)", "mean"),
 \description{
 meanSDplot function from VSN package
 }
+

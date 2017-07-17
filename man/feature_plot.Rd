@@ -11,3 +11,4 @@ feature_plot(df, selected_gene, plot_by = "sample", meta = NULL,
 \description{
 Plot feature expression with ggplot
 }
+

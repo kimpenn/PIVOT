@@ -6,3 +6,4 @@
 \usage{
 stdlog_plot(df)
 }
+

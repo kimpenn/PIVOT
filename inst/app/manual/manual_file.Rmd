@@ -3,9 +3,6 @@ title: "PIVOT User Manual"
 author: "Qin Zhu, Junhyong Kim Lab, University of Pennsylvania"
 date: "July 10th, 2015"
 output:
-  pdf_document:
-    number_sections: yes
-    toc: yes
   html_document:
     number_sections: yes
     theme: united
@@ -13,6 +10,9 @@ output:
     toc_float:
       collapsed: no
       smooth_scroll: no
+  pdf_document:
+    number_sections: yes
+    toc: yes
 ---
 
 # Introduction
@@ -39,19 +39,19 @@ In R, use command `library(PIVOT)` to attach the package. Once loaded, you can u
 
 * `pivot_module()` command will list out current available modules in PIVOT. Use` pivot(#ID_vector))` such as `pivot(c(1,3,5))` to launch selected modules.
 
-# Data Management
-
-## File Input
+# Data Input
 
 The input file format can be a set of count files in a folder (choose "directory"), or a single file containing all counts (choose "counts table").
 
-### Input gene expression matrix
+## Input expression matrix
 
-PIVOT support expression matrix in csv, txt, xls or xlsx formats. Choose proper settings on the left file input panel until the right "Loaded File Preview" correctly shows the data frame.
+* To input expression matrix, select "Counts Table" as input file type.
+
+* PIVOT support expression matrix in csv, txt, xls or xlsx formats. Choose proper settings on the left file input panel until the right "Loaded File Preview" correctly shows the data frame.
 
 <img src="figures/file_in.png" width="100%"/>
 
-you need to make sure that the data table:
+* you need to make sure that the data table:
 
     + *Contains no NA or non-numeric values.*
     
@@ -59,30 +59,29 @@ you need to make sure that the data table:
 
     + *Sample names are column names (first row) and gene names are row names (first column). (Check transpose matrix if necessary)*
 
+<p style="clear:both;">
 
-Then, set proper normalization method and feature filtering criteria before pressing the submit button. 
+## Input counts directory
+
+* If you have counts files with genes in the first column and gene counts in the second column. You can input the entire data folder. PIVOT will automatically combine the counts files into an expression matrix. Note you need to make sure that the files are all quatified using the same pipeline with the same annotation file.
+
+<img src="figures/directory_input.png" style= "margin: 20px" width="500px"/>
+
+* If you only want to input a subset of samples from the selected directory, you can type key words in the filter or directly choose the samples.
+
+<p style="clear:both;">
+
+## Normalization
+
+We have included a multitude of normalization methods in PIVOT. Some normalization methods are mostly used for bulk RNA-Seq data, while others may only be applicable to single-cell data. Users should be aware of which method best suits their data. 
 
 * If your data has already been processed by DESeq or other methods, please specify "none" in the normalization method. 
 
-* If DESeq failed on your data, one possibility is that you have low counts samples, which leads to all the genes contain at least one 0 in the counts matrix. You can either find out and remove these samples, or choose the "modified DESeq" normalization method. 
-
-
-    
-* If you specifies `directory`, then the next step is to choose which files you want to upload.
-    + You can type key words in the filter to quickly select those files you are interested in.
-    
-    ![alt text](figures/file_filter.png)
-    
-* If you choose to upload a `single file` containing the raw counts table, 
-    
-    + *Illegal R strings (e.g., sample-A(2)) are not allowed to be used as names.*
-
-    + *The file must be a csv/txt file.*
-
+* If DESeq failed on your data, one possibility is that you have low counts samples, which leads to all the genes contain at least one 0 in the counts matrix. You can either find out and remove these samples, or choose the "modified DESeq" normalization method. Setting sample inclusion 100% is equivalent to the original DESeq.
 
 * Before submitting data, please check the threshold. The program will first filter input counts based on row means or row sums, and then apply normalization. By default features with zero count will be filtered out.
 
-    ![alt text](figures/threshold.png)
+<img src="figures/threshold.png" width="100%"/>
 
 ## Design Information
 

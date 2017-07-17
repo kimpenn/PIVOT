@@ -12,3 +12,4 @@ pivot_dataScale_UI(id, include = c("Counts (raw)", "Counts (normalized)",
 \description{
 Controls which transformed data should be used as input for analysis modules, this is the UI part of the module.
 }
+

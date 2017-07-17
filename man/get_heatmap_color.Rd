@@ -9,3 +9,4 @@ get_heatmap_color(palette)
 \description{
 Get a vector of colors for heatmap
 }
+

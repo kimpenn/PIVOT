@@ -38,3 +38,4 @@ HSMM_fpkm_matrix <- exprs(HSMM)
 t_estimate = monocle_estimate_t(HSMM_fpkm_matrix)
 }
 }
+

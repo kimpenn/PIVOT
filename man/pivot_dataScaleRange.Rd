@@ -9,3 +9,4 @@ pivot_dataScaleRange(input, output, session, r_data, keep_stats = FALSE)
 \description{
 This is the server part of the module.
 }
+

@@ -9,3 +9,4 @@ modalActionButton(inputId, label, icon = NULL, width = NULL, ...)
 \description{
 custom modal button which also serves as an action button
 }
+

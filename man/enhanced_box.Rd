@@ -12,3 +12,4 @@ enhanced_box(..., title = NULL, id = NULL, footer = NULL, status = NULL,
 \description{
 PIVOT Data Input, UI function
 }
+

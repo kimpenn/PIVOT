@@ -10,3 +10,4 @@ create_subset(r_data, input, flist, slist, keep_filter = F, renorm = F,
 \description{
 Create subset by filtering or subsetting
 }
+

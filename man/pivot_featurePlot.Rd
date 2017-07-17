@@ -9,3 +9,4 @@ pivot_featurePlot(input, output, session, meta, df, gene, ids = NULL)
 \description{
 This is the server part of the module
 }
+

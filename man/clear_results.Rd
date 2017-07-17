@@ -9,3 +9,4 @@ clear_results(r_data)
 \description{
 Clean all analysis results
 }
+

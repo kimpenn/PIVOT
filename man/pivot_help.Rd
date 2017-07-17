@@ -9,3 +9,4 @@ pivot_help(input, output, session, title, content, size = "m")
 \description{
 PIVOT help modules, server
 }
+

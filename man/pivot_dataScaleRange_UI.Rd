@@ -11,3 +11,4 @@ pivot_dataScaleRange_UI(id, bound = 500, value = 100,
 \description{
 This is the UI part of the module.
 }
+

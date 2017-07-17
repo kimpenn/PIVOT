@@ -12,3 +12,4 @@ modal trigger button from Weicheng Zhu
 source: https://github.com/mingsnu/shiny-confirm-dialog
 Note: This was not used in PIVOT. I later switched to shiny modal.
 }
+

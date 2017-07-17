@@ -11,3 +11,4 @@ makeCheckboxTooltip(checkboxValue, buttonLabel, Tooltip)
 Checkbox tooltip, from K. Rohde
 Source: http://stackoverflow.com/questions/36670065/tooltip-in-shiny-ui-for-help-text
 }
+

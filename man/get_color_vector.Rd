@@ -9,3 +9,4 @@ get_color_vector(labels, pal = "Set1", maxCol = 9)
 \description{
 Get a vector of colors with RColorBrewer for group labels
 }
+

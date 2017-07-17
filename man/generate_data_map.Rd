@@ -9,3 +9,4 @@ generate_data_map(vis_nodes, vis_edges)
 \description{
 PIVOT data map plotting function
 }
+

@@ -9,3 +9,4 @@ render_Plotly(expr, env = parent.frame(), quoted = FALSE)
 \description{
 renderPlotly from plotly
 }
+

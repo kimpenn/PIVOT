@@ -9,3 +9,4 @@ pivot_featureInputModal(input, output, session, r_data, match_rdata = T)
 \description{
 This is the server part of the module.
 }
+

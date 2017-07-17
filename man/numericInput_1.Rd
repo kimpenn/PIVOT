@@ -12,3 +12,4 @@ numericInput_1(inputId, label, value, min = NA, max = NA, step = NA,
 PIVOT Data Input, UI function
 custom numeric input based on shiny
 }
+

@@ -9,3 +9,4 @@ make_plda(df, group, lambda, K)
 \description{
 Penalized LDA wrapper
 }
+

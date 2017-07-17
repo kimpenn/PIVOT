@@ -10,3 +10,4 @@ pivot_dataScale(input, output, session, r_data, order_by = NULL,
 \description{
 Controls which transformed data should be used as input for analysis modules, this is the server part of the module.
 }
+
