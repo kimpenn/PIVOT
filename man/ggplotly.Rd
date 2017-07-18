@@ -5,8 +5,8 @@
 \title{ggplotly from plotly}
 \usage{
 ggplotly(p = ggplot2::last_plot(), width = NULL, height = NULL,
-  tooltip = "all", layerData = 1, originalData = TRUE, source = "A",
-  ...)
+  tooltip = "all", dynamicTicks = FALSE, layerData = 1,
+  originalData = TRUE, source = "A", ...)
 }
 \description{
 ggplotly from plotly

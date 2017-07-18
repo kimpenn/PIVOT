@@ -1,7 +1,7 @@
 ---
 title: "PIVOT User Manual"
 author: "Qin Zhu, Junhyong Kim Lab, University of Pennsylvania"
-date: "July 10th, 2015"
+date: "July 10th, 2017"
 output:
   html_document:
     number_sections: yes
@@ -65,7 +65,7 @@ The input file format can be a set of count files in a folder (choose "directory
 
 * If you have counts files with genes in the first column and gene counts in the second column. You can input the entire data folder. PIVOT will automatically combine the counts files into an expression matrix. Note you need to make sure that the files are all quatified using the same pipeline with the same annotation file.
 
-<img src="figures/directory_input.png" style= "margin: 20px" width="500px"/>
+<img src="figures/directory_input.png" style= "margin: 20px" width="80%"/>
 
 * If you only want to input a subset of samples from the selected directory, you can type key words in the filter or directly choose the samples.
 
@@ -81,56 +81,66 @@ We have included a multitude of normalization methods in PIVOT. Some normalizati
 
 * Before submitting data, please check the threshold. The program will first filter input counts based on row means or row sums, and then apply normalization. By default features with zero count will be filtered out.
 
+* Once data have been normalized, you can check the normlization details which contain information such as the estimated size factors.
+
 <img src="figures/threshold.png" width="100%"/>
 
 ## Design Information
 
-* The design infomation are used for sample point coloring and differential expression analysis. The group information can be conditions (treated, control), cell types or other metafeatures that the user is interested in testing. The batch infomation are used for control of batch effects in differential expression analysis.
+<img src="figures/design_input.png" width="60%" style= "margin: 20px" align = "left"/>
 
-* You can add group and/or batch info manually or using a **`design-info`** file. A design-info file should contain one 'Sample' column, and one 'Group' column and/or one 'Batch' column (column names must be 'Sample', 'Group', 'Batch', case-sensitive). You can make a design-info file in the manual mode, and download it for later use.
+* The design infomation are used for sample point coloring and differential expression analysis. Users can input the entire sample meta sheet as design information, or manually specify groups or batches for each sample.
+
+* The first column of the design table should always be the sample name list, which must include all samples that's in the expression matrix. The rest columns will be treated as "categories", which can be "condition", "batch", "operator", "experiment date", etc. You will be able to choose which category to be used for analysis such as DE, or which groups in the category should be tested.
+
+* You can make a design-info file in the manual mode, and download it for later upload.
+
+* Empty or NA entries are allowed in design table. But You need to make sure the categories used for DE testing (conditions/time points/batches) do not contain NAs.
 
 * Most modules allow you to color the samples with the design info.
 
-    ![alt text](figures/sample_color.png)
+# Data Manipulation
 
-* You can press ![alt text](figures/change_gp_color.png) to try different color sets!
+## Feature Filtering
 
+* You can filter the dataset with various criteria to only keep features (rows) of interest. More specifically, you can choose to filter the dataset with certain expression/dispersion thresholds, a marker gene list or the DE results obtained from any DE tests.
 
-## Gene Filtering
+<img src="figures/filter_type.png" width="30%" style= "margin: 10px"/>
 
-* Filtration allows you to remove genes with too low or too high counts, or only perform analysis on a set of marker genes. The former requires the use of the expression filter, and the latter can be done using the marker feature filter.
-     
-    ![alt text](figures/filter_type.png)
-    
 * Filter can be either positive (selecting the genes that satisfy the condition) or negative (delete the genes). 
-
-    ![alt text](figures/filter_pos_neg.png)
     
-* Keep filtering the dataset means that the effect of filtration is additive. This mode is useful if you want to apply multiple criteria, e.g., first filter with marker features, then remove low count features, and finally remove features that's not expressed in a certain proportion of your samples. If this option is unchecked, you are always filtering the input dataset.
+<img src="figures/filter_pos_neg.png" width="30%" style= "margin: 10px"/>
 
-* Filter with renormalization means that after filtration, DESeq normalization will be re-performed on the filtered raw count dataset.
+* Keep filtering the dataset means that the effect of filtration is additive. This mode is useful if you want to apply multiple criteria, e.g., first filter with marker features, then remove low count features, and finally remove features that's not expressed in a certain proportion of your samples. If this option is unchecked, you are always filtering the current sample subset.
 
-* The count range filter can be base on either raw counts or normalized counts. You can either input the range manually or use the slider.
-
-    ![alt text](figures/feature_filter.png)
-
-* You can provide a marker feature list to get a marker feature expression dataset.
+* You can provide a marker feature list to get a marker feature expression subset.
     
     + The marker features should appear as the first column in your file.
     
-    + Please note that some of the genes in your marker list may not be found in the dataset, because they may have already been removed due to 0 expression in all your samples.
+    + Some of the features in your marker list may not be found in the dataset, because they may have already been removed due to 0 expression in all your samples.
 
-* Applying ![alt text](figures/undo_filter.png) will return the data to the unfiltered state. Note that if you have performed subsetting prior to filtering, you will get a subsetted dataset with a non-zero expression feature set.
+* Applying ![](figures/undo_filter.png) will return the data to the unfiltered state, i.e., if you have performed sample subsetting prior to filtering, the dataset will return to the sample subset.
 
-## Data Subsetting
+## Sample Subsetting
 
-* Subsetter allows you to choose a subset of samples for analysis.
+* Subsetter allows you to choose a subset of samples for analysis. You can either manually select samples, groups, upload a sample list or subset based on sample statistics.
 
-* You can choose whether or not the subset should be renormalized with DESeq.
-
-    ![alt text](figures/subset0.png)
+* You can choose whether or not the subset should be renormalized. You can change the re-normalization method and associated parameters in the "FILE" panel. 
 
 * An implicit filtration will occur to get nonzero count genes for the subset. This procedure prevents some downstream analysis from breaking on 0s.
+
+* When subsetting based on the bar plot featureing selected sample statistics, you can directly drag a range on the plot and only choose those samples within this range.
+
+* Applying ![](figures/undo_subset.png) will return the data to the original input dataset, which means all filtering or subsetting effects will be removed.
+
+## Data Map
+
+<img src="figures/data_map.png" width="90%" style= "margin: 10px"/>
+
+* With each data filtering/subsetting operation, you are creating data subsets whose lineage can be tracked using the data map. Mouse over each edge in the map will show you the operation details, and you can switch between data subsets, rename nodes, delete subsets or add notes by simply selecting the nodes and click buttons.
+
+* To attach analysis to the nodes, simply click the magnet ![](figures/small_btns.png) button on the top right corner of each analysis box. The rest of the buttons are for pasteing R markdown reports to the report module, generating HTML reports and box collapsing.
+
 
 # Analysis Modules
 

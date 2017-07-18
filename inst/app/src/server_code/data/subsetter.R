@@ -206,23 +206,21 @@ output$sample_subset_plot <- render_Plotly({
     if(is.null(r_data$sample_stats) || is.null(input$sample_stats_plt_type) || input$sample_stats_plt_type == "cooks") return()
     r_data$glb.meta
     input$sample_stats_group
-    isolate({
-        withProgress(message = 'Processing...', value = 0.5, {
-            tbl <- r_data$sample_stats %>% tibble::rownames_to_column("sample")
-            tbl$sample<-factor(tbl$sample, level = tbl$sample)
-            colnames(tbl)[which(colnames(tbl) == input$sample_stats_plt_type)] <- "y"
-            if(!is.null(input$sample_stats_group) && input$sample_stats_group != "None") {
-                tbl$Group <- r_data$glb.meta[,input$sample_stats_group][match(tbl$sample,r_data$glb.meta[,1])]
-                plt1 <- tbl %>% plotly::plot_ly(x = ~sample, y = ~y, type = "bar", color = as.character(tbl$Group), source = "sample_range_select")
-            } else {
-                plt1 <- tbl %>% plotly::plot_ly(x = ~sample, y = ~y, type = "bar", source = "sample_range_select")
-            }
+    withProgress(message = 'Processing...', value = 0.5, {
+        tbl <- r_data$sample_stats %>% tibble::rownames_to_column("sample")
+        tbl$sample<-factor(tbl$sample, level = tbl$sample)
+        colnames(tbl)[which(colnames(tbl) == input$sample_stats_plt_type)] <- "y"
+        assign("ptbl", tbl, env = .GlobalEnv)
+        if(ncol(r_data$glb.meta) >= 2 && !is.null(input$sample_stats_group) && input$sample_stats_group != "None") {
+            tbl$Group <- r_data$glb.meta[,input$sample_stats_group][match(tbl$sample,r_data$glb.meta[,1])]
+            plt1 <- tbl %>% plotly::plot_ly(x = ~sample, y = ~y, type = "bar", color = as.character(tbl$Group), source = "range_filter_plotly")
+        } else {
+            plt1 <- tbl %>% plotly::plot_ly(x = ~sample, y = ~y, type = "bar", source = "range_filter_plotly")
+        }
 
-            plt1 %>% plotly::layout(
-                xaxis = list(title = "sample"),
-                yaxis = list(title = input$sample_stats_plt_type))
-        })
-
+        plt1 %>% plotly::layout(
+            xaxis = list(title = "sample"),
+            yaxis = list(title = input$sample_stats_plt_type))
     })
 })
 
@@ -240,7 +238,7 @@ observeEvent(input$cooks_btn,  {
             dds <- DESeq2::DESeqDataSetFromMatrix(countData = r_data$raw, colData=samplesAll, design = ~ 1)
             dds <- DESeq2::estimateSizeFactors(dds)
             dds <- DESeq2::DESeq(dds)
-            r_data$cooks<-log10(assays(dds)[["cooks"]])
+            r_data$cooks<-log10(SummarizedExperiment::assays(dds)[["cooks"]])
         },
         error = function(e){
             error_I <<- 1
@@ -264,7 +262,7 @@ cur_sp_range$outlist <- NULL
 
 
 observe({
-    evt1 <- plotly::event_data("plotly_relayout", source = "sample_range_select")
+    evt1 <- plotly::event_data("plotly_relayout", source = "range_filter_plotly")
     if(is.null(evt1$`yaxis.range[0]`)) return()
     cur_sp_range$lower <- round(evt1$`yaxis.range[0]`, digits = 1)
     cur_sp_range$upper <- round(evt1$`yaxis.range[1]`, digits = 1)
