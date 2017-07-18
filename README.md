@@ -37,6 +37,9 @@ library(PIVOT)
 pivot()
 ```
 
+## User manual
+See here: https://cdn.rawgit.com/qinzhu/PIVOT/60489858/inst/app/manual/manual_file.html.
+
 ## Troubleshooting
  * URL 'http://xxx.tgz': status was '404 Not Found'
    * Call `chooseCRANmirror()` to select another CRAN mirror.
