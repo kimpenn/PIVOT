@@ -8,9 +8,10 @@
 **Walktrap Steps:** `r input$com_wt_step`
 
 ```{r echo = FALSE, warning=FALSE, message = FALSE}
+mstList <- callModule(pivot_dataScale, "mst_scale", r_data)
 mst_graph <- reactive({
-    rsList() <- callModule(pivot_dataScale, "mst_scale", r_data)
-    mst_data <- rsList()$df
+    req(mstList()$df)
+    mst_data <- mstList()$df
     if(input$mst_dist_method == 'euclidean') {
         dist_mtx <- t(mst_data) %>% dist() %>% as.matrix()
     } else if(input$mst_dist_method == 'correlation') {

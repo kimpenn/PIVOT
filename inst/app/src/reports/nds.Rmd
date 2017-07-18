@@ -12,7 +12,8 @@
 **Stress**: `r r_data$nds$nds_2d$stress`
 
 ```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 6}
-    callModule(pivot_Plot2d, "nds_plot2d", type = "nds", obj = NULL, proj = as.data.frame(r_data$nds$nds_2d$points), minfo = nds_minfo())
+    obj<-callModule(pivot_Plot2d, "nds_plot2d", type = "nds", obj = NULL, proj = as.data.frame(r_data$nds$nds_2d$points), minfo = nds_minfo())
+    obj$plot
 ```
 
 ### 3D Projection

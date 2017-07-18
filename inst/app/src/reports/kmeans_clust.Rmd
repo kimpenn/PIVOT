@@ -4,33 +4,19 @@
 ## Clustering results
 
 ```{r echo = FALSE, warning=FALSE, message = FALSE}
-# k-means
-    kmeansList() <- callModule(pivot_dataScale, "kmeans", r_data)
-km1 <- reactive({
-    req(input$km_centers)
-    req(input$km_nstart)
-    set.seed(input$kmeans_seed)
+if(is.null(r_data$kmeans)) return()
 
-    kmeans_data <- kmeansList()$df
-    kmeans(t(kmeans_data), centers = input$km_centers, nstart = input$km_nstart)
-})
-```
-
-
-```{r echo = FALSE, warning=FALSE, message = FALSE}
 km_assign_tbl <- reactive({
-    req(km1())
     gList <- callModule(pivot_groupBy, "kmeans", meta = r_data$meta)
 
     if(is.null(gList$meta) || length(unique(gList$meta[,1])) == 0)
     {
-        tbl <- data.frame(km1()$cluster)
-        colnames(tbl) <- c("assigned_cluster")
+        tbl <-r_data$meta[,c(1, which(colnames(r_data$meta) == "kmeans_cluster"))]
     } else {
         actual_group <- gList$meta[,1]
         names(actual_group) <- r_data$sample_name
         tbl <- data.frame(actual_group)
-        tbl$assigned_cluster <- km1()$cluster
+        tbl$assigned_cluster <- r_data$meta$kmeans_cluster
     }
     tbl
 })
@@ -42,17 +28,18 @@ DT::datatable(km_assign_tbl(), options = list(scrollX = TRUE, scrollY = "400px",
 ## Confusion Matrix
 
 ```{r echo = FALSE, warning=FALSE, message = FALSE}
+    if(is.null(r_data$kmeans)) return()
     gList <- callModule(pivot_groupBy, "kmeans", meta = r_data$meta)
 
     if(is.null(gList$meta) || length(unique(gList$meta[,1])) < 2)
     {
-        tbl <- as.data.frame(table(km1()$cluster))
+        tbl <- as.data.frame(table(r_data$meta$kmeans_cluster))
         colnames(tbl) <- c("Group", "Number of samples assigned")
         DT::datatable(tbl, options = list(paging = FALSE, searching = FALSE))
     } else {
         sample_gp <- gList$meta[,1]
         names(sample_gp) <- r_data$sample_name
-        tbl <- as.data.frame.matrix(table(km1()$cluster, sample_gp))
+        tbl <- as.data.frame.matrix(table(r_data$meta$kmeans_cluster, sample_gp))
         colnam <- names(tbl)
         names(tbl) <- sapply(colnam, function(x) paste("Is", x))
         rownam <- rownames(tbl)
@@ -62,6 +49,7 @@ DT::datatable(km_assign_tbl(), options = list(scrollX = TRUE, scrollY = "400px",
 ```
 
 ```{r echo = FALSE, warning=FALSE, message = FALSE}
+    if(is.null(r_data$kmeans)) return()
     gList <- callModule(pivot_groupBy, "kmeans", meta = r_data$meta)
 
     if(is.null(gList$meta) || length(unique(gList$meta[,1])) < 2)
@@ -70,7 +58,8 @@ DT::datatable(km_assign_tbl(), options = list(scrollX = TRUE, scrollY = "400px",
     } else {
         sample_gp <- gList$meta[,1]
         names(sample_gp) <- r_data$sample_name
-        tbl <- as.data.frame.matrix(table(km1()$cluster, sample_gp))
-        plot(as.factor(sample_gp), as.factor(km1()$cluster), xlab="Group", ylab = "Cluster")
+        tbl <- as.data.frame.matrix(table(r_data$meta$kmeans_cluster, sample_gp))
+        plot(as.factor(sample_gp), as.factor(r_data$meta$kmeans_cluster), xlab="Group", ylab = "Cluster")
     }
+
 ```

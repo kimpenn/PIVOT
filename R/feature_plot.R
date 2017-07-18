@@ -128,7 +128,7 @@ pivot_groupBy_UI <- function(id, category, append_sample = T, append_none = F, m
     categories = category
     names(categories) <- categories
     if(!append_sample) {
-        categories <- categories[categories != "sample"]
+        categories <- categories[-1]
     }
     options <- as.list(categories)
     if(choose_color) {

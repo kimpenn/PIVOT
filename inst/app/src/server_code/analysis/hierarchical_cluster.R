@@ -257,7 +257,7 @@ hclust_assign_tbl <- reactive({
 
     if(is.null(gList$meta) || length(unique(gList$meta[,1])) == 0)
     {
-        tbl <- r_data$meta[,c("sample", "hierarchical_cluster")]
+        tbl <- r_data$meta[,c(1, which(colnames(r_data$meta) == "hierarchical_cluster"))]
     } else {
         actual_group <- gList$meta[,1]
         names(actual_group) <- r_data$sample_name

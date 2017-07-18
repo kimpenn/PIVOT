@@ -49,7 +49,7 @@ output$kmeans_ui <- renderUI({
                 column(6,
                        tags$div(tags$b("Confusion Matrix"), class = "param_setting_title"),
                        fluidRow(
-                           pivot_groupBy_UI("kmeans", r_data$category, append_none = T, choose_color = F, width = 12)
+                           pivot_groupBy_UI("kmeans", r_data$category, append_sample = T, choose_color = F, width = 12)
                        ),
                        DT::dataTableOutput("km_tbl"),
                        plotOutput("km_conf_plot")
@@ -120,7 +120,7 @@ km_assign_tbl <- reactive({
 
     if(is.null(gList$meta) || length(unique(gList$meta[,1])) == 0)
     {
-        tbl <-r_data$meta[,c("sample", "kmeans_cluster")]
+        tbl <-r_data$meta[,c(1, which(colnames(r_data$meta) == "kmeans_cluster"))]
     } else {
         actual_group <- gList$meta[,1]
         names(actual_group) <- r_data$sample_name

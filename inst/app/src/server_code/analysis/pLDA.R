@@ -214,12 +214,11 @@ observeEvent(input$run_plda, {
     }
 
     error_I <- 0
-
     tryCatch({
         r_data$plda<-make_plda(plda_data, as.numeric(as.factor(plda_minfo$meta[,1])), lambda=input$plda_L,K=input$plda_K)
     },
     error = function(e) {
-        session$sendCustomMessage(type = "showalert", "PenalizdeLDA failed. Please recheck your parameters.")
+        session$sendCustomMessage(type = "showalert", paste("PenalizdeLDA failed with the following error message:", e))
         r_data$plda <- NULL
         error_I <<- 1
     })

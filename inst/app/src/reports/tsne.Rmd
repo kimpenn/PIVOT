@@ -10,18 +10,19 @@
 ### 1D Projection
 
 ```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 6}
-   callModule(pivot_Plot1d, "tsne_plot1d", type = "tsne", obj = NULL, proj = as.data.frame(r_data$tsne$tsne_1d$Y), minfo = tsne_minfo())
+callModule(pivot_Plot1d, "tsne_plot1d", type = "tsne", obj = NULL, proj = r_data$tsne$tsne_1d, minfo = tsne_minfo())
 ```
 
 ### 2D Projection
 
 ```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 6}
-    callModule(pivot_Plot2d, "tsne_plot2d", type = "tsne", obj = NULL, proj = as.data.frame(r_data$tsne$tsne_2d$Y), minfo = tsne_minfo())
+    obj <- callModule(pivot_Plot2d, "tsne_plot2d", type = "tsne", obj = NULL, proj = r_data$tsne$tsne_2d, minfo = tsne_minfo())
+    obj$plot
 ```
 
 ### 3D Projection
 
 ```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 6}
-    callModule(pivot_Plot3d, "tsne_plot3d", type = "tsne", obj = NULL, proj = as.data.frame(r_data$tsne$tsne_3d$Y), minfo = tsne_minfo())
+ callModule(pivot_Plot3d, "tsne_plot3d", type = "tsne", obj = NULL, proj = r_data$tsne$tsne_3d, minfo = tsne_minfo())
 ```
 

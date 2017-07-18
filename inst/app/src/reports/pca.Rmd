@@ -47,7 +47,8 @@ if (is.null(r_data$pca)) return()
 ### 2D Projection
 
 ```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 6}
-    callModule(pivot_Plot2d, "pca_plot2d", type = "pca", r_data$pca, as.data.frame(r_data$pca$x), minfo = pca_minfo())
+    obj <- callModule(pivot_Plot2d, "pca_plot2d", type = "pca", r_data$pca, proj = as.data.frame(r_data$pca$x), minfo = pca_minfo())
+    obj$plot
 ```
 
 ### 3D Projection
