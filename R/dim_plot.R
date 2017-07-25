@@ -179,44 +179,44 @@ pivot_Plot2d <- function(input, output, session, type = NULL, obj = NULL, proj =
             pal = NULL
         }
 
-        # x = as.formula(paste0("~", dname, "1"))
-        # y = as.formula(paste0("~", dname, "2"))
-        #
-        # if(!is.null(input$plot2d_x)){
-        #     x = as.formula(paste0("~", input$plot2d_x))
-        #     y = as.formula(paste0("~", input$plot2d_y))
-        # }
-        #
-        # plotly::plot_ly(proj, x = x, y = y, text = row.names(proj), source = source, key = row.names(proj),
-        #                 type = "scatter", mode = "markers", color = minfo$meta[,1], colors = pal, marker = list(size = 10)) %>%
-        #     plotly::layout(dragmode = "select")
-
-        # Use ggplotly instead because of wrong key binding
-        x = paste0(dname, "1")
-        y = paste0(dname, "2")
+        x = as.formula(paste0("~", dname, "1"))
+        y = as.formula(paste0("~", dname, "2"))
 
         if(!is.null(input$plot2d_x)){
-            x = input$plot2d_x
-            y = input$plot2d_y
+            x = as.formula(paste0("~", input$plot2d_x))
+            y = as.formula(paste0("~", input$plot2d_y))
         }
 
-        proj<-proj %>% tibble::rownames_to_column()
-        plt1 <- ggplot2::ggplot(proj, ggplot2::aes_string(x=x, y=y, text = "rowname", key = "rowname")) + ggplot2::theme_minimal()
+        plotly::plot_ly(proj, x = x, y = y, text = row.names(proj), source = source, key = row.names(proj),
+                        type = "scatter", mode = "markers", color = minfo$meta[,1], colors = pal, marker = list(size = 10)) %>%
+            plotly::layout(dragmode = "select")
 
-        if(is.null(group)) {
-            plt1 <- plt1 + ggplot2::geom_point(shape=19, alpha=0.8, size = 2, color = 'steelblue')
-        } else {
-            plt1 <- plt1 +
-                ggplot2::geom_point(shape=19, alpha=0.8, size = 2, ggplot2::aes(color = group)) +
-                ggplot2::scale_color_manual(values = pal)
-        }
-        #assign("plt1", plt1, env =.GlobalEnv)
-        tryCatch({
-            plotly::ggplotly(source = source) %>% plotly::layout(dragmode = "select")
-        }, error = function(e) {
-            print(e)
-            return()
-        })
+        # Use ggplotly instead because of wrong key binding
+        # x = paste0(dname, "1")
+        # y = paste0(dname, "2")
+        #
+        # if(!is.null(input$plot2d_x)){
+        #     x = input$plot2d_x
+        #     y = input$plot2d_y
+        # }
+        #
+        # proj<-proj %>% tibble::rownames_to_column()
+        # plt1 <- ggplot2::ggplot(proj, ggplot2::aes_string(x=x, y=y, text = "rowname", key = "rowname")) + ggplot2::theme_minimal()
+        #
+        # if(is.null(group)) {
+        #     plt1 <- plt1 + ggplot2::geom_point(shape=19, alpha=0.8, size = 2, color = 'steelblue')
+        # } else {
+        #     plt1 <- plt1 +
+        #         ggplot2::geom_point(shape=19, alpha=0.8, size = 2, ggplot2::aes(color = group)) +
+        #         ggplot2::scale_color_manual(values = pal)
+        # }
+        # #assign("plt1", plt1, env =.GlobalEnv)
+        # tryCatch({
+        #     plotly::ggplotly(source = source) %>% plotly::layout(dragmode = "select")
+        # }, error = function(e) {
+        #     print(e)
+        #     return()
+        # })
 
     })
 
