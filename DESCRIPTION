@@ -53,6 +53,7 @@ Imports:
     readxl,
     RUVSeq,
     caret,
+    GO.db,
     org.Hs.eg.db, 
     org.Mm.eg.db
 License: http://kim.bio.upenn.edu/software/LICENSE
