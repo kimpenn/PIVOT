@@ -220,7 +220,8 @@ output$sample_subset_plot <- render_Plotly({
 
         plt1 %>% plotly::layout(
             xaxis = list(title = "sample"),
-            yaxis = list(title = input$sample_stats_plt_type))
+            yaxis = list(title = input$sample_stats_plt_type),
+            dragmode = "zoom")
     })
 })
 

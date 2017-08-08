@@ -180,9 +180,6 @@ observeEvent(input$ft_coe_search, {
 
     withProgress(message = 'Processing...', value = 0.8, {
 
-    resp <- c()
-    est <- c()
-
     if(input$ft_coe_abs == "positive") {
         cust_f <- function(x){x}
     } else if(input$ft_coe_abs == "negative") {
@@ -190,8 +187,6 @@ observeEvent(input$ft_coe_search, {
     } else {
         cust_f <- abs
     }
-
-    mat <- as.matrix(r_data$df)
 
     tbl <- do.call(rbind, apply(mat, 1, function(row) {
         x <- cor.test(gene, row, method = input$ft_coe_method)
