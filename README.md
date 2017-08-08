@@ -16,10 +16,13 @@ saved, loaded and shared.
   * Upgrading R and Rstudio to the latest version (R > 3.2, Rstudio > 1.0.0) is strongly recommended. 
 
 ```
-# dependecies
+# dependecies that needs to be manually installed
 install.packages("devtools")
 library("devtools")
 source("http://bioconductor.org/biocLite.R")  
+biocLite("GO.db")
+biocLite("org.Mm.eg.db")
+biocLite("org.Hs.eg.db")
 
 # Install PIVOT
 install_github("qinzhu/PIVOT")
