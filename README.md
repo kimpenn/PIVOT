@@ -21,6 +21,7 @@ install.packages("devtools")
 library("devtools")
 source("http://bioconductor.org/biocLite.R")  
 biocLite("GO.db")
+biocLite("HSMMSingleCell")
 biocLite("org.Mm.eg.db")
 biocLite("org.Hs.eg.db")
 
@@ -50,11 +51,6 @@ See here: https://cdn.rawgit.com/qinzhu/PIVOT/60489858/inst/app/manual/manual_fi
  * Linux specific: Dependency openssl configuration failed
    * Please install the latest libgdal-dev package (apt-get install libgdal-dev)
    
- * Current Known bug:
-   * Some times when user press the "launch module" or "clean session" button, new window does not show up. In such cases, please call the last command you see in Rstudio, i.e., `pivot_main()` or `pivot('clean')`
-   
- * If you run into other bugs, please report them in github, or email me directly (qinzhu@outlook.com). Thanks!
-
 ## Citation
 
 * Qin Zhu, Stephen A Fisher, Hannah Dueck, Sarah Middleton, Mugdha Khaladkar, Junhyong Kim. PIVOT: Platform for Interactive Analysis and Visualization of Transcriptomics Data (Preprint) bioRxiv 053348; doi: http://dx.doi.org/10.1101/053348
