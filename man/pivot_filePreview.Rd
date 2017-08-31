@@ -10,4 +10,3 @@ pivot_filePreview(input, output, session, df, height = "350px",
 \description{
 PIVOT file input preview module, server
 }
-

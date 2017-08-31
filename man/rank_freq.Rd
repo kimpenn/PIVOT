@@ -9,4 +9,3 @@ rank_freq(df, logX = FALSE, logY = FALSE)
 \description{
 
 }
-

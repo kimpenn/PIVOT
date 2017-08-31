@@ -9,4 +9,3 @@ scde_pair_plot(counts, groups, rl, ids)
 \description{
 Function for generating pairwise correlation plot, from SCDE
 }
-

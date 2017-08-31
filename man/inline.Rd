@@ -9,4 +9,3 @@ inline(ui, width = "150px")
 \description{
 Set shiny widgets to be inline
 }
-

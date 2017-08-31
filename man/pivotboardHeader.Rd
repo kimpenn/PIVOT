@@ -12,4 +12,3 @@ pivotboardHeader(..., title = NULL, titleWidth = NULL, disable = FALSE,
 PIVOT Data Input, UI function from shinydashboard
 Modified for sidebar-mini
 }
-

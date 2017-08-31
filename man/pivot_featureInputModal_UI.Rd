@@ -9,4 +9,3 @@ pivot_featureInputModal_UI(id, label = NULL)
 \description{
 This is the ui part of the module.
 }
-

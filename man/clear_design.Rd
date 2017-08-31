@@ -9,4 +9,3 @@ clear_design(r_data)
 \description{
 Remove design information
 }
-

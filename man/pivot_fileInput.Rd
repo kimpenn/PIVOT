@@ -9,4 +9,3 @@ pivot_fileInput(input, output, session, reset = FALSE, return_df = T)
 \description{
 PIVOT help modules, server
 }
-

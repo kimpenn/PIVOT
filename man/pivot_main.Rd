@@ -12,4 +12,3 @@ Launch PIVOT Data Basic Analysis Module
 \examples{
 pivot_analysis()
 }
-

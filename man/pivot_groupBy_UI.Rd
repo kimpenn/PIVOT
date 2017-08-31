@@ -10,4 +10,3 @@ pivot_groupBy_UI(id, category, append_sample = T, append_none = F,
 \description{
 This is the UI part of the module
 }
-

@@ -10,4 +10,3 @@ estimateSizeFactorsForMatrix_groupwise(counts, group, locfunc = median,
 \description{
 Groupwise modified DESeq script
 }
-

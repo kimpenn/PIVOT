@@ -14,7 +14,7 @@ generateRelativeFreq <- function(raw){
 #' Controls which transformed data should be used as input for analysis modules, this is the UI part of the module.
 #'
 #' @export
-pivot_dataScale_UI <- function(id, include = c("Counts (raw)", "Counts (normalized)", "Relative Frequency", "Log10 Counts", "Standardized Counts", "Log10 & Standardized", "Projection Matrix"), selected = "Counts (normalized)", width = 4) {
+pivot_dataScale_UI <- function(id, include = c("Counts (raw)", "Counts (normalized)", "Relative Frequency", "Log10 Counts", "Standardized Counts", "Log10 & Standardized", "Projection Matrix"), selected = "Counts (normalized)", width = 4, order = F) {
     ns<- NS(id)
     names(include) <- include
     proj_lists <- c("PCA", "t-SNE", "MDS", "Nonmetric-MDS")
@@ -33,10 +33,20 @@ pivot_dataScale_UI <- function(id, include = c("Counts (raw)", "Counts (normaliz
             )
         )
     } else {
-        tagList(
-            column(width = width, selectInput(ns("data_scale"), label = "Data Input",
-                                              choices = as.list(include), selected = selected))
-        )
+        if(order) {
+            tagList(
+                column(width = width/2, selectInput(ns("data_scale"), label = "Data Input",
+                                                  choices = as.list(include), selected = selected)),
+                column(width = width/2, selectInput(ns("data_order"), label = "Order features by",
+                            choices = list("None" = "none", "Variance" = "variance", "Fano Factor" = "fano_factor", "Row Average" = "row_average", "Row Median" = "row_median"),
+                            selected = "none"))
+            )
+        } else {
+            tagList(
+                column(width = width, selectInput(ns("data_scale"), label = "Data Input",
+                                                  choices = as.list(include), selected = selected))
+            )
+        }
     }
 }
 
@@ -48,7 +58,7 @@ pivot_dataScale_UI <- function(id, include = c("Counts (raw)", "Counts (normaliz
 #'
 #' @import dplyr tibble
 #' @export
-pivot_dataScale <- function(input, output, session, r_data, order_by = NULL, keep_stats = FALSE) {
+pivot_dataScale <- function(input, output, session, r_data, order=F, keep_stats = FALSE) {
 
     output$pc_choice <- renderUI({
         req(input$data_scale == "Projection Matrix")
@@ -85,27 +95,27 @@ pivot_dataScale <- function(input, output, session, r_data, order_by = NULL, kee
             else if(input$data_scale == "Relative Frequency")
                 new_df <- generateRelativeFreq(raw)
 
-            if(!is.null(order_by) && order_by != "custom") {
-                if(order_by == "none") {
+            if(order && !is.null(input$data_order)) {
+                if(input$data_order == "none") {
                     new_df <- new_df %>% tibble::rownames_to_column("feature")
-                } else if(order_by == "variance") {
+                } else if(input$data_order == "variance") {
                     new_df <- new_df %>%
                         tibble::rownames_to_column("feature") %>%
                         dplyr::mutate(variance = apply(new_df,1,var)) %>% # Compute variance of feature across sample
                         dplyr::arrange(desc(variance))
-                } else if(order_by == "row_average") {
+                } else if(input$data_order == "row_average") {
                     new_df <- new_df %>%
                         tibble::rownames_to_column("feature") %>%
                         dplyr::mutate(average = apply(new_df,1,mean)) %>%
                         dplyr::arrange(desc(average))
-                } else if(order_by == "fano_factor"){
+                } else if(input$data_order == "fano_factor"){
                     new_df <- new_df %>%
                         tibble::rownames_to_column("feature") %>%
                         dplyr::mutate(average = apply(new_df,1,mean)) %>%
                         dplyr::mutate(variance = apply(new_df,1,var)) %>% # Compute variance of feature across sample
                         dplyr::mutate(fano_factor = variance/average) %>%
                         dplyr::arrange(desc(fano_factor))
-                } else if(order_by == "row_median") {
+                } else if(input$data_order == "row_median") {
                     new_df <- new_df %>%
                         tibble::rownames_to_column("feature") %>%
                         dplyr::mutate(median = apply(new_df,1,median)) %>%
@@ -176,7 +186,7 @@ pivot_dataScale <- function(input, output, session, r_data, order_by = NULL, kee
     return(reactive(list(
         df = data0(),
         scale = input$data_scale,
-        order = order_by
+        order = input$data_order
     )))
 }
 
@@ -196,9 +206,9 @@ pivot_dataScaleRange_UI <- function(id, bound = 500, value = 100, include = c("C
 
     tagList(
         fluidRow(
-            pivot_dataScale_UI(ns("hm_scale"), include = include, selected = "Log10 Counts", width = 3),
+            pivot_dataScale_UI(ns("hm_scale"), include = include, selected = "Log10 Counts", width = 6, order = T),
             column(3, selectInput(ns("rank_method"), label = "Select features by", choices = list("None" = "none", "Variance" = "variance", "Fano Factor" = "fano_factor", "Row Average" = "row_average", "Row Median" = "row_median", "Custom feature list" = "custom"), selected = "fano_factor")),
-            column(6, sliderInput(ns("feature_range"), label = "Rank Range", min = 1, max = max_bound, value = c(1, value), step = 1))
+            column(3, sliderInput(ns("feature_range"), label = "Rank Range", min = 1, max = max_bound, value = c(1, value), step = 1))
         ),
         conditionalPanel(sprintf("input['%s'] != 'custom'", ns("rank_method")),
                          fluidRow(
@@ -258,7 +268,7 @@ pivot_dataScaleRange <- function(input, output, session, r_data, keep_stats = FA
         }
     })
 
-    hmapList <- callModule(pivot_dataScale, "hm_scale", r_data, keep_stats = keep_stats, order_by = input$rank_method)
+    hmapList <- callModule(pivot_dataScale, "hm_scale", r_data, keep_stats = keep_stats, order = T)
     flist <- callModule(pivot_featureInputModal, "ft_hmap", r_data = r_data)
 
     data0 <- reactive({

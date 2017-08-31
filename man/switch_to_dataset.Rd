@@ -9,4 +9,3 @@ switch_to_dataset(r_data, s)
 \description{
 Switch to selected dataset via data map module
 }
-

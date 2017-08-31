@@ -4,10 +4,9 @@
 \alias{pivot_dataScale}
 \title{PIVOT data scale module}
 \usage{
-pivot_dataScale(input, output, session, r_data, order_by = NULL,
+pivot_dataScale(input, output, session, r_data, order = F,
   keep_stats = FALSE)
 }
 \description{
 Controls which transformed data should be used as input for analysis modules, this is the server part of the module.
 }
-

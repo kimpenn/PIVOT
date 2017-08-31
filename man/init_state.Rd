@@ -9,4 +9,3 @@ init_state(r_data)
 \description{
 Set all stored values to NULL
 }
-

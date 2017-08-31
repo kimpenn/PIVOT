@@ -9,4 +9,3 @@ pivot_featurePlot_UI(id, meta, ids = NULL)
 \description{
 This is the UI part of the module, includes scale option, color group option, color set option, plot style option and the plot.
 }
-

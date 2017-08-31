@@ -9,4 +9,3 @@ generate_data_node(his_tbl = NULL, reg_tbl = NULL)
 \description{
 Generate data history node and edge table for data map
 }
-

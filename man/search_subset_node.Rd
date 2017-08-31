@@ -9,4 +9,3 @@ search_subset_node(tbl, node)
 \description{
 This function is for determining which sample subset the filter operation is performed on, if not keep filtering.
 }
-

@@ -10,4 +10,3 @@ pivot_Plot3d(input, output, session, type = NULL, obj = NULL, proj = NULL,
 \description{
 This is the server part of the module.
 }
-

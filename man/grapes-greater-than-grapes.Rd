@@ -9,4 +9,3 @@ lhs \%>\% rhs
 \description{
 PIVOT Data Input, pipe function
 }
-

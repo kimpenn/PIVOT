@@ -9,4 +9,3 @@ rowV(x, mean, ...)
 \description{
 meanSDplot support function from VSN package
 }
-

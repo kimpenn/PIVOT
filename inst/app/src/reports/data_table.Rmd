@@ -2,7 +2,7 @@
 # Data Table
 
 ```{r echo = FALSE, warning=FALSE, message = FALSE}
-rs_table <- callModule(pivot_dataScale, "table_scale", r_data, order_by = input$tbl_order)
+rs_table <- callModule(pivot_dataScale, "table_scale", r_data, order=T)
     #assign("rList", rsList, env = .GlobalEnv)
 ```
 

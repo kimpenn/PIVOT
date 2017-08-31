@@ -11,4 +11,3 @@ pivot_deGroupBy_UI(id, meta, width = 12, reduced = c("no", "yes", "maybe"),
 This module allow user choose which model, e.g., "~ condition", "~condition + batch"  or "timecourse", should be used for DE analysis,
 and which meta data column should be used as the covariates.
 }
-

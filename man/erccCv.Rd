@@ -9,4 +9,3 @@ erccCv(counts)
 \description{
 Compute coefficient of variation
 }
-

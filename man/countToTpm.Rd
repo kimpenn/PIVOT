@@ -9,4 +9,3 @@ countToTpm(counts, effLen)
 \description{
 Calculating TPM for each sample.
 }
-

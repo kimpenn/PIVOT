@@ -14,4 +14,3 @@ meanVarPlot(df, fxn.x, fxn.y, do.plot = TRUE, set.var.genes = TRUE,
 \description{
 From Seurat package, with modification
 }
-

@@ -10,4 +10,3 @@ estimateSizeFactorsForMatrix_MK(counts, locfunc = median, geoMeans,
 \description{
 Mugdhak's modified DESeq script
 }
-

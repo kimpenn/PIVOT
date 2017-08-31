@@ -11,4 +11,3 @@ ggplotly(p = ggplot2::last_plot(), width = NULL, height = NULL,
 \description{
 ggplotly from plotly
 }
-

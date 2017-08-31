@@ -10,4 +10,3 @@ generate_mst(dist_mtx, method = "walktrap", step = NULL,
 \description{
 Gnerate minimum spanning tree given distance matrix
 }
-

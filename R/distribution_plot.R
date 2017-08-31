@@ -1,7 +1,7 @@
 
 #' Standardized log data distribution plot
 #'
-#' @description
+#' @description Plot data distribution.
 #' @import ggplot2
 #' @export
 stdlog_plot <- function(df) {

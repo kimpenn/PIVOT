@@ -9,4 +9,3 @@ pivot_featureList(input, output, session, r_data)
 \description{
 This is the server part of the module.
 }
-

@@ -9,4 +9,3 @@ pivot_help_UI(id, title, tooltip = T)
 \description{
 PIVOT help modules, UI
 }
-

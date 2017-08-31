@@ -6,4 +6,6 @@
 \usage{
 stdlog_plot(df)
 }
-
+\description{
+Plot data distribution.
+}

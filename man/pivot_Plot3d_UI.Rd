@@ -9,4 +9,3 @@ pivot_Plot3d_UI(id, type, height = "600px")
 \description{
 This is the UI part of the module.
 }
-

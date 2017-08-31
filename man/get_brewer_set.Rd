@@ -9,4 +9,3 @@ get_brewer_set(palette = c("sequential", "diverging", "qualitative"))
 \description{
 Generate color set for plots
 }
-

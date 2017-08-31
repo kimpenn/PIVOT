@@ -9,4 +9,3 @@ pivot_groupBy(input, output, session, meta)
 \description{
 This is the server part of the module
 }
-

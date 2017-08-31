@@ -9,4 +9,3 @@ normalize_data(method, params = NULL, raw, ercc = NULL)
 \description{
 Data normalization master function
 }
-

@@ -32,10 +32,7 @@ output$table_box_ui <- renderUI({
 
             tags$div(tags$b("General Settings:"), class = "param_setting_title"),
             fluidRow(
-                pivot_dataScale_UI("table_scale", width = 6),
-                column(6,
-                       selectInput("tbl_order", label = "Order features by", choices = list("None" = "none", "Variance" = "variance", "Fano Factor" = "fano_factor", "Row Average" = "row_average", "Row Median" = "row_median"), selected = "none")
-                )
+                pivot_dataScale_UI("table_scale", include = c("Counts (raw)", "Counts (normalized)", "Relative Frequency", "Log10 Counts", "Standardized Counts", "Log10 & Standardized"), width = 8, order = T)
             ),
             tags$p("Tip: Select row in the table to see the plot of that feature."),
             fluidRow(
@@ -58,7 +55,7 @@ output$table_box_ui <- renderUI({
 
 })
 
-rs_table <- callModule(pivot_dataScale, "table_scale", r_data, order_by = input$tbl_order)
+rs_table <- callModule(pivot_dataScale, "table_scale", r_data, order = T)
 
 # Normalized Data
 output$data_tbl <- DT::renderDataTable({

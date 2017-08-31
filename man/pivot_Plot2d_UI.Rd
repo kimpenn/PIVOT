@@ -9,4 +9,3 @@ pivot_Plot2d_UI(id, type)
 \description{
 This is the UI part of the module.
 }
-

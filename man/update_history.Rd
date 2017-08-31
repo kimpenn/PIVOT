@@ -10,4 +10,3 @@ update_history(r_data, parent, action_type, action, lists, norm_method,
 \description{
 Write new entries to data history
 }
-

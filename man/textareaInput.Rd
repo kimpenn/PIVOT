@@ -9,4 +9,3 @@ textareaInput(inputId, label, value = "", placeholder = "", rows = 2)
 \description{
 Box for text input
 }
-

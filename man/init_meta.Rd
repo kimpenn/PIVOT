@@ -9,4 +9,3 @@ init_meta(r_data, type = "both")
 \description{
 Meta data generation
 }
-

@@ -9,4 +9,3 @@ meanNormFunction(data, myfuncX, myfuncY, nBin = 20)
 \description{
 From Seurat package.
 }
-

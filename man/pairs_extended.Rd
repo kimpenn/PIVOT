@@ -12,4 +12,3 @@ pairs_extended(x, labels, panel = points, ..., lower.panel = panel,
 \description{
 Function for generating pairwise correlation plot, from SCDE
 }
-
