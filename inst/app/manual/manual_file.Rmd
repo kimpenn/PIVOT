@@ -23,13 +23,13 @@ See http://kim.bio.upenn.edu/software/pivot.shtml for more details.
 
 # Launch PIVOT
 
-In R, use command `library(PIVOT)` to attach the package. Once loaded, you can use one of the following methods to launch PIVOT.
+In R, use command `library(PIVOT)` to attach the package. Once loaded, you can use one of the following methods to launch PIVOT. Normally users just need to use `pivot()` to launch the default pivot modules. For advanced use see explanations below.
 
 ## Launch with PIVOT Launcher
 
 <img src="figures/launcher.png" align = "left" style= "margin-right: 20px" width="350px"/>
 
-* By calling `pivot()`, you will see the window like the left image. This launcher serves as a gateway to multiple pivot modules you can use. Just check the boxes of modules that you want to load, and then press launch module. 
+* By calling `pivot_launcher()`, you will see the window like the left image. This launcher serves as a gateway to multiple pivot modules you can use. Just check the boxes of modules that you want to load, and then press launch module. 
 
 * It is recommended that a user only launch needed modules, because using too many modules will lead to too many loaded DLLs (current R only support up to 100 DLLs per session) and potential namespace conflicts. The launcher also serves as a DLL monitor and cleaner. Simply press the clean DLLs button when there are too many DLLs loaded. Note that the best way to clean loaded DLLs is using Rstudio -> Session -> Restart R.
 
