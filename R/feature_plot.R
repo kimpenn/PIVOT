@@ -150,7 +150,7 @@ pivot_groupBy_UI <- function(id, category, append_sample = T, append_none = F, m
 #'
 #' @export
 pivot_groupBy <- function(input, output, session, meta) {
-    if(is.null(input$group_by) || any(input$group_by %in% c("sample", "none"))) {
+    if(is.null(input$group_by) || any(input$group_by %in% c(colnames(meta)[1], "none"))) {
         meta <- NULL
     } else {
         req(input$group_by %in% colnames(meta))

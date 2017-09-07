@@ -33,7 +33,7 @@ output$transnet_ui <- renderUI({
     }
 
     if(!is.null(r_data$deseq_results) && !("deseq" %in% gene_choices)) {
-        group_string <- paste("DE genes of Group", r_data$deseq_group[1], "and Group",  r_data$deseq_group[2], "reported by DESeq")
+        group_string <- paste("DE genes of ", r_data$deseq_group, "reported by DESeq")
         gene_choices <- c(gene_choices, setNames(list("deseq"), group_string))
     }
 

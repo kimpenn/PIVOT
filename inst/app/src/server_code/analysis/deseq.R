@@ -156,8 +156,7 @@ output$deseq_results_box <- renderUI({
         if(r_data$deseq_params$test != "LRT") {
             fluidRow(
                 column(4, tags$br(),tags$b("Contrast:")),
-                column(4, selectInput("deseq_term1", "Term 1", choices = as.list(options), selected = options[[1]])),
-                column(4, selectInput("deseq_term2", "Term 2", choices = as.list(options), selected = options[[2]]))
+                column(4, selectInput("deseq_term1", "Term", choices = as.list(options), selected = options[[1]]))
             )
         } else {
             fluidRow(
@@ -235,20 +234,18 @@ observe({
 
     if(r_data$deseq_params$test == "LRT") {
         req(input$deseq_pval_type, input$deseq_result_name)
+        result_name <- input$deseq_result_name
     } else {
-        req(input$deseq_term1, input$deseq_term1 != input$deseq_term2)
+        req(input$deseq_term1)
+        result_name <- input$deseq_term1
     }
     withProgress(message = 'Processing...', value = 0.5, {
-        if(r_data$deseq_params$test == "LRT") {
-            res1 <- DESeq2::results(r_data$dds, test = input$deseq_pval_type,
-                                    name = input$deseq_result_name,
-                                    alpha = input$deseq_alpha)
-        } else {
-            res1 <- DESeq2::results(r_data$dds, contrast = list(input$deseq_term1, input$deseq_term2), alpha = input$deseq_alpha)
-        }
+        res1 <- DESeq2::results(r_data$dds, test = input$deseq_pval_type,
+                                name = result_name,
+                                alpha = input$deseq_alpha)
 
         resOrdered <- res1[order(res1$padj),]
-        r_data$deseq_group <- c(input$deseq_term1, input$deseq_term2)
+        r_data$deseq_group <- input$deseq_term1
         if(input$deseq_cuttbl) {
             r_data$deseq_results <- BiocGenerics::subset(resOrdered, padj <= input$deseq_alpha)
         } else {
@@ -300,16 +297,7 @@ observe({
 
     d <- as.data.frame(t(r_data$df[selected_gene,])) %>% tibble::rownames_to_column()
     colnames(d) <- c("sample", "expression_level")
-
-    samples = NULL
-    if(r_data$deseq_params$test != "LRT" && r_data$deseq_params$design %in% c("condition", "condition_batch")) {
-        req(r_data$deseq_group)
-        designVar <- all.vars(r_data$deseq_params$model$full)
-        cond <- designVar[1]
-        samples = r_data$meta[,1][which(r_data$meta[,cond] %in% gsub(cond, "",r_data$deseq_group))]
-    }
-
-    callModule(pivot_featurePlot, "deseq_gene_plt", meta = r_data$meta, df = d, gene = selected_gene, ids = samples)
+    callModule(pivot_featurePlot, "deseq_gene_plt", meta = r_data$meta, df = d, gene = selected_gene, ids = NULL)
 })
 
 
