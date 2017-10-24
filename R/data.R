@@ -35,7 +35,7 @@ init_state <- function(r_data) {
     r_data$feature_list <- NULL # This contains the filtered feature list used for analysis, every time the user choose a different feature set, the analyzer will grab that set of data using this key
     r_data$sample_name <- NULL # This has same value as sample_key once analyze btn is pressed.
 
-    r_data$feature_meta <- NULL
+    r_data$sceset <- NULL
     r_data$sample_stats <- NULL
 
     r_data$norm_param <- NULL
@@ -51,6 +51,7 @@ init_state <- function(r_data) {
 #'
 #' @export
 clear_results <-function(r_data) {
+    r_data$sceset <- NULL
     r_data$dds <- NULL
     r_data$deseq_results <- NULL
     r_data$deseq_params <- NULL
@@ -77,10 +78,21 @@ clear_results <-function(r_data) {
     r_data$scde_results <- NULL
 
     r_data$kmeans <- NULL
+    r_data$hc <- NULL
+    r_data$community <- NULL
 
     r_data$pca <- NULL
     r_data$pca_var <- NULL
     r_data$pca_var_exp <- NULL
+
+    r_data$plda <- NULL
+    r_data$plda_flist <- NULL
+
+    r_data$mds <- NULL
+    r_data$nds <- NULL
+    r_data$tsne <- NULL
+    r_data$dfm <- NULL
+    r_data$dpt <- NULL
 
     r_data$cooks <- NULL
 
@@ -90,24 +102,16 @@ clear_results <-function(r_data) {
     r_data$coe_ft_target <- NULL
     r_data$coe_ft_tbl <- NULL
 
-    r_data$plda <- NULL
-    r_data$plda_flist <- NULL
-
     r_data$mww_results <- NULL
     r_data$mww_group<- NULL
     r_data$mww_gene <- NULL
 
     r_data$cellset <- NULL # Monocle data object
-    r_data$monocle_ok <- NULL
 
+    r_data$monocle_ok <- NULL
     r_data$monocle_results <- NULL
-    r_data$monocle_gene <- NULL
-    r_data$monocle_ordering <- NULL
-    r_data$monocle_genelist <- NULL
-    r_data$monocle_gene_submitted <- NULL
     r_data$monocle_gene_for_clust <- NULL
-    r_data$monocle_alpha<- NULL
-    r_data$monocle_clusters <- NULL
+    r_data$monocle_gene_clusters <- NULL
 
     r_data$stringdb_link <- NULL
     r_data$stringdb_genetbl <- NULL
@@ -133,6 +137,22 @@ clear_results <-function(r_data) {
     r_data$venn_list <- NULL
     return(r_data)
 }
+
+#' Get feature data
+#'
+#' @description
+#' fData from Biobase
+#' @import Biobase
+#' @export
+fData <- Biobase::fData
+
+#' Get pheno data
+#'
+#' @description
+#' pData from Biobase
+#' @import Biobase
+#' @export
+pData <- Biobase::pData
 
 #' PIVOT Data Control
 #'
@@ -165,45 +185,38 @@ clear_design <- function(r_data) {
 #' Meta data generation
 #'
 #' @export
-init_meta <- function(r_data, type = "both") {
-    if(!type %in% c("both", "sample", "feature")) {
-        stop("unrecognized input type variable")
-    }
+init_meta <- function(r_data) {
 
     if(is.null(r_data$df)) return()
 
-    if(type %in% c("both", "sample")) {
-        r_data$sample_stats <- data.frame(total_normalized_counts = colSums(r_data$df))
+    # Generate sample statistics
+    r_data$sample_stats <- data.frame(total_normalized_counts = colSums(r_data$df))
 
-        if(r_data$norm_param$method != "None") {
-            r_data$sample_stats$total_raw_reads <- colSums(r_data$raw)
-            if(r_data$norm_param$method %in% c("DESeq", "Modified_DESeq") ) {
-                r_data$sample_stats$deseq_size_factor <- r_data$norm_param$sizeFactor[r_data$sample_name,,drop = F]$size_factor
-            } else if(r_data$norm_param$method %in% c("ERCC-RLM", "Census")) {
-                r_data$sample_stats$t_estimate = r_data$norm_param$t_estimate[r_data$sample_name]
-                r_data$sample_stats$expected_total_mRNAs = r_data$norm_param$expected_total_mRNAs[r_data$sample_name]
-            }
+    if(r_data$norm_param$method != "None") {
+        r_data$sample_stats$total_raw_reads <- colSums(r_data$raw)
+        if(r_data$norm_param$method %in% c("DESeq", "Modified_DESeq") ) {
+            r_data$sample_stats$deseq_size_factor <- r_data$norm_param$sizeFactor[r_data$sample_name,,drop = F]$size_factor
+        } else if(r_data$norm_param$method %in% c("ERCC-RLM", "Census")) {
+            r_data$sample_stats$t_estimate = r_data$norm_param$t_estimate[r_data$sample_name]
+            r_data$sample_stats$expected_total_mRNAs = r_data$norm_param$expected_total_mRNAs[r_data$sample_name]
         }
-
-        r_data$sample_stats$num_genes_expressed <- colSums(r_data$raw > 0)
-
     }
 
-    if(type %in% c("both", "feature")) {
-        r_data$feature_meta <- data.frame(gene = r_data$feature_list, cap_name = toupper(r_data$feature_list))
-        rownames(r_data$feature_meta) <- r_data$feature_list
+    r_data$sample_stats$num_genes_expressed <- colSums(r_data$raw > 0)
 
-        if(r_data$norm_param$method != "None") {
-            r_data$feature_meta$total_raw_reads <- rowSums(r_data$raw)
-        }
-
-        r_data$feature_meta$total_normalized_counts = rowSums(r_data$df)
-        r_data$feature_meta$num_cells_expressed <- rowSums(r_data$raw > 0)
-        r_data$feature_meta$percent_cells_expressed <-  r_data$feature_meta$num_cells_expressed / length(r_data$sample_name)
-    }
-
+    # Design information
     r_data$meta <- r_data$glb.meta[match(r_data$sample_name, r_data$glb.meta[,1]),, drop = F]
     r_data$category <- colnames(r_data$meta)
+
+    # Initiate sceset
+    pd <- new("AnnotatedDataFrame", data = cbind(r_data$sample_stats, r_data$meta))
+    fd <- new("AnnotatedDataFrame", data = data.frame(gene = r_data$feature_list, cap_name = toupper(r_data$feature_list)))
+    rownames(fd) <-rownames(r_data$df)
+    r_data$sceset<-scater::newSCESet(countData = r_data$raw, phenoData = pd, featureData = fd, logExprsOffset = 1, lowerDetectionLimit = 0)
+    r_data$sceset <- scater::calculateQCMetrics(r_data$sceset)
+
+    # There is a bug in scater package which needs to be fixed: the mean and sum of exprs when it is log scale. Also need future investication of the normalization used by scater.
+
     return(r_data)
 }
 

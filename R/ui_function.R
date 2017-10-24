@@ -97,7 +97,7 @@ dropdownMenu <- function (..., type = c("messages", "notifications", "tasks", "s
         icon <- switch(type, messages = shiny::icon("envelope"),
                        notifications = shiny::icon("list-alt"), tasks = shiny::icon("tasks"), system = shiny::icon("cog"), support = shiny::icon("question-circle"))
     }
-    dropdown_style <- ifelse(type%in% c("messages","support"), "width:290px", "width:200px;")
+    dropdown_style <- ifelse(type%in% c("messages","support"), "width:310px", "width:200px;")
     tags$li(class = dropdownClass, a(href = "#", class = "dropdown-toggle",`data-toggle` = "dropdown", icon, NULL), tags$ul(class = "dropdown-menu", style = dropdown_style, tags$li(class = "header", top_msg), tags$li(tags$ul(class = "menu", style = "list-style-type: none;max-height: 800px;", items))))
 }
 
@@ -380,7 +380,7 @@ render_Plotly <- function (expr, env = parent.frame(), quoted = FALSE)
         expr <- substitute(expr)
     }
     expr <- call("ggplotly", expr)
-    shinyRenderWidget(expr, plotlyOutput, env, quoted = TRUE)
+    htmlwidgets::shinyRenderWidget(expr, plotlyOutput, env, quoted = TRUE)
 }
 #' ggplotly from plotly
 #' @import plotly

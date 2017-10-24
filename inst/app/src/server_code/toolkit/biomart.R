@@ -96,7 +96,12 @@ output$biomart_species_ui <- renderUI({
 observeEvent(input$bmart_load_db, {
     if(is.null(input$bmart_species)) return()
     withProgress(message = 'Loading database...', value = 0.3, {
-        bmart$db = biomaRt::useMart("ensembl",dataset=input$bmart_species)
+        tryCatch({
+            bmart$db = biomaRt::useMart("ensembl",dataset=input$bmart_species)
+        }, error=function (e){
+            showNotification("Request to BioMart web service failed. Please make sure you have internet connection.", type="error", duration=10)
+            return()
+        })
     })
 })
 

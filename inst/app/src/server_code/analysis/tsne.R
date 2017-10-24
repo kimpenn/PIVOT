@@ -36,9 +36,10 @@ output$tsne_ui <- renderUI({
                            column(4, numericInput("tsne_seed", label = "Set Seed", min = 1, max = 5000, value = 1, step = 1))
                        ),
                        fluidRow(
-                           uiOutput("tsne_color_by_ui"),
-                           column(4, radioButtons("tsne_pca", label = "Perform initial PCA step?", choices = list("Yes" = "TRUE", "No" = "FALSE"), selected = "TRUE", inline = TRUE))
-                       )
+                           column(4, radioButtons("tsne_pca", label = "Perform initial PCA step?", choices = list("Yes" = "TRUE", "No" = "FALSE"), selected = "TRUE", inline = TRUE)),
+                           uiOutput("tsne_color_by_ui")
+                       ),
+                       actionButton("run_tsne", "Run", class = "btn-info btn_rightAlign")
                    )
             )
         ),
@@ -97,7 +98,7 @@ output$tsne_color_by_ui <- renderUI({
 
 tsneList <- callModule(pivot_dataScale, "tsne", r_data)
 
-observe({
+observeEvent(input$run_tsne, {
     tsne_data <- tsneList()$df
     req(tsne_data, input$tsne_seed, input$tsne_pca)
     tryCatch({

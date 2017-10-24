@@ -4,8 +4,7 @@
 \alias{generate_mst}
 \title{Gnerate minimum spanning tree given distance matrix}
 \usage{
-generate_mst(dist_mtx, method = "walktrap", step = NULL,
-  color_list = NULL)
+generate_mst(dist_mtx, method = "walktrap", step = NULL)
 }
 \description{
 Gnerate minimum spanning tree given distance matrix

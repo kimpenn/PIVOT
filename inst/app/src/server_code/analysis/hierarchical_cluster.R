@@ -36,6 +36,7 @@ output$hclust_ui <- renderUI({
                 column(3, selectInput("hc_agglo_method", "Agglomeration method", choices = list("Ward.D" = "ward.D", "Ward.D2" = "ward.D2","Single"= "single", "Complete"="complete", "Average"= "average", "Mcquitty"="mcquitty", "Median"= "median", "Centroid" = "centroid"), selected = "complete")),
                 column(3, numericInput("hclust_num", label = "Number of Clusters", min = 2, max = length(r_data$sample_name) - 1, value = 2, step = 1))
             ),
+            fluidRow(column(12,actionButton("run_hc", "Run", class = "btn-info btn_rightAlign"))),
             tags$div(tags$b("Visualization Settings:"), class = "param_setting_title"),
             fluidRow(
                 column(3, selectInput("hclust_package", "Plotting Package", choices = list("Dendexdend" = "dendextend", "networkD3" = "networkD3"), selected = "dendextend")),
@@ -100,13 +101,13 @@ output$d3_hclust <- renderUI({
 
 # distance measure
 hcList <- callModule(pivot_dataScale, "hc_scale", r_data)
-hclust0 <- reactive({
+observeEvent(input$run_hc, {
     req(hcList()$df)
     hc_data <- hcList()$df
     if(!(input$hc_dist_method %in% c('scde', 'corr'))) {
-        t(hc_data) %>% dist(method = input$hc_dist_method) %>% hclust(method = input$hc_agglo_method)
+        r_data$hc <- t(hc_data) %>% dist(method = input$hc_dist_method) %>% hclust(method = input$hc_agglo_method)
     } else if(input$hc_dist_method == 'corr') {
-        as.dist(1 - cor(hc_data, method = input$hclust_cor_method)) %>% hclust(method = input$hc_agglo_method)
+        r_data$hc <- as.dist(1 - cor(hc_data, method = input$hclust_cor_method)) %>% hclust(method = input$hc_agglo_method)
     } else if(input$hc_dist_method == 'scde') {
         if(is.null(input$hclust_scde_dist_method)) return()
         if(is.null(r_data$scde_ddo) && is.null(r_data$scde_rw) && is.null(r_data$scde_mrw)) {
@@ -120,7 +121,7 @@ hclust0 <- reactive({
                 updateTabItems(session, "tabs", "scde")
                 return()
             } else {
-                r_data$scde_ddo %>% hclust(method = input$hc_agglo_method)
+                r_data$hc <- r_data$scde_ddo %>% hclust(method = input$hc_agglo_method)
             }
         } else if(input$hclust_scde_dist_method == "rw") {
             if(is.null(r_data$scde_rw)) {
@@ -128,7 +129,7 @@ hclust0 <- reactive({
                 updateTabItems(session, "tabs", "scde")
                 return()
             } else {
-                r_data$scde_rw %>% hclust(method = input$hc_agglo_method)
+                r_data$hc <- r_data$scde_rw %>% hclust(method = input$hc_agglo_method)
             }
         } else if(input$hclust_scde_dist_method == "mrw") {
             if(is.null(r_data$scde_mrw)) {
@@ -136,7 +137,7 @@ hclust0 <- reactive({
                 updateTabItems(session, "tabs", "scde")
                 return()
             } else {
-                r_data$scde_mrw %>% hclust(method = input$hc_agglo_method)
+                r_data$hc <- r_data$scde_mrw %>% hclust(method = input$hc_agglo_method)
             }
         }
     }
@@ -145,9 +146,8 @@ hclust0 <- reactive({
 
 output$hclust_plot <- renderPlot({
     par(mar=c(8, 8, 8, 8), cex = 1, xpd=TRUE)
-
-    if(is.null(hclust0())) return ()
-    hc0 <- hclust0()
+    req(r_data$hc)
+    hc0 <- r_data$hc
     # get max height of the tree, this will be used to adjust the group bar height
     max_height <- max(hc0$height)
     hc1 <- hc0 %>% as.dendrogram()
@@ -192,8 +192,8 @@ output$hclust_plot <- renderPlot({
 })
 
 output$hclust.d3 <- networkD3::renderDendroNetwork({
-    if(is.null(hclust0())) return ()
-    Root <- hclust0()
+    req(r_data$hc)
+    Root <- r_data$hc
 
     rsList <- callModule(pivot_groupBy, "hclust", meta = r_data$meta)
     if(is.null(rsList$meta)) {

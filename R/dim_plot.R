@@ -11,8 +11,8 @@ pivot_Plot1d_UI <- function(id, type) {
         plotly::plotlyOutput(ns("plotly1d")),
         fluidRow(
             column(4, selectInput(ns("plot1d_plt_type"), "Choose plot type", choices = list("density" = "density", "histogram" = "hist"), selected = "density")),
-            column(4, uiOutput(ns("plot1d_pc_ui"))),
-            column(4, sliderInput(ns("plot1d_step"),.1, 2, value = .1, step = .1, label = "Band/Bin Width Adjustment"))
+            column(4, sliderInput(ns("plot1d_step"),.1, 2, value = .1, step = .1, label = "Band/Bin Width Adjustment")),
+            uiOutput(ns("plot1d_pc_ui"))
         )
     )
 }
@@ -25,17 +25,18 @@ pivot_Plot1d_UI <- function(id, type) {
 #' @export
 pivot_Plot1d <- function(input, output, session, type = NULL, obj = NULL, proj = NULL, minfo = NULL) {
     if(is.null(proj)) return()
+    if(type == "pca") {
+        dname = "PC"
+    } else if(type != "dfm") {
+        dname = "V"
+    } else if(type == "dfm") {
+        dname = "DC"
+    }
     output$plot1d_pc_ui <- renderUI({
-        if(type == "tsne") return()
-        if(type == "pca") {
-            dname = "PC"
-        } else if(type == "plda") {
-            dname = "V"
-        }
         PCs <- colnames(proj)
         PC_options <- as.list(PCs)
         names(PC_options) <- PCs
-        selectInput(session$ns("plot1d_pc"), label = paste(dname, "on X axis"), choices = PC_options, selected = PC_options[[1]])
+        column(4, selectInput(session$ns("plot1d_pc"), label = "X axis", choices = PC_options, selected = PC_options[[1]]))
     })
 
     # 1d Plotly
@@ -104,22 +105,23 @@ pivot_Plot1d <- function(input, output, session, type = NULL, obj = NULL, proj =
 pivot_Plot2d_UI <- function(id, type) {
     ns<- NS(id)
     if(type == "pca") {
-        options <- list("plotly" = "plotly", "ggbiplot" = "ggbiplot")
+        options <- list("plotly" = "plotly", "ggplot2"="ggplot2", "ggbiplot" = "ggbiplot")
     } else {
-        options <- list("plotly" = "plotly")
+        options <- list("plotly" = "plotly", "ggplot2"="ggplot2")
     }
     biplot_select <- selectInput(ns("plot2d_package"), "Plotting package", choices = options, selected = "plotly")
     tagList(
         conditionalPanel(sprintf("input['%s'] == 'plotly'", ns("plot2d_package")),
                          plotly::plotlyOutput(ns("plotly2d"))
         ),
-        conditionalPanel(sprintf("input['%s'] == 'ggbiplot'", ns("plot2d_package")),
-                         plotOutput(ns("biplot"), width = "600px", height = "600px")
+        conditionalPanel(sprintf("input['%s'] != 'plotly'", ns("plot2d_package")),
+                         uiOutput(ns("ggplot2d_ui"))
         ),
         fluidRow(
-            column(4, biplot_select),
-            column(4, uiOutput(ns("plot2d_x_ui"))),
-            column(4, uiOutput(ns("plot2d_y_ui")))
+            column(3, biplot_select),
+            column(3, numericInput(ns("psize_2d"), "Marker Size", value = 1, min =0.1, step =0.1)),
+            uiOutput(ns("plot2d_x_ui")),
+            uiOutput(ns("plot2d_y_ui"))
         ),
         uiOutput(ns("selected_sample_ui"))
     )
@@ -133,91 +135,91 @@ pivot_Plot2d_UI <- function(id, type) {
 #' @export
 pivot_Plot2d <- function(input, output, session, type = NULL, obj = NULL, proj = NULL, minfo = NULL, source = NULL, event = NULL, selected = NULL) {
     if(is.null(proj)) return()
+
+    if(type == "pca") {
+        dname = "PC"
+    } else if(type != "dfm") {
+        dname = "V"
+    } else if(type == "dfm") {
+        dname = "DC"
+    }
+
+    if(!is.null(minfo$meta)){
+        group = minfo$meta[,1]
+        pal = unique(minfo$meta_color[,1])
+        pal <- setNames(pal, unique(group))
+    } else {
+        group = NULL
+        pal = NULL
+    }
+
     # 2d_pca select principal component UI
     output$plot2d_x_ui <- renderUI({
         if(type %in% c("tsne", "mds", "nds")) return()
-        if(type == "pca") {
-            dname = "PC"
-        } else if(type == "plda") {
-            dname = "V"
-        }
         PCs <- colnames(proj)
         PC_options <- as.list(PCs)
         names(PC_options) <- PCs
-        selectInput(session$ns("plot2d_x"), label = paste(dname, "on X axis"), choices = PC_options, selected = PC_options[[1]])
+        column(3, selectInput(session$ns("plot2d_x"), label = "X axis", choices = PC_options, selected = PC_options[[1]]))
     })
 
     output$plot2d_y_ui <- renderUI({
         if(type %in% c("tsne", "mds", "nds")) return()
-        if(type == "pca") {
-            dname = "PC"
-        } else if(type == "plda") {
-            dname = "V"
-        }
         if(ncol(proj) < 2) return()
         PCs <- colnames(proj)
         PC_options <- as.list(PCs)
         names(PC_options) <- PCs
-        selectInput(session$ns("plot2d_y"), label = paste(dname, "on X axis"), choices = PC_options, selected = PC_options[[2]])
+        column(3, selectInput(session$ns("plot2d_y"), label = "X axis", choices = PC_options, selected = PC_options[[2]]))
     })
 
-    # 2d Plotly
-
+    # 2d plot object
     plot2d <- reactive({
         if(ncol(proj) < 2) return()
-        if(type == "pca") {
-            dname = "PC"
-        } else {
-            dname = "V"
+        req(input$plot2d_package, input$psize_2d)
+        if(input$plot2d_package == "plotly") {
+            x = as.formula(paste0("~", dname, "1"))
+            y = as.formula(paste0("~", dname, "2"))
+
+            if(!is.null(input$plot2d_x)){
+                x = as.formula(paste0("~", input$plot2d_x))
+                y = as.formula(paste0("~", input$plot2d_y))
+            }
+            pp<-plotly::plot_ly(proj, x = x, y = y, text = row.names(proj), source = source, key = row.names(proj),
+                            type = "scatter", mode = "markers", color = minfo$meta[,1], colors = pal, marker = list(size = 10*input$psize_2d)) %>%
+                plotly::layout(dragmode = "select")
+        } else if(input$plot2d_package == "ggplot2") {
+            x = paste0(dname, "1")
+            y = paste0(dname, "2")
+
+            if(!is.null(input$plot2d_x)){
+                x = paste0(input$plot2d_x)
+                y = paste0(input$plot2d_y)
+            }
+            pp<-ggplot2::ggplot(proj, ggplot2::aes_string(x=x, y=y)) +
+                ggplot2::theme_bw()
+            if(is.null(group)){
+                pp<-pp +
+                    ggplot2::geom_point(alpha=0.8, size = 3*input$psize_2d, color = 'steelblue')
+            } else {
+                pp <- pp +
+                    ggplot2::geom_point(alpha=0.8, size = 3*input$psize_2d, ggplot2::aes(color = group)) +
+                    ggplot2::scale_color_manual(values = pal)
+            }
+        } else if(input$plot2d_package == "ggbiplot") {
+            if(!"ggbiplot" %in% rownames(installed.packages())) {
+                session$sendCustomMessage(type = "showalert", "Please install ggbiplot manually from https://github.com/vqv/ggbiplot")
+                return()
+            }
+            if(!is.null(group)){
+                pp <-ggbiplot::ggbiplot(obj, groups = group, ellipse = TRUE, circle = TRUE, varname.size = 3, labels.size=3) +
+                    geom_point(aes(colour=group), size = 3*input$psize_2d) +
+                    scale_colour_manual(values = unique(minfo$meta_color[,1])) +
+                    theme(legend.direction = 'horizontal', legend.position = 'top')
+            } else {
+                pp <-ggbiplot::ggbiplot(obj, ellipse = TRUE, circle = TRUE, varname.size = 3, labels.size=3) +
+                    geom_point(size = 3*input$psize_2d)
+            }
         }
-        if(!is.null(minfo$meta)){
-            group = minfo$meta[,1]
-            pal = unique(minfo$meta_color[,1])
-            pal <- setNames(pal, unique(group))
-        } else {
-            group = NULL
-            pal = NULL
-        }
-
-        x = as.formula(paste0("~", dname, "1"))
-        y = as.formula(paste0("~", dname, "2"))
-
-        if(!is.null(input$plot2d_x)){
-            x = as.formula(paste0("~", input$plot2d_x))
-            y = as.formula(paste0("~", input$plot2d_y))
-        }
-
-        plotly::plot_ly(proj, x = x, y = y, text = row.names(proj), source = source, key = row.names(proj),
-                        type = "scatter", mode = "markers", color = minfo$meta[,1], colors = pal, marker = list(size = 10)) %>%
-            plotly::layout(dragmode = "select")
-
-        # Use ggplotly instead because of wrong key binding
-        # x = paste0(dname, "1")
-        # y = paste0(dname, "2")
-        #
-        # if(!is.null(input$plot2d_x)){
-        #     x = input$plot2d_x
-        #     y = input$plot2d_y
-        # }
-        #
-        # proj<-proj %>% tibble::rownames_to_column()
-        # plt1 <- ggplot2::ggplot(proj, ggplot2::aes_string(x=x, y=y, text = "rowname", key = "rowname")) + ggplot2::theme_minimal()
-        #
-        # if(is.null(group)) {
-        #     plt1 <- plt1 + ggplot2::geom_point(shape=19, alpha=0.8, size = 2, color = 'steelblue')
-        # } else {
-        #     plt1 <- plt1 +
-        #         ggplot2::geom_point(shape=19, alpha=0.8, size = 2, ggplot2::aes(color = group)) +
-        #         ggplot2::scale_color_manual(values = pal)
-        # }
-        # #assign("plt1", plt1, env =.GlobalEnv)
-        # tryCatch({
-        #     plotly::ggplotly(source = source) %>% plotly::layout(dragmode = "select")
-        # }, error = function(e) {
-        #     print(e)
-        #     return()
-        # })
-
+        return(pp)
     })
 
     output$plotly2d <- plotly::renderPlotly({
@@ -225,9 +227,8 @@ pivot_Plot2d <- function(input, output, session, type = NULL, obj = NULL, proj =
         plot2d()
     })
 
-
     output$selected_sample_ui <- renderUI({
-        if(is.null(event)) return()
+        req(event, input$plot2d_package == "plotly")
         selected_samples <- event()$key
         if(length(selected_samples)) {
             sp_text<-paste(selected_samples, collapse = ", ")
@@ -245,7 +246,7 @@ pivot_Plot2d <- function(input, output, session, type = NULL, obj = NULL, proj =
         if(is.null(event)) return()
         sps <- event()$key
         if(nchar(input$graph_group) < 1){
-            session$sendCustomMessage(type = "showalert", "Please specify a group name.")
+            showNotification("Please specify a group name.", type="error", duration=10)
             return()
         }
         if(length(sps) && !is.null(selected)) {
@@ -255,23 +256,24 @@ pivot_Plot2d <- function(input, output, session, type = NULL, obj = NULL, proj =
     })
 
     # 2d ggbiplot
-    output$biplot <- renderPlot({
-        if(is.null(obj)) return()
-        if(!"ggbiplot" %in% rownames(installed.packages())) {
-            session$sendCustomMessage(type = "showalert", "Please install ggbiplot manually from https://github.com/vqv/ggbiplot")
-            return()
-        }
-        if(!is.null(minfo$meta)){
-            groups <- factor(minfo$meta[,1], levels = unique(minfo$meta[,1]))
-            ggbiplot::ggbiplot(obj, groups = groups, ellipse = TRUE, circle = TRUE, varname.size = 3, labels.size=3) +
-                geom_point(aes(colour=groups), size = 3) +
-                scale_colour_manual(values = unique(minfo$meta_color[,1])) +
-                theme(legend.direction = 'horizontal', legend.position = 'top')
-        } else {
-            ggbiplot::ggbiplot(obj, ellipse = TRUE, circle = TRUE, varname.size = 3, labels.size=3) +
-                geom_point(size = 3)
+    output$ggplot2d_ui <- renderUI({
+        if(input$plot2d_package == "ggplot2") {
+            plotOutput(session$ns("ggpp"), width = "100%", height = "450px")
+        } else if(input$plot2d_package == "ggbiplot") {
+            plotOutput(session$ns("biplot"), width = "100%", height = "450px")
         }
     })
+
+    output$ggpp <- renderPlot({
+        req(plot2d())
+        plot2d()
+    })
+
+    output$biplot <- renderPlot({
+        req(plot2d())
+        plot2d()
+    })
+
     if(is.null(selected)) {
         return(list(plot = isolate(plot2d())))
     } else {
@@ -297,7 +299,8 @@ pivot_Plot3d_UI <- function(id, type, height = "600px") {
                          threejs::scatterplotThreeOutput(ns("threejs3d"), height = height)
         ),
         fluidRow(
-            column(6, selectInput(ns("plot3d_package"), "Plotting package", choices = list("plotly" = "plotly", "threejs" = "threejs"), selected = "plotly"))
+            column(4, selectInput(ns("plot3d_package"), "Plotting package", choices = list("plotly" = "plotly", "threejs" = "threejs"), selected = "plotly")),
+            column(4, numericInput(ns("psize_3d"), "Marker Size", value = 1, min =0.1, step =0.1))
         )
     )
 }
@@ -314,9 +317,9 @@ pivot_Plot3d <- function(input, output, session, type = NULL, obj = NULL, proj =
     output$threejs3d <- threejs::renderScatterplotThree({
         if(ncol(proj) < 3) return()
         if(!is.null(minfo$meta)){
-            threejs::scatterplot3js(proj[,1:3], color = minfo$meta_color[,1], labels = rownames(proj), label.margin="150px 150px 150px 150px", size = 1.2, renderer = "canvas")
+            threejs::scatterplot3js(as.matrix(proj[,1:3]), color = minfo$meta_color[,1], labels = rownames(proj), label.margin="150px 150px 150px 150px", size = 0.5*input$psize_3d)
         } else{
-            threejs::scatterplot3js(proj[,1:3], color = "grey", labels = rownames(proj), label.margin="150px 150px 150px 150px", size = 1.2, renderer = "canvas")
+            threejs::scatterplot3js(as.matrix(proj[,1:3]), color = rep("grey",nrow(proj)), labels = rownames(proj), label.margin="150px 150px 150px 150px", size = 0.5*input$psize_3d)
         }
     })
 
@@ -326,8 +329,10 @@ pivot_Plot3d <- function(input, output, session, type = NULL, obj = NULL, proj =
 
         if(type == "pca") {
             dname = "PC"
-        } else {
+        } else if(type != "dfm") {
             dname = "V"
+        } else if(type == "dfm") {
+            dname = "DC"
         }
 
         if(!is.null(minfo$meta)){
@@ -339,19 +344,20 @@ pivot_Plot3d <- function(input, output, session, type = NULL, obj = NULL, proj =
             pal = NULL
         }
 
-        plotly::plot_ly(proj[,1:3], x = as.formula(paste0("~", dname, "1")), y = as.formula(paste0("~", dname, "2")), z = as.formula(paste0("~", dname, "3")), text = rownames(proj), color = minfo$meta[,1], colors = pal) %>%
-            plotly::add_markers() %>%
+        plotly::plot_ly(proj[,1:3],
+                        x = as.formula(paste0("~", dname, "1")), y = as.formula(paste0("~", dname, "2")), z = as.formula(paste0("~", dname, "3")),
+                        marker = list(size = 10*input$psize_3d),
+                        text = rownames(proj), color = minfo$meta[,1], colors = pal) %>%
             plotly::layout(scene = list(xaxis = list(title = paste0(dname, "1")),
                                 yaxis = list(title =  paste0(dname, "2")),
                                 zaxis = list(title =  paste0(dname, "3"))))
     })
 
     # 3d_pca plotly
-    output$plotly3d <- threejs::renderScatterplotThree({
+    output$plotly3d <- plotly::renderPlotly({
         req(plot3d())
         plot3d()
     })
-
     return(plot3d())
 }
 

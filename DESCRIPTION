@@ -13,6 +13,7 @@ Depends:
     shinyBS,
     igraph
 Imports:
+    Biobase,
     RColorBrewer,
     plotly,
     ggplot2,
@@ -26,6 +27,7 @@ Imports:
     STRINGdb,
     monocle,
     scde,
+    scater,
     shinyAce,
     rmarkdown,
     Rtsne,
@@ -55,7 +57,9 @@ Imports:
     caret,
     GO.db,
     org.Hs.eg.db, 
-    org.Mm.eg.db
+    org.Mm.eg.db,
+    destiny,
+    SC3
 License: http://kim.bio.upenn.edu/software/LICENSE
 Encoding: UTF-8
 LazyData: true

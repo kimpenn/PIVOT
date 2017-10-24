@@ -44,7 +44,11 @@ output$deseq_ui <- renderUI({
                        uiOutput("deseq_test_explain")
                 )
             ),
-            actionButton("perform_deseq", "Run DE", class = "btn-info btn_leftAlign")
+            fluidRow(
+                column(6),
+                column(3, checkboxInput("deseq_parallel", "Run with multithread", value=F)),
+                column(3, actionButton("perform_deseq", "Run DE", class = "btn-info"))
+            )
         ),
         uiOutput("deseq_results_box"),
         enhanced_box(
@@ -133,13 +137,13 @@ observeEvent(input$perform_deseq, {
         }
 
         if(input$deseq_test_method == "Wald") {
-            r_data$dds <- DESeq2::DESeq(dds)
+            r_data$dds <- DESeq2::DESeq(dds, test="Wald", parallel = input$deseq_parallel)
         } else if(input$deseq_test_method == "LRT") {
             if(is.null(deseqModel()$model$reduced)) {
                 session$sendCustomMessage(type = "showalert", "Reduced formula required.")
                 return()
             }
-            r_data$dds <- DESeq2::DESeq(dds, test = "LRT", reduced = deseqModel()$model$reduced)
+            r_data$dds <- DESeq2::DESeq(dds, test = "LRT", reduced = deseqModel()$model$reduced, parallel = input$deseq_parallel)
         }
 
         r_data$deseq_params <- list(design = deseqModel()$design, test = input$deseq_test_method, model = deseqModel()$model)
@@ -152,32 +156,14 @@ output$deseq_results_box <- renderUI({
     options <- options[which(options != "Intercept")]
     names(options) <- options
 
-    deseq_group_ui <- list(
-        if(r_data$deseq_params$test != "LRT") {
-            fluidRow(
-                column(4, tags$br(),tags$b("Contrast:")),
-                column(4, selectInput("deseq_term1", "Term", choices = as.list(options), selected = options[[1]]))
-            )
-        } else {
-            fluidRow(
-                column(4, selectInput("deseq_pval_type", "P value type", choices = list("LRT" = "LRT", "Wald" = "Wald"), selected = "LRT")),
-                column(8,
-                       selectInput("deseq_result_name", "Choose comparison/individual effect",
-                                   choices = as.list(options))
-                )
-            )
-
-        }
-
-    )
-
     enhanced_box(
         width = 12,
         title = NULL,
         status = "primary",
         solidHeader = T,
         tags$div(tags$b("Results Table:"), class = "param_setting_title"),
-        deseq_group_ui,
+        selectInput("deseq_result_name", "Choose comparison/individual effect",
+                    choices = as.list(options)),
         fluidRow(
             column(4,
                    uiOutput("deseq_test_method_text")
@@ -232,31 +218,26 @@ output$download_deseq_result_ui <- renderUI({
 observe({
     req(r_data$meta, r_data$dds, r_data$deseq_params, ncol(r_data$meta) >= 2)
 
-    if(r_data$deseq_params$test == "LRT") {
-        req(input$deseq_pval_type, input$deseq_result_name)
-        result_name <- input$deseq_result_name
-    } else {
-        req(input$deseq_term1)
-        result_name <- input$deseq_term1
-    }
+    req(input$deseq_result_name)
+    result_name <- input$deseq_result_name
+
     withProgress(message = 'Processing...', value = 0.5, {
-        res1 <- DESeq2::results(r_data$dds, test = input$deseq_pval_type,
+        res1 <- DESeq2::results(r_data$dds, test = r_data$deseq_params$test,
                                 name = result_name,
                                 alpha = input$deseq_alpha)
 
-        resOrdered <- res1[order(res1$padj),]
-        r_data$deseq_group <- input$deseq_term1
-        if(input$deseq_cuttbl) {
-            r_data$deseq_results <- BiocGenerics::subset(resOrdered, padj <= input$deseq_alpha)
-        } else {
-            r_data$deseq_results <- resOrdered
-        }
+        r_data$deseq_results <- res1[order(res1$padj),]
+        r_data$deseq_group <- input$deseq_result_name
     })
 })
 
 output$deseq_result_tbl <- DT::renderDataTable({
     req(r_data$deseq_results)
-    tbl<-as.data.frame(r_data$deseq_results)
+    if(input$deseq_cuttbl) {
+        tbl<- as.data.frame(BiocGenerics::subset(r_data$deseq_results, padj <= input$deseq_alpha))
+    } else {
+        tbl<- as.data.frame(r_data$deseq_results)
+    }
     if(nrow(tbl) == 0) return()
     DT::datatable(tbl, selection = 'single', options = list(scrollX = TRUE, scrollY = "250px", searching=T, order = list(list(6, 'asc')) , orderClasses = T))
 })
@@ -266,7 +247,14 @@ output$download_deseq_result <- downloadHandler(
         "deseq_results.csv"
     },
     content = function(file) {
-        write.csv(as.data.frame(r_data$deseq_results), file)
+        if(input$deseq_cuttbl) {
+            deseq_results <- BiocGenerics::subset(resOrdered, padj <= input$deseq_alpha)
+        } else {
+            deseq_results <- resOrdered
+        }
+        tbl<-as.data.frame(deseq_results)
+        if(nrow(tbl) == 0) return()
+        write.csv(as.data.frame(tbl), file)
     }
 )
 
@@ -277,17 +265,18 @@ output$deseq_ma_plt <- renderPlot({
 
 output$deseq_gene_plot_ui <- renderUI({
     req(r_data$deseq_params)
-    if(r_data$deseq_params$test != "LRT" && r_data$deseq_params$design %in% c("condition", "condition_batch")) {
-        pivot_featurePlot_UI("deseq_gene_plt", meta = r_data$meta, ids = 1)
-    } else {
-        pivot_featurePlot_UI("deseq_gene_plt", meta = r_data$meta)
-    }
+    pivot_featurePlot_UI("deseq_gene_plt", meta = r_data$meta)
 })
 
 observe({
-    req(r_data$deseq_results)
+    req(r_data$deseq_results, !is.null(input$deseq_cuttbl))
     s = input$deseq_result_tbl_row_last_clicked
-    tbl<-as.data.frame(r_data$deseq_results)
+    req(r_data$deseq_results)
+    if(input$deseq_cuttbl) {
+        tbl<- as.data.frame(BiocGenerics::subset(r_data$deseq_results, padj <= input$deseq_alpha))
+    } else {
+        tbl<- as.data.frame(r_data$deseq_results)
+    }
 
     if (length(s)) {
         selected_gene <- rownames(tbl[s, , drop = FALSE])
@@ -297,7 +286,7 @@ observe({
 
     d <- as.data.frame(t(r_data$df[selected_gene,])) %>% tibble::rownames_to_column()
     colnames(d) <- c("sample", "expression_level")
-    callModule(pivot_featurePlot, "deseq_gene_plt", meta = r_data$meta, df = d, gene = selected_gene, ids = NULL)
+    callModule(pivot_featurePlot, "deseq_gene_plt", meta = r_data$meta, df = d, gene = selected_gene)
 })
 
 

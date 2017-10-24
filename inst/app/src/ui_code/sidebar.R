@@ -90,6 +90,7 @@ if('PIVOT.analysis' %in% r_module) {
         menuItem("Clustering",  icon = icon("share-alt"),
                  menuSubItem("Hierachical", tabName = "hclust", icon = icon("angle-right")),
                  menuSubItem("K-means", tabName = "kmeans", icon = icon("angle-right")),
+                 menuSubItem("SC3", tabName = "sc3", icon = icon("angle-right")),
                  menuSubItem("Community Detection", tabName = "community", icon = icon("angle-right"))
         ),
         menuItem("Correlation",  icon=icon("line-chart"),
@@ -102,6 +103,7 @@ if('PIVOT.analysis' %in% r_module) {
                  menuSubItem("PCA", tabName = "pca", icon = icon("angle-right")),
                  menuSubItem("t-SNE", tabName = "tsne", icon = icon("angle-right")),
                  menuSubItem("MDS", tabName = "mds", icon = icon("angle-right")),
+                 menuSubItem("DiffusionMap", tabName = "dfm", icon = icon("angle-right")),
                  menuSubItem("penalizedLDA", tabName = "plda", icon = icon("angle-right"))
         ),
         menuItem("Enrichment Analysis", tabName = "gsea", icon = icon("flask")),

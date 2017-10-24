@@ -27,28 +27,34 @@ body <- dashboardBody(
                                        tags$b("FILE"),
                                        value = "file_in",
                                        tags$div(tags$b("Input Settings:"), class = "param_setting_title"),
+                                       uiOutput("refreshOnExampleLoad"),
                                        fluidRow(
-                                           column(3,
+                                           column(4,
                                                   selectInput("file_format", label = "Input file type",
-                                                              choices = list("Counts Directory" = "dir", "Counts Table" = "single", "PIVOT State" = "state"),
+                                                              choices = list("Counts Directory" = "dir", "Counts Table" = "single", "10x Directory" = "tenx", "PIVOT State" = "state"),
                                                               selected = "single")
                                            ),
-                                           column(3,
-                                                  uiOutput("proc_method_ui")
-                                           ),
-                                           column(3, uiOutput("gene_length_ui")),
-                                           column(3, tags$br(), uiOutput("norm_details_ui"))
+                                           uiOutput("proc_method_ui"),
+                                           uiOutput("gene_length_ui"),
+                                           uiOutput("tenx_package_check_ui")
                                        ),
                                        uiOutput("norm_params_ui"),
-                                       uiOutput("norm_text_ui"),
-                                       tags$hr(),
-                                       tags$p("Choose if spike-ins or low count features should be excluded from the data BEFORE normalization:"),
                                        fluidRow(
-                                           column(4, checkboxInput("exclude_ercc", tags$b("Exclude Spike-ins (except for ERCC module/normalization)"), value = T)),
-                                           column(4, radioButtons("input_threshold_type", "Exclude features by:", choices = c("Row Mean" = "mean", "Row Sum" = "sum"), inline = T)),
-                                           column(4, uiOutput("input_threshold_ui"))
+                                           column(8, uiOutput("norm_text_ui")),
+                                           column(4, uiOutput("norm_details_ui"))
                                        ),
                                        tags$hr(),
+                                       conditionalPanel(
+                                           "input.file_format != 'tenx' & input.file_format != 'state'",
+                                           tags$p("Choose if spike-ins or low count features should be excluded from the data BEFORE normalization:"),
+                                           fluidRow(
+                                               column(4, checkboxInput("exclude_ercc", tags$b("Exclude Spike-ins (except for ERCC module/normalization)"), value = T)),
+                                               column(4, radioButtons("input_threshold_type", "Exclude features by:", choices = c("Row Mean" = "mean", "Row Sum" = "sum"), inline = T)),
+                                               column(4, uiOutput("input_threshold_ui"))
+                                           ),
+                                           tags$hr()
+                                       ),
+
                                        ##### count file input module #####
                                        conditionalPanel(
                                            "input.file_format == 'dir'",
@@ -70,6 +76,21 @@ body <- dashboardBody(
                                                options = list(container = "body")
                                            ),
                                            uiOutput("select_data")
+                                       ),
+
+                                       conditionalPanel(
+                                           "input.file_format == 'tenx'",
+                                           tags$div(
+                                               tags$b("10x Cell Ranger Output Directory Input:"),
+                                               pivot_help_UI("tenx_input", "How to input a 10x folder"),
+                                               class = "param_setting_title"
+                                           ),
+                                           fluidRow(
+                                               column(6,
+                                                      shinyFiles::shinyDirButton('tenx_folder', 'Select 10x Folder', 'Please select your 10x folder', FALSE, class = "btn-info")
+                                               ),
+                                               column(6, verbatimTextOutput("tenx_folder_show"))
+                                           )
                                        ),
 
                                        ##### Single file module #####
@@ -112,7 +133,7 @@ body <- dashboardBody(
                                            fluidRow(
                                                column(12,
                                                       tags$div(
-                                                          tags$b("Input method:"),
+                                                          tags$b("Input Method:"),
                                                           pivot_help_UI("design", title = "What is a design table"),
                                                           class = "param_setting_title"
                                                       )
@@ -262,6 +283,12 @@ body <- dashboardBody(
                 br()
         ),
 
+        # sc3
+        tabItem(tabName = "sc3",
+                uiOutput("sc3_ui"),
+                hr(),
+                br()
+        ),
         # Community detection
         tabItem(tabName = "community",
                 uiOutput("mst_ui")
@@ -306,6 +333,13 @@ body <- dashboardBody(
         # MDS
         tabItem(tabName = "mds",
                 uiOutput("mds_ui"),
+                hr(),
+                br()
+        ),
+
+        # Diffusion map
+        tabItem(tabName = "dfm",
+                uiOutput("dfm_ui"),
                 hr(),
                 br()
         ),

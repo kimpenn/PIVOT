@@ -13,40 +13,10 @@
 # under the License.
 
 species_list <- list("Homo sapiens (9606)" = "9606",
-                     "Mus musculus (10090)" = "10090",
-                     "Rattus norvegicus (10116)" = "10116",
-                     "Danio rerio (7955)" = "7955",
-                     "Caenorhabditis elegans (6239)" = "6239",
-                     "Drosophila melanogaster (7227)" = "7227")
+                     "Mus musculus (10090)" = "10090")
 
 output$transnet_ui <- renderUI({
-
-    if(is.null(r_data$df)) {
-        return()
-    }
-
-    gene_choices <- list()
-
-    if(!is.null(r_data$scde_results) && !("scde" %in% gene_choices)) {
-        group_string <- paste("DE genes of Group", unique(r_data$scde_group)[1], "and Group", unique(r_data$scde_group)[2] ,"reported by SCDE")
-        gene_choices <- c(gene_choices, setNames(list("scde"), group_string))
-    }
-
-    if(!is.null(r_data$deseq_results) && !("deseq" %in% gene_choices)) {
-        group_string <- paste("DE genes of ", r_data$deseq_group, "reported by DESeq")
-        gene_choices <- c(gene_choices, setNames(list("deseq"), group_string))
-    }
-
-    if(!is.null(r_data$mww_results) && !("mww" %in% gene_choices)) {
-        group_string <- paste("DE genes of Group", r_data$mww_group[1], "and Group",  r_data$mww_group[2], "reported by Mann–Whitney U test")
-        gene_choices <- c(gene_choices, setNames(list("mww"), group_string))
-    }
-
-    if(length(gene_choices) == 0) {
-        tf_de_select_ui <- tags$p("Please run DE analysis first.") # TODO: allow input of custom gene list
-    } else {
-        tf_de_select_ui <- selectInput("tf_de_select", "Choose DE results", choices = gene_choices)
-    }
+    req(r_data$df)
 
     list(
         fluidRow(
@@ -67,39 +37,22 @@ output$transnet_ui <- renderUI({
                                   selectInput("transnet_species", "Choose species:",
                                               choices = species_list)
                            ),
-                           column(5, tf_de_select_ui),
-                           column(3, uiOutput("scde_lfc_ui"))
+                           pivot_featureList_UI("transnet", include = c("deseq", "edgeR", "scde", "mwu"), width = 8)
                        ),
-
                        tags$p("The built-in transcription factor list is a combined list of DBD predicted transcription factors and Regnetwork regulators (with micro-RNAs removed). "),
-
-                       uiOutput("tf_loaded_ui"),
                        fluidRow(
-                           column(6, checkboxInput("tf_custom_check", "Use a custom transcription factor list", value = F)),
-                           column(6, uiOutput("tf_custom_btn_ui"))
+                           column(4, selectInput("tf_de_subset", "Include genes:", choices = list("All genes" = "all", "Transcription factors" = "tf"), selected = "tf")),
+                           column(4, selectInput("tf_de_rank_type", "Order genes by", choices = list("Score" = "score", "Adjusted P value" = "padj", "Absolute log fold change/Effect size" = "lfc"), selected = "score")),
+                           column(4, numericInput("tf_score_pthresh", "Score P threshold", value = 0.1, min = 0, max = 1, step = 0.001))
                        ),
-                       hr(),
-
-                       wellPanel(
-                           fluidRow(
-                               column(3, selectInput("tf_de_subset", "Include genes:", choices = list("All genes" = "all", "Transcription factors" = "tf"), selected = "tf")),
-                               column(3, selectInput("tf_de_rank_type", "Order genes by", choices = list("Score" = "score", "Adjusted P value" = "padj", "Absolute log fold change/Effect size" = "lfc"), selected = "score")),
-                               column(3, selectInput("tf_de_direction", "Select direction:", choices = list("All direction (lfc = 0, >0, <0)" = "all", "Upregulation (lfc > 0)" = "up", "Downregulation (lfc < 0)" = "down"), selected = "all")),
-                               column(3, numericInput("tf_de_padj", "Padj cutoff", value = 1, min = 0, max = 1, step = 0.001))
-                           )
-                       ),
-
-                       wellPanel(
-                           fluidRow(
-                               column(3, selectInput("tf_score_type", "Gene score formula:",
-                                                     choices = list("Absolute log fold change" = "lfc",
-                                                                    "Absolute log fold change with Padj threshold" = "lfc_threshold",
-                                                                    "Original Mogrify Score" = "mogrify",
-                                                                    "Mogrify score with Padj threshold" = "mogrify_modified"),
-                                                     selected = "mogrify_modified")),
-                               column(6, uiOutput("tf_score_formula_ui")),
-                               column(3, uiOutput("tf_score_pthresh_ui"))
-                           )
+                       fluidRow(
+                           column(4, selectInput("tf_score_type", "Gene score formula:",
+                                                 choices = list("Absolute log fold change" = "lfc",
+                                                                "Absolute log fold change with Padj threshold" = "lfc_threshold",
+                                                                "Original Mogrify Score" = "mogrify",
+                                                                "Mogrify score with Padj threshold" = "mogrify_modified"),
+                                                 selected = "mogrify_modified")),
+                           column(8, uiOutput("tf_score_formula_ui"))
                        ),
 
                        DT::dataTableOutput("tf_de_tbl_show"),
@@ -203,34 +156,60 @@ output$transnet_ui <- renderUI({
 })
 
 
-output$scde_lfc_ui <- renderUI({
-    if(is.null(r_data$df) || is.null(input$tf_de_select)) return()
+####################### Load DE table #####################
+transnet_feature_tbl <- callModule(pivot_featureList, "transnet", r_data = r_data)
 
-    if(input$tf_de_select == "scde") {
-        selectInput("scde_lfc", "Choose SCDE LFC:",
-                    choices = list("Maximum likelyhood estimate (mle)" = "mle", "Conservative estimate (ce)" = "ce"),
-                    selected = "mle")
+output$tf_de_tbl_show <- DT::renderDataTable({
+    req(r_data$df, transnet_feature_tbl())
+    tbl <- transnet_feature_tbl()
+    tryCatch({
+        if(input$tf_score_type == "lfc") {
+            tbl$gene_score = abs(tbl$lfc_or_es)
+        } else if(input$tf_score_type == "mogrify") {
+            tbl$gene_score = abs(tbl$lfc_or_es) * (-log10(tbl$padj))
+        } else if(input$tf_score_type == "mogrify_modified") {
+            tmp_padj <- ifelse(tbl$padj > input$tf_score_pthresh, -log10(tbl$padj), -log10(input$tf_score_pthresh))
+            tbl$gene_score = abs(tbl$lfc_or_es) * tmp_padj
+        } else if(input$tf_score_type == "lfc_threshold") {
+            mulplier <- ifelse(tbl$padj > input$tf_score_pthresh,0,1)
+            tbl$gene_score = abs(tbl$lfc_or_es) * mulplier
+        }
+
+        if(input$tf_de_rank_type == "score") {
+            tbl <- tbl %>% dplyr::arrange(-gene_score)
+        } else if(input$tf_de_rank_type == "padj") {
+            tbl <- tbl %>% dplyr::arrange(padj)
+        } else if(input$tf_de_rank_type == "lfc") {
+            tbl <- tbl %>% dplyr::arrange(-abs(lfc_or_es))
+        }
+
+        r_data$tf_de_tbl <- tbl
+
+        if(input$tf_de_subset == "tf"){
+            if(is.null(r_data$tf_list)) return()
+            tbl <- tbl[which(toupper(tbl$gene) %in% toupper(r_data$tf_list)),]
+        }
+
+        r_data$tf_de_tbl_vis <- tbl
+    }, error = function(e){})
+
+    DT::datatable(tbl, selection = 'single', options = list(scrollX = TRUE, scrollY = "300px", searching=T))
+})
+
+
+output$download_tf_de_tbl_ui <- renderUI({
+    req(r_data$tf_de_tbl_vis)
+    downloadButton("download_tf_de_tbl", "Download", class = "btn btn-success")
+})
+
+output$download_tf_de_tbl <- downloadHandler(
+    filename = "de_tbl.csv",
+    content = function(file) {
+        req(r_data$tf_de_tbl_vis)
+        tbl <- r_data$tf_de_tbl_vis
+        write.csv(tbl, file)
     }
-})
-
-output$final_score_def_ui <- renderUI({
-    if(is.null(r_data$tf_de_tbl) ) return()
-    if(!is.null(r_data$tf_neighbor_order) && r_data$tf_neighbor_order == 0) return()
-    selectInput("final_score_def", "Define final score",
-                choices = list(
-                    "Influence score" = "influence_score",
-                    "Influence score adjusted by total number of vertices" = "adj_v",
-                    "Influence score adjusted by total number of activated vertices" = "adj_vth",
-                    "Influence score adjusted by proportion of activated vertices" = "adj_prop",
-                    "TF score" = "tf_score",
-                    "TF score adjusted by total number of vertices" = "tf_adj_v",
-                    "TF score adjusted by total number of activated vertices" = "tf_adj_vth",
-                    "TF score adjusted by proportion of activated vertices" = "tf_adj_prop",
-                    "Proportion of activated vertices" = "prop"
-                ),
-                selected = "adj_v"
-    )
-})
+)
 
 output$tf_score_formula_ui <- renderUI({
     if(input$tf_score_type == "mogrify") {
@@ -254,6 +233,45 @@ output$tf_score_formula_ui <- renderUI({
                                 \\end{cases}$$")))
     }
 })
+
+# Load TF
+
+# Load TF list
+observe({
+    req(input$transnet_species, r_data$df)
+    withProgress(message = 'Loading list...', value = 0.5, {
+        if(input$transnet_species == "9606"){
+            tf_tbl1 <- read.csv("src/built_in_files/hs_dbd_tf.csv")
+            tf_tbl2 <- read.csv("src/built_in_files/hs_reg_tf.csv")
+            list1 <- as.character(tf_tbl1$tf_gene)
+            list2 <- as.character(tf_tbl2$tf_gene)
+            input_tfs<- unique(c(list1, list2))
+            r_data$input_tfs<-input_tfs[!grepl("hsa-.*", input_tfs)]
+        } else if(input$transnet_species == "10090") {
+            tf_tbl1 <- read.csv("src/built_in_files/mm_dbd_tf.csv")
+            tf_tbl2 <- read.csv("src/built_in_files/mm_reg_tf.csv")
+            r_data$reg_g = igraph::graph.data.frame(tf_tbl2,T)
+            list1 <- as.character(tf_tbl1$tf_gene)
+            list2 <- as.character(tf_tbl2$tf_gene)
+            input_tfs<- unique(c(list1, list2))
+            r_data$input_tfs<-input_tfs[!grepl("MMU-.*", input_tfs)]
+        } else {
+            r_data$reg_g <- NULL
+            print("Add species alert")
+            return()
+        }
+        r_data$tf_list <-r_data$input_tfs[which(toupper(r_data$input_tfs) %in% toupper(r_data$feature_list))] # change it to unfiltered list?
+    })
+})
+
+
+
+
+
+
+
+
+
 
 output$tf_influence_def_pic <- renderUI({
     if(is.null(input$tf_influence_def)) return()
@@ -296,46 +314,6 @@ output$tf_influence_parameters <- renderUI({
             column(3, tf_acti_threshold_ui),
             column(9, tags$p(), tags$p("Vertices with score above this threshold is considered 'activated' (related stats shown in the tables below). The default value is the 75 percentile of all gene scores."))
         )
-    )
-})
-
-output$tf_score_pthresh_ui <- renderUI({
-    if(input$tf_score_type == "mogrify_modified" || input$tf_score_type == "lfc_threshold") {
-        numericInput("tf_score_pthresh", "P threshold", value = 0.1, min = 0, max = 1, step = 0.001)
-    }
-})
-
-
-output$tf_nbs_direction_ui <- renderUI({
-    if(is.null(input$tf_interactome_selection)) return()
-    if(input$tf_interactome_selection == "reg"){
-        selectInput("tf_nbs_direction", "Select edge directions:", choices = list("Include all direction" = "all", "Include outgoing edges" = "out", "Include incoming edges" = "in"), selected = "all")
-    }
-})
-
-output$tf_custom_btn_ui <- renderUI({
-    if(!input$tf_custom_check) return()
-    content <- list(
-        fluidRow(
-            column(6,
-                   wellPanel(
-                       fileInput('tf_list_file', label = NULL, accept=c('text/csv', 'text/comma-separated-values,text/plain', '.csv')),
-                       checkboxInput('tf_header', 'Header', value = F),
-                       radioButtons('tf_sep', 'Separator', c(Comma=',', Semicolon=';', Tab='\t'), selected = '\t'),
-                       radioButtons('tf_quote', 'Quote', c(None='', 'Double Quote'='"', 'Single Quote'="'"), selected = '"'),
-                       actionButton("tf_list_submit", "Submit List", class = "btn btn-info")
-                   )
-            ),
-            column(6,
-                   tags$p("[feature name in 1st column]"),
-                   DT::dataTableOutput('tf_list_tbl_show')
-            )
-        )
-    )
-
-    list(
-        actionButton("tf_custom_btn", label = "Upload a custom TF list", class = "btn-warning"),
-        shinyBS::bsModal(id = "tf_custom_modal", "Upload a custom transcription factor list", "tf_custom_btn", size = "large", content)
     )
 })
 
@@ -456,201 +434,6 @@ generate_neighbor_graph <- function(cur_id, cur_mode = "all", cur_levs, influenc
 }
 
 
-tmp_tf_list <- reactiveValues()
-tmp_tf_list$tbl <- NULL
-
-# process the upload TF list
-observe({
-    inFile <- input$tf_list_file
-    error_I <- 0
-    if (!is.null(inFile)) {
-        tryCatch({
-            tmp_tf_list$tbl <- read.csv(inFile$datapath, header=input$tf_header, sep=input$tf_sep, quote=input$tf_quote)
-        },
-        error = function(e){
-            error_I <<- 1
-        })
-    }
-    if(error_I) {
-        session$sendCustomMessage(type = "showalert", "Unsupported file format.")
-        return()
-    }
-})
-
-output$tf_list_tbl_show <- DT::renderDataTable({
-    if(is.null(tmp_tf_list$tbl)) return()
-    DT::datatable(tmp_tf_list$tbl, options = list(scrollX = TRUE, scrollY = "350px", searching = FALSE))
-})
-
-observeEvent(input$tf_list_submit, {
-    if (is.null(tmp_tf_list$tbl) || nrow(tmp_tf_list$tbl) == 0)
-    {
-        session$sendCustomMessage(type = "showalert", "Give me something!")
-        return(NULL)
-    }
-
-    tf_names <- make.names(as.character(unique(tmp_tf_list$tbl[,1])))
-
-    cur_flist <- r_data$feature_list
-
-    tf_list <- cur_flist[match(toupper(tf_names), toupper(cur_flist))]
-    tf_list <- tf_list[!is.na(tf_list)]
-
-    if(length(tf_list) != length(tf_names)) {
-        message_gl <- paste0(length(tf_names) - length(tf_list)," genes in your file (", length(tf_names)," gene names) are not found in the current dataset.")
-        session$sendCustomMessage(type = "showalert", message_gl)
-    }
-
-    if(length(tf_list) > 0) {
-        r_data$tf_list <- tf_list
-        r_data$input_tfs <- tf_names
-    }
-})
-
-
-# Load TF list
-observe({
-    if(is.null(input$transnet_species) || is.null(r_data$df)) return()
-    if(input$tf_custom_check) return()
-    withProgress(message = 'Loading list...', value = 0.5, {
-        if(input$transnet_species == "9606"){
-            tf_tbl1 <- read.csv("src/built_in_files/hs_dbd_tf.csv")
-            tf_tbl2 <- read.csv("src/built_in_files/hs_reg_tf.csv")
-            list1 <- as.character(tf_tbl1$tf_gene)
-            list2 <- as.character(tf_tbl2$tf_gene)
-            input_tfs<- unique(c(list1, list2))
-            r_data$input_tfs<-input_tfs[!grepl("hsa-.*", input_tfs)]
-        } else if(input$transnet_species == "10090") {
-            tf_tbl1 <- read.csv("src/built_in_files/mm_dbd_tf.csv")
-            tf_tbl2 <- read.csv("src/built_in_files/mm_reg_tf.csv")
-            r_data$reg_g = igraph::graph.data.frame(tf_tbl2,T)
-            list1 <- as.character(tf_tbl1$tf_gene)
-            list2 <- as.character(tf_tbl2$tf_gene)
-            input_tfs<- unique(c(list1, list2))
-            r_data$input_tfs<-input_tfs[!grepl("MMU-.*", input_tfs)]
-        } else {
-            r_data$reg_g <- NULL
-            print("Add species alert")
-            return()
-        }
-
-        r_data$tf_list <-r_data$input_tfs[which(toupper(r_data$input_tfs) %in% toupper(r_data$feature_list))] # change it to unfiltered list?
-
-    })
-
-})
-
-
-output$tf_loaded_ui <- renderUI({
-    if(!is.null(r_data$tf_list)){
-        return(
-            fluidRow(
-                column(9, tags$b(
-                    paste0("Total number of transcription factors found in the current dataset: ",
-                           length(r_data$tf_list), " (", length(r_data$input_tfs) - length(r_data$tf_list),
-                           " tfs are not found)."))),
-                column(3, downloadButton("download_tfs", "Download TF list", class = "btn btn-success"))
-            )
-
-        )
-    } else {
-        return(tags$p(paste0("You need to manually upload a transcription factor list for the specified species.")))
-    }
-})
-
-output$download_tfs <- downloadHandler(
-    filename = "tf_list.csv",
-    content = function(file) {
-        if(is.null(r_data$tf_list)) return()
-        write.csv(data.frame(tf_list = r_data$tf_list), file, row.names = F)
-    }
-)
-
-
-
-output$tf_de_tbl_show <- DT::renderDataTable({
-    if(is.null(r_data$df) || is.null(input$tf_de_select)) return()
-    if(input$tf_de_select == "scde" && is.null(input$scde_lfc)) return()
-    tryCatch({
-    if(input$tf_de_select == "scde") {
-        if(is.null(r_data$scde_results)) return()
-        if(input$scde_lfc == "mle") {
-            tbl <- r_data$scde_results %>% tibble::rownames_to_column("gene") %>%
-                dplyr::select(gene, lfc_or_es = mle, pval = p.values, padj = p.values.adj)
-        } else if(input$scde_lfc == "ce") {
-            tbl <- r_data$scde_results %>% tibble::rownames_to_column("gene") %>%
-                dplyr::select(gene, lfc_or_es = ce, pval = p.values, padj = p.values.adj)
-        }
-    } else if(input$tf_de_select == "deseq") {
-        if(is.null(r_data$deseq_results)) return()
-        tbl <- as.data.frame(r_data$deseq_results) %>% tibble::rownames_to_column("gene") %>%
-            dplyr::select(gene, lfc_or_es = log2FoldChange, pval = pvalue, padj = padj)
-    } else if(input$tf_de_select == "mww") {
-        if(is.null(r_data$mww_results)) return()
-        tbl <- r_data$mww_results %>% tibble::rownames_to_column("gene") %>%
-            dplyr::select(gene, lfc_or_es = effectSize, pval = P.value, padj = adjustedP)
-        tbl$lfc_or_es <- sign(tbl$lfc_or_es)*log(abs(tbl$lfc_or_es) + 1) # This is the correct transformation?
-    }
-
-    if(input$tf_score_type == "lfc") {
-        tbl$gene_score = abs(tbl$lfc_or_es)
-    } else if(input$tf_score_type == "mogrify") {
-        tbl$gene_score = abs(tbl$lfc_or_es) * (-log10(tbl$padj))
-    } else if(input$tf_score_type == "mogrify_modified") {
-            tmp_padj <- ifelse(tbl$padj > input$tf_score_pthresh, -log10(tbl$padj), -log10(input$tf_score_pthresh))
-            tbl$gene_score = abs(tbl$lfc_or_es) * tmp_padj
-    } else if(input$tf_score_type == "lfc_threshold") {
-        mulplier <- ifelse(tbl$padj > input$tf_score_pthresh,0,1)
-        tbl$gene_score = abs(tbl$lfc_or_es) * mulplier
-    }
-
-
-    if(input$tf_de_rank_type == "score") {
-        tbl <- tbl %>% dplyr::arrange(-gene_score)
-    } else if(input$tf_de_rank_type == "padj") {
-        tbl <- tbl %>% dplyr::arrange(padj)
-    } else if(input$tf_de_rank_type == "lfc") {
-        tbl <- tbl %>% dplyr::arrange(-abs(lfc_or_es))
-    }
-
-    r_data$tf_de_tbl <- tbl
-
-    if(input$tf_de_subset == "tf"){
-        if(is.null(r_data$tf_list)) return()
-        tbl <- tbl[which(toupper(tbl$gene) %in% toupper(r_data$tf_list)),]
-    }
-
-    tbl <- tbl %>% dplyr::filter(padj <= input$tf_de_padj)
-
-    if(input$tf_de_direction == "up") {
-        tbl <- tbl[which(tbl$lfc_or_es > 0),]
-    } else if(input$tf_de_direction == "down") {
-        tbl <- tbl[which(tbl$lfc_or_es < 0),]
-    }
-
-    r_data$tf_de_tbl_vis <- tbl
-    }, error = function(e){})
-
-    DT::datatable(tbl, selection = 'single', options = list(scrollX = TRUE, scrollY = "300px", searching=T))
-})
-
-output$download_tf_de_tbl_ui <- renderUI({
-    if(is.null(input$tf_de_select) || is.null(r_data$df) || is.null(r_data$tf_de_tbl_vis)) return()
-    if(input$tf_de_select == "scde" && is.null(input$scde_lfc)) return()
-
-    downloadButton("download_tf_de_tbl", "Download", class = "btn btn-success")
-})
-
-output$download_tf_de_tbl <- downloadHandler(
-    filename = "de_tbl.csv",
-    content = function(file) {
-        if(is.null(r_data$tf_de_tbl_vis)) return()
-        tbl <- r_data$tf_de_tbl_vis
-
-        write.csv(tbl, file)
-    }
-)
-
 
 output$tf_interactome_selection_ui <- renderUI({
     interactome_list <- list()
@@ -670,7 +453,7 @@ output$tf_interactome_selection_ui <- renderUI({
 })
 
 output$string_load_ui <- renderUI({
-    if(is.null(input$tf_interactome_selection)) return()
+    req(input$tf_interactome_selection)
 
     if(input$tf_interactome_selection == "stringdb") {
         list(
@@ -680,8 +463,10 @@ output$string_load_ui <- renderUI({
     }
 })
 
+### Load Regnetwork ###
+
 observe({
-    if(is.null(input$tf_interactome_selection)) return()
+    req(input$tf_interactome_selection)
     if(input$tf_interactome_selection == "reg"){
         if(input$transnet_species == "9606"){
             tbl2 <- read.csv("src/built_in_files/hs_reg_tf.csv")
@@ -700,7 +485,6 @@ observe({
 # The functions swiped from STRINGdb, using the original stringdb package cause crash because of igraph incompatibility
 
 downloadAbsentFile <- function(urlStr, oD = tempdir()){
-
     fileName = tail(strsplit(urlStr, "/")[[1]], 1)
     temp <- paste(oD,"/", fileName, sep="")
     if(! file.exists(temp) || file.info(temp)$size==0) download.file(urlStr,temp)
@@ -757,10 +541,11 @@ observeEvent(input$loadStringSpecies, {
         })
         if(!is.null(r_data$string_meta)) r_data$string_meta <- NULL
         message_alert <- capture.output({
-            if(!is.null(r_data$feature_meta$STRING_id)) {
-                tbl <- r_data$feature_meta %>% dplyr::select(-STRING_id)
+            fmeta <- fData(r_data$sceset)
+            if(!is.null(fmeta$STRING_id)) {
+                tbl <- fmeta %>% dplyr::select(-STRING_id)
             } else {
-                tbl <- r_data$feature_meta
+                tbl <- fmeta
             }
             string_meta <- r_data$stringdb$map(as.matrix(tbl), "cap_name", removeUnmappedRows = FALSE) # After this step, get more rows because of non-unique stringid
             #assign("test_sm", string_meta, env = .GlobalEnv)
@@ -824,7 +609,7 @@ output$net_vis <- renderUI({
                            checkboxInput("tf_net_add_label", "Show gene names", value = T)
                     ),
                     column(4,
-                           numericInput("tf_vscale_factor", "Vertex size scaling:", min = 0.1, max = 100, value = 1)
+                           numericInput("tf_vscale_factor", "Vertex size scaling:", min = 0.1, value = 1, step=0.1)
                     ),
                     column(4, selectInput("tf_net_layout", "Choose graph layout:", choices = list("auto" = "layout.auto", "fruchterman.reingold" = "layout.fruchterman.reingold", "kamada.kawai" = "layout.kamada.kawai", "mds" = "layout.mds", "random" = "layout.random", "circle" = "layout.circle", "sphere" = "layout.sphere")))
                 )
@@ -841,7 +626,6 @@ output$net_vis <- renderUI({
                 uiOutput("stringdb_gene_range_ui"),
                 uiOutput("plotStringNets_ui")
             ),
-
             htmlOutput("stringdb_vis")
         )
     }
@@ -889,35 +673,34 @@ observeEvent(input$plotStringNets, {
         }
 
         genes <- tbl$STRING_id
-
-        link <- r_data$stringdb$get_link(genes, payload_id=NULL, required_score=r_data$string_score) # Set this to match
-
-        r_data$stringdb_link<- paste0("<iframe src='", link, "', width='100%', height='750'>STRINGdb Visualization</iframe>")
+        r_data$stringdb_link <- r_data$stringdb$get_link(genes, payload_id=NULL, required_score=r_data$string_score) # Set this to match
     })
 })
 
 
 output$stringdb_vis <- renderUI({
-    return(HTML(r_data$stringdb_link))
+    return(tags$iframe(src=r_data$stringdb_link, height=700, width="100%"))
 })
 
 output$tf_net_all <- renderPlot({
-    if(is.null(r_data$tf_de_tbl_vis) || nrow(r_data$tf_de_tbl_vis) ==0) return()
-    if(is.null(input$tf_interactome_selection)) return()
+    req(r_data$tf_de_tbl_vis, nrow(r_data$tf_de_tbl_vis) !=0, input$tf_interactome_selection)
 
     if(input$tf_interactome_selection == "stringdb") {
-        if(is.null(r_data$stringdb_g)) return()
+        req(r_data$stringdb_g)
         g0 <- r_data$stringdb_g
     }
-    if(input$tf_interactome_selection == "reg") g0 <- r_data$reg_g
+    if(input$tf_interactome_selection == "reg") {
+        req(r_data$reg_g)
+        g0 <- r_data$reg_g
+    }
 
     tbl <- r_data$tf_de_tbl_vis
 
-    if(nrow(tbl) <=input$tf_net_limit)
+    if(nrow(tbl) <=input$tf_net_limit) {
         row_limit <- nrow(tbl)
-    else
+    } else {
         row_limit <- input$tf_net_limit
-
+    }
     tbl <- tbl[1:row_limit,]
 
     if(input$tf_interactome_selection == "stringdb") {
@@ -927,10 +710,9 @@ output$tf_net_all <- renderPlot({
         tbl_in<-as.character(str_in[which(str_in %in% V(g0)$name)])
         cap_id <-cap_id[which(str_in %in% V(g0)$name)]
         tbl <- tbl[match(cap_id, toupper(tbl$gene)), ]
-    }
-
-    if(input$tf_interactome_selection == "reg"){
-        tbl_in <- r_data$feature_meta$cap_name[match(toupper(tbl$gene), r_data$feature_meta$cap_name)]
+    } else if(input$tf_interactome_selection == "reg"){
+        fmeta <- fData(r_data$sceset)
+        tbl_in <-fmeta$cap_name[match(toupper(tbl$gene), fmeta$cap_name)]
         tbl_in<-as.character(tbl_in[which(tbl_in %in% V(g0)$name)])
         tbl <- tbl[match(tbl_in, toupper(tbl$gene)), ]
     }
@@ -949,13 +731,9 @@ output$tf_net_all <- renderPlot({
     col=colfunc(abs_max * 2 + 1)
     names(col) <- as.character(seq(-abs_max, abs_max, by = 1))
     cols <- col[as.character(range)]
-
     lbl_size <- seq(0, 0.8, length = abs_max + 1)
-
     names(lbl_size) <- as.character(c(0:abs_max))
-
     V(tbl_nets)$label.cex = lbl_size[as.character(abs(range))] + 0.1 # give it a min so that no 0s
-
     V(tbl_nets)$color <- cols
     V(tbl_nets)$size <- abs(tbl$gene_score[match(V(tbl_nets)$name, tbl$gene)]) * input$tf_vscale_factor # gene_score, or LFC
     V(tbl_nets)$size[is.na(V(tbl_nets)$size)] <- 0
@@ -1060,7 +838,7 @@ observeEvent(input$tf_sum_score, {
             for(i in 1: nrow(tfs)) {
                 if(input$tf_interactome_selection == "reg") {
                     cur_mode = input$tf_nbs_direction
-                    meta_tbl <- r_data$feature_meta
+                    meta_tbl <- fData(r_data$sceset)
                 } else {
                     cur_mode = "all"
                     meta_tbl <- r_data$string_meta
@@ -1220,7 +998,7 @@ output$tf_gp1_net_show <- renderUI({
 
             if(input$tf_interactome_selection == "reg") {
                 cur_mode = input$tf_nbs_direction
-                meta_tbl <- r_data$feature_meta
+                meta_tbl <- fData(r_data$sceset)
             } else {
                 cur_mode = "all"
                 meta_tbl <- r_data$string_meta
@@ -1351,7 +1129,7 @@ output$tf_gp2_net_show <- renderUI({
 
             if(input$tf_interactome_selection == "reg") {
                 cur_mode = input$tf_nbs_direction
-                meta_tbl <- r_data$feature_meta
+                meta_tbl <- fData(r_data$sceset)
             } else {
                 cur_mode = "all"
                 meta_tbl <- r_data$string_meta
@@ -1421,5 +1199,23 @@ output$tf_gp2_forcenet <- networkD3::renderForceNetwork({
 })
 
 
+output$final_score_def_ui <- renderUI({
+    if(is.null(r_data$tf_de_tbl) ) return()
+    if(!is.null(r_data$tf_neighbor_order) && r_data$tf_neighbor_order == 0) return()
+    selectInput("final_score_def", "Define final score",
+                choices = list(
+                    "Influence score" = "influence_score",
+                    "Influence score adjusted by total number of vertices" = "adj_v",
+                    "Influence score adjusted by total number of activated vertices" = "adj_vth",
+                    "Influence score adjusted by proportion of activated vertices" = "adj_prop",
+                    "TF score" = "tf_score",
+                    "TF score adjusted by total number of vertices" = "tf_adj_v",
+                    "TF score adjusted by total number of activated vertices" = "tf_adj_vth",
+                    "TF score adjusted by proportion of activated vertices" = "tf_adj_prop",
+                    "Proportion of activated vertices" = "prop"
+                ),
+                selected = "adj_v"
+    )
+})
 
 

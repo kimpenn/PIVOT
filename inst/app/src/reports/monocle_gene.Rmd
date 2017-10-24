@@ -42,10 +42,10 @@ if(is.null(r_data$cellset) || is.null(pData(r_data$cellset)$State) || is.null(in
 ### Gene Clustering Result
 
 ```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 6}
-if(is.null(r_data$monocle_clusters)) {
+if(is.null(r_data$monocle_gene_clusters)) {
     return()
 } else {
-    tbl <- r_data$monocle_clusters$tbl
+    tbl <- r_data$monocle_gene_clusters$tbl
     DT::datatable(tbl,
                   options = list(
                       scrollX = F, scrollY = "400px", lengthMenu = c(20, 50, 100)
@@ -57,10 +57,8 @@ if(is.null(r_data$monocle_clusters)) {
 ### Gene Clustering Heatmap
 
 ```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 8}
-    if(is.null(r_data$monocle_clusters)) return()
-    ph_res <- r_data$monocle_clusters$hmap
-    grid::grid.rect(gp = grid::gpar("fill", col = NA))
-    grid::grid.draw(ph_res$gtable)
+    if(is.null(r_data$monocle_gene_clusters)) return()
+    grid::grid.draw(r_data$monocle_gene_clusters$gtable)
 ```
 
 

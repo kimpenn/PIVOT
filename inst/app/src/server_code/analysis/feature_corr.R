@@ -26,7 +26,7 @@ output$cor_ft_ui <- renderUI({
             width = 12,
             title = "Feature Correlation",
             id = "feature_corr",
-            status = "danger",
+            status = "primary",
             solidHeader = T,
             collapsible = T,
             reportable = T,
@@ -44,7 +44,7 @@ output$cor_ft_ui <- renderUI({
             tags$div(tags$b("Visualization Settings:"), class = "param_setting_title"),
             fluidRow(
                 column(4, selectInput("cor_ft_package", label = "Plotting package", choices = list("gplots"="gplots", "heatmaply"="heatmaply"), multiple = F)),
-                column(4, selectInput("cor_ft_hmcolor", label = "Heatmap color", choices = c(get_brewer_set("sequential"), list("viridis" = "viridis", "magma" = "magma", "plasma" = "plasma", "inferno" = "inferno")), multiple = F))
+                column(4, selectInput("cor_ft_hmcolor", label = "Heatmap color", choices = c(get_brewer_set("sequential"), list("diverge_hcl"="diverge_hcl", "redgreen" = "redgreen"), list("viridis" = "viridis", "magma" = "magma", "plasma" = "plasma", "inferno" = "inferno")), multiple = F))
             ),
             uiOutput("cor_ft_exceed_max_plot"),
             tags$hr(),

@@ -1,0 +1,38 @@
+
+# Diffusion Map
+
+## Diffusion Map Projection Plots
+
+```{r echo = FALSE, warning=FALSE, message = FALSE}
+    dfm_minfo<- reactive(callModule(pivot_groupBy, "dfm", meta = r_data$meta))
+```
+
+### 2D Projection
+
+```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 6}
+    obj<-callModule(pivot_Plot2d, "dfm_plot2d", type = "dfm",  obj = NULL, proj = as.data.frame(r_data$dfm@eigenvectors), minfo = dfm_minfo(),
+                      source = NULL, event = NULL, selected = NULL)
+    obj$plot
+```
+
+### 3D Projection
+
+**Stress**: `r r_data$nds$nds_3d$stress`
+
+```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 6}
+         callModule(pivot_Plot3d, "dfm_plot3d", type = "dfm", obj = NULL, proj = as.data.frame(r_data$dfm@eigenvectors), minfo = dfm_minfo())
+```
+
+## Diffusion Pseudo Time (DPT)
+
+```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 6}
+    destiny::plot.DPT(r_data$dpt)
+```
+
+```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 6}
+    btbl <- as.data.frame(r_data$dpt@branch)
+    rownames(btbl) <- r_data$sample_name
+    DT::datatable(btbl)
+```
+
+

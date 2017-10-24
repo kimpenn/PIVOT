@@ -19,7 +19,7 @@ output$gsea_ui <- renderUI({
     list(
         enhanced_box(
             width = 12,
-            title = "Gene Set Enrichment Analysis",
+            title = "Enrichment Analysis",
             id = "gsea",
             status = "primary",
             solidHeader = T,
@@ -27,28 +27,39 @@ output$gsea_ui <- renderUI({
             reportable = T,
             get_html = T,
             register_analysis= T,
-            tags$div(tags$b("GSEA Settings:"), class = "param_setting_title"),
+            tags$div(tags$b("Enrichment Analysis Settings:"), class = "param_setting_title"),
             fluidRow(
-                column(3,
+                column(4,
                        selectInput("gsea_type", "Analysis Type", choices = list("Gene Ontology Analysis" = "go", "KEGG Pathway Analysis" = "kegg"))
                 ),
-                column(3,
+                column(4,
                        uiOutput("gsea_species_ui")
                 ),
-                column(3, tags$br(), checkboxInput("gsea_id_convert", "Convert gene name to id", value = T))
+                column(4, tags$br(),
+                       checkboxInput("gsea_id_convert",
+                                     tags$span("Convert gene name to id", shinyBS::tipify(
+                                         bsButton("gsea_id_convert_tooltip", label = NULL, icon = icon("question-circle"), style = "link", size = "extra-small"),
+                                         title = "Check this if your input list is gene name. PIVOT will automatically convert it to entrez id. If you have already converted names to id in the Feature panel, uncheck this to proceed.",
+                                         options = list(container = "body")
+                                     )),
+                                     value = T)
+                    )
             ),
             fluidRow(
-                pivot_featureList_UI("gsea", include = c("custom", "deseq", "edgeR", "scde", "monocle", "mwu"), selected = "custom", width = 6),
-                column(3,
+                pivot_featureList_UI("gsea", include = c("custom", "deseq", "edgeR", "scde", "monocle", "mwu"), selected = "custom", width = 8),
+                uiOutput("gsea_feature_preview")
+            ),
+            fluidRow(
+                column(4,
                        selectInput("gsea_bg_type", "Background Set", choices = list("All expressed genes" = "expressed", "All Entrez Gene IDs" = "all", "Custom background" = "custom"))
                 ),
-                column(3, uiOutput("gsea_custom_bg_ui"))
+                uiOutput("gsea_custom_bg_ui"),
+                uiOutput("gsea_bg_preview")
             ),
             fluidRow(
-                column(3, uiOutput("gsea_feature_preview")),
-                column(3, uiOutput("gsea_bg_preview")),
-                column(3),
-                column(3, uiOutput("run_gsea_ui"))
+                column(4),
+                column(4, numericInput("gsea_top_num", "Top GO term #", value = 100, min =1, step=1)),
+                column(4, uiOutput("run_gsea_ui"))
             )
         ),
         enhanced_box(
@@ -74,16 +85,18 @@ output$gsea_ui <- renderUI({
 
 output$gsea_feature_preview <- renderUI({
     if(is.null(gsea_feature_tbl()) || nrow(gsea_feature_tbl()) == 0) {
-        tagList(tags$p("Feature set not detected."))
+        column(4,
+            tags$br(),
+            tags$p("Feature set not detected.")
+        )
     } else {
         modal_content <- list(
             DT::dataTableOutput("gsea_feature_pv_tbl")
         )
-        tagList(
-            tagList(tags$br(),
-                   actionButton("gsea_feature_pv_btn", paste0("Preview loaded feature set (", nrow(gsea_feature_tbl()), ")"), class = "btn-success"),
-                   shinyBS::bsModal(id = "gsea_feature_pv_modal", "Loaded features", "gsea_feature_pv_btn", size = "large", modal_content)
-            )
+        column(4,
+               tags$br(),
+               actionButton("gsea_feature_pv_btn", paste0("Preview loaded feature set (", nrow(gsea_feature_tbl()), ")"), class = "btn-success"),
+               shinyBS::bsModal(id = "gsea_feature_pv_modal", "Loaded features", "gsea_feature_pv_btn", size = "large", modal_content)
         )
     }
 })
@@ -110,7 +123,7 @@ gsea_bg <- reactive({
 output$gsea_custom_bg_ui <- renderUI({
     req(input$gsea_bg_type)
     if(input$gsea_bg_type == "custom") {
-        tagList(
+        column(4,
             tags$br(),
             pivot_featureInputModal_UI("gsea_bg", "Input custom background list")
         )
@@ -122,11 +135,10 @@ output$gsea_bg_preview <- renderUI({
         modal_content <- list(
             DT::dataTableOutput("gsea_bg_pv_tbl")
         )
-        tagList(
-            tagList(tags$br(),
-                    actionButton("gsea_bg_pv_btn", paste0("Preview loaded background set (", length(gsea_bg()), ")"), class = "btn-success"),
-                    shinyBS::bsModal(id = "gsea_bg_pv_modal", "Loaded background", "gsea_bg_pv_btn", size = "large", modal_content)
-            )
+        column(4,
+               tags$br(),
+               actionButton("gsea_bg_pv_btn", paste0("Preview loaded background set (", length(gsea_bg()), ")"), class = "btn-success"),
+               shinyBS::bsModal(id = "gsea_bg_pv_modal", "Loaded background", "gsea_bg_pv_btn", size = "large", modal_content)
         )
     }
 })
@@ -140,7 +152,10 @@ gsea_feature_tbl <- callModule(pivot_featureList, "gsea", r_data = r_data)
 
 output$run_gsea_ui <- renderUI({
     req(gsea_feature_tbl())
-    actionButton("run_gsea", "Run Analysis", class = "btn-primary btn_leftAlign")
+    list(
+        tags$br(),
+        actionButton("run_gsea", "Run Analysis", class = "btn-primary btn_leftAlign")
+    )
 })
 
 output$gsea_species_ui <- renderUI({
@@ -183,6 +198,9 @@ observeEvent(input$run_gsea, {
             } else {
                 bglist <- NULL
             }
+        } else {
+            flist <- gsub("^X", "", flist)
+            bglist <-  gsub("^X", "", bglist)
         }
 
         if(input$gsea_species == "hsapiens_gene_ensembl") {
@@ -195,14 +213,14 @@ observeEvent(input$run_gsea, {
         error_I <- 0
         if(input$gsea_type == "go") {
             tryCatch({
-                r_data$gsea <- limma::topGO(limma::goana(de = flist, universe = bglist, species = species))
+                r_data$gsea <- limma::topGO(limma::goana(de = flist, universe = bglist, species = species), number = input$gsea_top_num)
             }, error = function(e) {
                 error_I <<- 1
                 print(e)
             })
         } else if(input$gsea_type == "kegg") {
             tryCatch({
-                r_data$gsea <- limma::topKEGG(limma::kegga(de = flist, universe = bglist, species = species))
+                r_data$gsea <- limma::topKEGG(limma::kegga(de = flist, universe = bglist, species = species), number = input$gsea_top_num)
             }, error = function(e) {
                 error_I <<- 1
                 print(e)

@@ -21,7 +21,10 @@ output$design_ui <- renderUI({
                 fluidRow(
                     column(5,
                            tags$div(tags$b("Add Category:"), class = "param_setting_title"),
-                           textInput("man_cate_name", "Category(column) name:", placeholder = "e.g., Group/Batch/Condition"),
+                           fluidRow(
+                               column(6, textInput("man_cate_name", "Name:", placeholder = "e.g., Group/Batch/Condition")),
+                               column(6, selectInput("man_cate_type", "Type", choices = list("categorical" = "categorical", "numerical"="numerical")))
+                           ),
                            actionButton('man_add_cate', label = "Add Category", class = "btn btn-info"),
                            tags$p(),
                            uiOutput("man_choose_cate_ui"),
@@ -46,6 +49,7 @@ output$design_ui <- renderUI({
                                     pivot_help_UI("design_input", "File format requirement"),
                                     class = "param_setting_title"),
                            pivot_fileInput_UI("design"),
+                           uiOutput("design_upload_cate_type_ui"),
                            checkboxInput("sample_reorder", "Reorder samples according to the design table.", value = F)
                     ),
                     column(7,
@@ -70,11 +74,13 @@ observe({
 })
 
 
+########################### Manual Input ###########################
+
 custom_merge <- function(df, df1, by, col) {
     sp <- df[,by]
     gp <- df[,col]
     names(gp) <- as.character(sp)
-    gp [as.character(df1[,by])] <- as.character(df1[,col])
+    gp[as.character(df1[,by])] <- df1[,col]
     df[,col] <- gp
     return(df)
 }
@@ -91,25 +97,31 @@ output$man_choose_cate_ui <- renderUI({
 })
 
 output$manual_add_group_ui <- renderUI({
-    if(is.null(input$man_choose_cate)) return()
+    req(input$man_choose_cate)
     sample_name <- colnames(r_data$glb.raw)
-    isolate({
-        group_options <- as.list(sample_name)
-        names(group_options) <- sample_name
-        list(
-            textInput("man_group_name", label = "Group name:", value = "group_1"),
-            selectizeInput('man_sample_in_group', label = "Add samples to this group", choices = group_options, multiple = TRUE),
-            verbatimTextOutput("man_group_show"),
-            actionButton('man_add_group', label = "Add Group", class = "btn-info")
-        )
-    })
+    group_options <- as.list(sample_name)
+    names(group_options) <- sample_name
+
+    if(is.character(r_data$design_pv[[input$man_choose_cate]])) {
+        val_or_group <- textInput("man_group_name", label = "Group name:", value = "group_1")
+    } else if (is.numeric(r_data$design_pv[[input$man_choose_cate]])) {
+        val_or_group <- numericInput("man_group_value", label = "Group value:", value = 0)
+    } else {
+        return()
+    }
+    list(
+        val_or_group,
+        selectizeInput('man_sample_in_group', label = "Add samples to this group", choices = group_options, multiple = TRUE),
+        verbatimTextOutput("man_group_show"),
+        actionButton('man_add_group', label = "Add Group", class = "btn-info")
+    )
 })
 
 output$man_cate_add_group_ui <- renderUI({
     if(is.null(input$man_choose_cate)) return()
     if(!input$man_choose_cate %in% colnames(r_data$design_pv)) return()
     list(
-        tags$div(tags$b(paste("Add Groups to Category"),input$man_choose_cate), class = "param_setting_title"),
+        tags$div(tags$b(paste("Add Values to Category"),input$man_choose_cate), class = "param_setting_title"),
         uiOutput("manual_add_group_ui")
     )
 })
@@ -134,13 +146,13 @@ output$man_design_submit_ui <- renderUI({
 })
 
 
-###### Handle manual group input #####
+# Initialization
 observe({
     # Init df
     if(is.null(r_data$glb.raw)) return()
     if(is.null(r_data$design_pv)) {
         r_data$design_pv <- data.frame(Sample = colnames(r_data$glb.raw))
-        r_data$design_pv$Group <- rep(NA, nrow(r_data$design_pv))
+        r_data$design_pv$Group <- as.character(rep(NA, nrow(r_data$design_pv)))
     }
 })
 
@@ -158,10 +170,16 @@ observe({
 })
 
 current_group <- reactive({
-    if(is.null(input$man_sample_in_group)) return()
+    req(input$man_sample_in_group)
     cur_cate <- input$man_choose_cate
     df<-data.frame(Sample = input$man_sample_in_group)
-    df[,cur_cate] <- rep(input$man_group_name, nrow(df))
+    if(is.character(r_data$design_pv[[input$man_choose_cate]])) {
+        df[[cur_cate]] <- rep(input$man_group_name, nrow(df))
+    } else if (is.numeric(r_data$design_pv[[input$man_choose_cate]])) {
+        df[[cur_cate]] <- rep(input$man_group_value, nrow(df))
+    } else {
+        return()
+    }
     return(df)
 })
 
@@ -182,7 +200,11 @@ observeEvent(input$man_add_cate, {
         session$sendCustomMessage(type = "showalert", "'None' or 'none' cannot be used as category name.")
         return()
     }
-    r_data$design_pv[,input$man_cate_name] <- rep(NA, nrow(r_data$design_pv))
+    if(input$man_cate_type == "categorical") {
+        r_data$design_pv[[input$man_cate_name]] <- as.character(rep(NA, nrow(r_data$design_pv)))
+    } else {
+        r_data$design_pv[[input$man_cate_name]] <- as.numeric(rep(NA, nrow(r_data$design_pv)))
+    }
 })
 
 observeEvent(input$man_del_cate, {
@@ -207,7 +229,7 @@ observeEvent(input$clear_group_1, {
         incProgress(0.3, detail = "Removing design info...")
         r_data <- clear_design(r_data)
         incProgress(0.3, detail = "Updating metadata...")
-        r_data <- init_meta(r_data, type = "sample")
+        r_data <- init_meta(r_data)
         setProgress(1)
     })
 })
@@ -226,7 +248,7 @@ observeEvent(input$man_submit_design, {
         r_data$glb.meta <- df_tmp
 
         incProgress(0.3, detail = "Updating metadata...")
-        r_data <- init_meta(r_data, type = "sample")
+        r_data <- init_meta(r_data)
         setProgress(1)
     })
 })
@@ -243,23 +265,38 @@ observeEvent(input$submitConfirmDlgBtn, {
         # Other sanity checks? Like cols contain NA, empty cols(only spaces), cols contain only one category?
         r_data$glb.meta <- df_tmp
         incProgress(0.3, detail = "Updating metadata...")
-        r_data <- init_meta(r_data, type = "sample")
+        r_data <- init_meta(r_data)
         setProgress(1)
     })
 })
 
 
-##### Handle group info input file #####
 
-observeEvent(input$clear_group_2, {
-    withProgress(message = 'Processing', value = 0, {
-        incProgress(0.3, detail = "Removing design info...")
-        r_data <- clear_design(r_data)
-        incProgress(0.3, detail = "Updating metadata...")
-        r_data <- init_meta(r_data, type = "sample")
-        setProgress(1)
-    })
+
+
+####################### Upload design #######################
+output$design_upload_cate_type_ui <- renderUI({
+    design_upload <- callModule(pivot_fileInput, "design")
+    if(is.null(design_upload$df)) {
+        return()
+    }
+    df_tmp <- as.data.frame(design_upload$df)[,-1,drop=F]
+    cur_type<-lapply(df_tmp, typeof)
+    content <- list(
+        lapply(1:length(cur_type), function(i) {
+            list(selectInput(paste0("design_cate", i),
+                              names(cur_type)[i],
+                              choices = list("categorical" = "categorical", "numerical" = "numerical"),
+                              selected=ifelse(cur_type[i] %in% c("character","logical","raw"), "categorical", "numerical")))
+
+        })
+    )
+    list(
+        actionButton("design_cate_type_btn", label = "Set design variable type", class = "btn-info"),
+        shinyBS::bsModal(id = "design_cate_type_modal", "Set design variable type", "design_cate_type_btn", size = "small", content)
+    )
 })
+
 
 # Upload group info handler
 observeEvent(input$submit_design_upload, {
@@ -269,6 +306,17 @@ observeEvent(input$submit_design_upload, {
     }
 
     df_tmp <- as.data.frame(design_upload$df)
+
+    # Set column type
+
+    for(i in 2:ncol(df_tmp)){
+        if(input[[paste0("design_cate",i-1)]] == "categorical"){
+            df_tmp[[i]] <- as.character(df_tmp[[i]])
+        } else {
+            df_tmp[[i]] <- as.numeric(df_tmp[[i]])
+        }
+    }
+
     # assign('df_tmp', df_tmp, env = .GlobalEnv)
     # Take first column as sample column
     sample_col <- df_tmp[,1]
@@ -304,7 +352,7 @@ observeEvent(input$submit_design_upload, {
         }
 
         incProgress(0.3, detail = "Updating metadata...")
-        r_data <- init_meta(r_data, type = "sample")
+        r_data <- init_meta(r_data)
         setProgress(1)
     })
 })
@@ -336,7 +384,6 @@ output$download_design_tbl <- downloadHandler(
         write.csv(r_data$glb.meta, file, row.names = F)
     }
 )
-
 
 
 

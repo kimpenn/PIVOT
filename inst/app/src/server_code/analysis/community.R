@@ -40,6 +40,12 @@ output$mst_ui <- renderUI({
                 column(4, selectInput("com_algorithm", "Community Detection Algorithm", choices = list("Walktrap" = "walktrap"))),
                 column(4, numericInput("com_wt_step", "Walktrap Steps", value = 4, min = 1, max = 100, step = 1))
             ),
+            fluidRow(column(12,actionButton("run_community", "Run", class = "btn-info btn_rightAlign")))
+        ),
+        box(
+            title = NULL,
+            status = "primary",
+            width = 12,
             tags$div(tags$b("Visualization Settings:"), class = "param_setting_title"),
             fluidRow(
                 column(4, selectInput("mst_package", "Plotting package", choices = list("igraph" = "igraph", "networkD3" = "networkD3"), selected = "igraph")),
@@ -48,12 +54,7 @@ output$mst_ui <- renderUI({
             fluidRow(
                 column(4, sliderInput("vertex_size", "Vertex size", min = 1, max = 20, value = 5)),
                 uiOutput("mst_igraph_param")
-            )
-        ),
-        box(
-            title = NULL,
-            status = "primary",
-            width = 12,
+            ),
             fluidRow(
                 column(4,
                        tags$div(tags$b("Community Detection Results"), class = "param_setting_title"),
@@ -106,7 +107,7 @@ output$down_com_ui <- renderUI({
 
 # Construct graph object from data
 mstList <- callModule(pivot_dataScale, "mst_scale", r_data)
-mst_graph <- reactive({
+observeEvent(input$run_community, {
     req(mstList()$df)
     mst_data <- mstList()$df
     if(input$mst_dist_method == 'euclidean') {
@@ -147,11 +148,10 @@ mst_graph <- reactive({
         }
     }
 
-    cList <- callModule(pivot_groupBy, "community", meta = r_data$meta)
-    rsList<-generate_mst(dist_mtx, method = input$com_algorithm, color_list = cList, step = input$com_wt_step)
+    rsList<-generate_mst(dist_mtx, method = input$com_algorithm, step = input$com_wt_step)
     r_data$meta$community <- paste0("community_",as.character(igraph::membership(rsList$community)))
     r_data$category <- colnames(r_data$meta)
-    return(rsList) # Return the graph for plotting
+    r_data$community <- rsList
 })
 
 # Minimum spanning tree plot
@@ -165,15 +165,22 @@ output$mst_plt_ui <- renderUI({
 })
 
 output$mst_plt <- renderPlot({
-    if(is.null(mst_graph())) return()
-    mst0 <- mst_graph()$g
+    if(is.null(r_data$community)) return()
+    mst0 <- r_data$community$g
+    color_list <- callModule(pivot_groupBy, "community", meta = r_data$meta)
+    if(!is.null(color_list$meta)) {
+        V(mst0)$color <- color_list$meta_color[,1]
+        V(mst0)$group <- as.character(color_list$meta[,1])
+    } else {
+        V(mst0)$group <- rep("NA", length(r_data$sample_name))
+    }
     label <- NA
     if(input$mst_lbl) {
         label <- V(mst0)$label
     }
 
     if(!is.null(input$color_com) && input$color_com) {
-        igraph::plot.igraph(mst0, vertex.label=label, vertex.size=input$vertex_size, mark.groups = mst_graph()$community)
+        igraph::plot.igraph(mst0, vertex.label=label, vertex.size=input$vertex_size, mark.groups = r_data$community$community)
     } else {
         igraph::plot.igraph(mst0, vertex.label=label, vertex.size=input$vertex_size)
     }
@@ -181,8 +188,15 @@ output$mst_plt <- renderPlot({
 })
 
 output$mst_d3 <- networkD3::renderForceNetwork({
-    if(is.null(mst_graph())) return()
-    mst0 <- mst_graph()$g
+    if(is.null(r_data$community)) return()
+    mst0 <- r_data$community$g
+    color_list <- callModule(pivot_groupBy, "community", meta = r_data$meta)
+    if(!is.null(color_list$meta)) {
+        V(mst0)$color <- color_list$meta_color[,1]
+        V(mst0)$group <- as.character(color_list$meta[,1])
+    } else {
+        V(mst0)$group <- rep("NA", length(r_data$sample_name))
+    }
     d3_g1<-networkD3::igraph_to_networkD3(mst0, group = V(mst0)$group)
     d3_g1$nodes$size <- rep(input$vertex_size, length(r_data$sample_name))
     ColourScale <- paste0('d3.scaleOrdinal().domain([\"',

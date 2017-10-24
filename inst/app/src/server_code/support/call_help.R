@@ -17,6 +17,11 @@ callModule(pivot_help, "directory", title = "How to input a count folder", conte
     img(src = "exp_count_file.png", width = 150)
 ))
 
+callModule(pivot_help, "tenx_input", title = "How to input a 10x Cell Ranger output folder", content = list(
+    tags$li("PIVOT expect the output directory produced by Cell Ranger (the folder containing `outs`).")
+))
+
+
 callModule(pivot_help, "single", title = "How to input a count table", content = list(
     tags$li("PIVOT only accepts .csv or .txt input."),
     tags$li("Feature names or sample names may be slightly modified to be valid R row/column names."),
@@ -36,6 +41,15 @@ callModule(pivot_help, "design_input", title = "File format requirements", conte
     tags$li("The first column must be sample column, and rest be metadata (categories). Values in each non-sample column will be treated as groups in that category"),
     tags$li("All samples must be present in the table (case sensitive). It is not recommended to have empty cells in the sheet, as those may affect some analysis/plots."),
     img(src = "sample_design_tbl.png", width = 500)
+))
+
+
+callModule(pivot_help, "feature_convert", title = "Feature id/name conversion mechanism", content = list(
+    tags$li("Feature id/name conversion is performed using the bioMart database."),
+    tags$li("PIVOT will try to convert all your features to the desired gene name/id type."),
+    tags$li("For features that has no match in the database, PIVOT will keep its original ID."),
+    tags$li("For features that map to multiple entries in the database, PIVOT will use the first matched entry."),
+    tags$li("For multiple features that map to one entry in the database, PIVOT will name the duplicates as 'name.1', 'name.2',etc.")
 ))
 
 callModule(pivot_help, "filter_type", title = "What is a feature filter", content = list(

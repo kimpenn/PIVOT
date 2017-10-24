@@ -43,7 +43,7 @@ output$hm_ui <- renderUI({
             tags$div(tags$b("Visualization Settings:"), class = "param_setting_title"),
             fluidRow(
                 column(3, selectInput("hmap_package", label = "Plotting package", choices = list("gplots"="gplots", "heatmaply"="heatmaply"), multiple = F)),
-                column(3, selectInput("hmap_hmcolor", label = "Heatmap color", choices = c(get_brewer_set("sequential"), list("viridis" = "viridis", "magma" = "magma", "plasma" = "plasma", "inferno" = "inferno")), multiple = F)),
+                column(3, selectInput("hmap_hmcolor", label = "Heatmap color", choices = c(get_brewer_set("sequential"), list("diverge_hcl"="diverge_hcl", "redgreen" = "redgreen"), list("viridis" = "viridis", "magma" = "magma", "plasma" = "plasma", "inferno" = "inferno")), multiple = F)),
                 pivot_groupBy_UI("hmap", r_data$category, append_none = T, width = 6)
             ),
             tags$hr(),

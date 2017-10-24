@@ -1,5 +1,5 @@
 
-# Community Detection with Minimum Spanning Tree
+# Community Detection
 
 **Distance measure:** `r input$mst_dist_method`
 
@@ -7,75 +7,39 @@
 
 **Walktrap Steps:** `r input$com_wt_step`
 
-```{r echo = FALSE, warning=FALSE, message = FALSE}
-mstList <- callModule(pivot_dataScale, "mst_scale", r_data)
-mst_graph <- reactive({
-    req(mstList()$df)
-    mst_data <- mstList()$df
-    if(input$mst_dist_method == 'euclidean') {
-        dist_mtx <- t(mst_data) %>% dist() %>% as.matrix()
-    } else if(input$mst_dist_method == 'correlation') {
-        dist_mtx <- 1 - cor(mst_data, method = input$mst_cor_method)
-    } else if(input$mst_dist_method == 'scde') {
-        if(is.null(input$mst_scde_dist_method)) return()
-        if(is.null(r_data$scde_ddo) && is.null(r_data$scde_rw) && is.null(r_data$scde_mrw)) {
-            session$sendCustomMessage(type = "showalert", "Please compute the SCDE-adjusted distance you want to use in SCDE module first.")
-            #updateTabItems(session, "tabs", "scde")
-            return()
-        }
-        if(input$mst_scde_dist_method == "ddo") {
-            if(is.null(r_data$scde_ddo)) {
-                session$sendCustomMessage(type = "showalert", "Please compute Direct drop-out adjusted distance in SCDE module first.")
-                #updateTabItems(session, "tabs", "scde")
-                return()
-            } else {
-                dist_mtx <-r_data$scde_ddo %>% as.matrix()
-            }
-        } else if(input$mst_scde_dist_method == "rw") {
-            if(is.null(r_data$scde_rw)) {
-                session$sendCustomMessage(type = "showalert", "Please compute Reciprocal weighting adjusted distance in SCDE module first.")
-                #updateTabItems(session, "tabs", "scde")
-                return()
-            } else {
-                dist_mtx <-r_data$scde_rw %>% as.matrix()
-            }
-        } else if(input$mst_scde_dist_method == "mrw") {
-            if(is.null(r_data$scde_mrw)) {
-                session$sendCustomMessage(type = "showalert", "Please compute Mode-relative weighting adjusted distance in SCDE module first.")
-                #updateTabItems(session, "tabs", "scde")
-                return()
-            } else {
-                dist_mtx <-r_data$scde_mrw %>% as.matrix()
-            }
-        }
-    }
-
-    cList <- callModule(pivot_groupBy, "community", meta = r_data$meta)
-    rsList<-generate_mst(dist_mtx, method = input$com_algorithm, color_list = cList, step = input$com_wt_step)
-    r_data$meta$community <- paste0("community_",as.character(igraph::membership(rsList$community)))
-    r_data$category <- colnames(r_data$meta)
-    return(rsList) # Return the graph for plotting
-})
-```
+## Minimum Spanning Tree
 
 ```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 6}
+    color_list <- callModule(pivot_groupBy, "community", meta = r_data$meta)
 if(input$mst_package == "igraph") {
-if(is.null(mst_graph())) return()
-    mst0 <- mst_graph()$g
+if(is.null(r_data$community)) return()
+    mst0 <- r_data$community$g
     label <- NA
     if(input$mst_lbl) {
         label <- V(mst0)$label
     }
+    if(!is.null(color_list$meta)) {
+        V(mst0)$color <- color_list$meta_color[,1]
+        V(mst0)$group <- as.character(color_list$meta[,1])
+    } else {
+        V(mst0)$group <- rep("NA", length(r_data$sample_name))
+    }
 
     if(!is.null(input$color_com) && input$color_com) {
-        igraph::plot.igraph(mst0, vertex.label=label, vertex.size=input$vertex_size, mark.groups = mst_graph()$community)
+        igraph::plot.igraph(mst0, vertex.label=label, vertex.size=input$vertex_size, mark.groups = r_data$community$community)
     } else {
         igraph::plot.igraph(mst0, vertex.label=label, vertex.size=input$vertex_size)
     }
     legend("topright", legend = unique(V(mst0)$group),  bty="n", fill = unique(V(mst0)$color), text.col = unique(V(mst0)$color), border = FALSE)
     } else if(input$mst_package == "networkD3"){
-        if(is.null(mst_graph())) return()
-    mst0 <- mst_graph()$g
+        if(is.null(r_data$community)) return()
+    mst0 <- r_data$community$g
+    if(!is.null(color_list$meta)) {
+        V(mst0)$color <- color_list$meta_color[,1]
+        V(mst0)$group <- as.character(color_list$meta[,1])
+    } else {
+        V(mst0)$group <- rep("NA", length(r_data$sample_name))
+    }
     d3_g1<-networkD3::igraph_to_networkD3(mst0, group = V(mst0)$group)
     d3_g1$nodes$size <- rep(input$vertex_size, length(r_data$sample_name))
     ColourScale <- paste0('d3.scaleOrdinal().domain([\"',
@@ -90,3 +54,13 @@ if(is.null(mst_graph())) return()
     }
    
 ```
+
+## Community Assignment
+
+```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 6}
+if(is.null(r_data$community)) return()
+    tbl <- r_data$meta[, c(1, which(colnames(r_data$meta) == "community"))]
+    DT::datatable(tbl, options = list(scrollX = TRUE, scrollY = "400px", lengthMenu = c(20, 50, 100)))
+```  
+    
+

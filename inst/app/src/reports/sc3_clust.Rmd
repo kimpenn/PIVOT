@@ -1,0 +1,40 @@
+
+# SC3 Clustering
+
+## Average Silhouette
+
+```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 6}
+    krange <- r_data$sc3_krange
+    silw<-sapply(krange, function(i) {
+         mean(r_data$sceset@sc3$consensus[[as.character(i)]]$silhouette[,"sil_width"])
+    })
+    plot(krange, silw, type="n", xlab="k", ylab="Average Silhouette", ylim = c(0,1), xaxt="n")
+    lines(krange, silw, type="b", lwd=1.5,lty=1, col="black", pch=18)
+    axis(1, at = krange)
+```
+
+## Silhouette Plot
+
+```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 6}
+    SC3::sc3_plot_silhouette(r_data$sceset, k = input$sc3_silw_k)
+```
+
+## Consensus Matrix
+
+```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 10, fig.height = 10}
+    SC3::sc3_plot_consensus(r_data$sceset, input$sc3_consensus_k, show_pdata = paste0("sc3_", r_data$sc3_krange, "_clusters"))
+```
+
+## Assignment Results
+
+```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 6}
+    p_data <- pData(r_data$sceset)
+    if(all(paste0("sc3_", r_data$sc3_krange, "_clusters") %in% colnames(p_data))) {
+        tbl <- p_data[,paste0("sc3_", r_data$sc3_krange, "_clusters")]
+    } else {
+        return()
+    }
+    DT::datatable(tbl, options = list(scrollX = TRUE, scrollY = "400px", lengthMenu = c(20, 50, 100)))
+```
+
+

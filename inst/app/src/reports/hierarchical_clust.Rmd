@@ -5,56 +5,15 @@
 
 **Agglomeration method**: `r input$hc_agglo_method`
 
-```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 6}
+```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 12, fig.height = 7}
 # distance measure
 hcList <- callModule(pivot_dataScale, "hc_scale", r_data)
-hclust0 <- reactive({
-    req(hcList()$df)
-    hc_data <- hcList()$df
-    if(!(input$hc_dist_method %in% c('scde', 'corr'))) {
-        t(hc_data) %>% dist(method = input$hc_dist_method) %>% hclust(method = input$hc_agglo_method)
-    } else if(input$hc_dist_method == 'corr') {
-        as.dist(1 - cor(hc_data, method = input$hclust_cor_method)) %>% hclust(method = input$hc_agglo_method)
-    } else if(input$hc_dist_method == 'scde') {
-        if(is.null(input$hclust_scde_dist_method)) return()
-        if(is.null(r_data$scde_ddo) && is.null(r_data$scde_rw) && is.null(r_data$scde_mrw)) {
-            session$sendCustomMessage(type = "showalert", "Please compute the SCDE-adjusted distance you want to use in SCDE module first.")
-            updateTabItems(session, "tabs", "scde")
-            return()
-        }
-        if(input$hclust_scde_dist_method == "ddo") {
-            if(is.null(r_data$scde_ddo)) {
-                session$sendCustomMessage(type = "showalert", "Please compute Direct drop-out adjusted distance in SCDE module first.")
-                updateTabItems(session, "tabs", "scde")
-                return()
-            } else {
-                r_data$scde_ddo %>% hclust(method = input$hc_agglo_method)
-            }
-        } else if(input$hclust_scde_dist_method == "rw") {
-            if(is.null(r_data$scde_rw)) {
-                session$sendCustomMessage(type = "showalert", "Please compute Reciprocal weighting adjusted distance in SCDE module first.")
-                updateTabItems(session, "tabs", "scde")
-                return()
-            } else {
-                r_data$scde_rw %>% hclust(method = input$hc_agglo_method)
-            }
-        } else if(input$hclust_scde_dist_method == "mrw") {
-            if(is.null(r_data$scde_mrw)) {
-                session$sendCustomMessage(type = "showalert", "Please compute Mode-relative weighting adjusted distance in SCDE module first.")
-                updateTabItems(session, "tabs", "scde")
-                return()
-            } else {
-                r_data$scde_mrw %>% hclust(method = input$hc_agglo_method)
-            }
-        }
-    }
-})
 
     if(input$hclust_package != "networkD3") {
 par(mar=c(8, 8, 8, 8), cex = 1, xpd=TRUE)
 
-    if(is.null(hclust0())) return ()
-    hc0 <- hclust0()
+    if(is.null(r_data$hc)) return ()
+    hc0 <- r_data$hc
     # get max height of the tree, this will be used to adjust the group bar height
    max_height <- max(hc0$height)
     hc1 <- hc0 %>% as.dendrogram()
@@ -97,8 +56,8 @@ par(mar=c(8, 8, 8, 8), cex = 1, xpd=TRUE)
         hc1 %>% dendextend::rect.dendrogram(k=input$hclust_num, border = 8, lty = 5, lwd = 2)
     }
     } else {
-        if(is.null(hclust0())) return ()
-    Root <- hclust0()
+        if(is.null(r_data$hc)) return ()
+    Root <- r_data$hc
 
     rsList <- callModule(pivot_groupBy, "hclust", meta = r_data$meta)
     if(is.null(rsList$meta)) {
@@ -120,4 +79,19 @@ par(mar=c(8, 8, 8, 8), cex = 1, xpd=TRUE)
 ```
 
 
+```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 6}
+if(is.null(r_data$meta$hierarchical_cluster)) return()
+    gList <- callModule(pivot_groupBy, "hclust2", meta = r_data$meta)
+
+    if(is.null(gList$meta) || length(unique(gList$meta[,1])) == 0)
+    {
+        tbl <- r_data$meta[,c(1, which(colnames(r_data$meta) == "hierarchical_cluster"))]
+    } else {
+        actual_group <- gList$meta[,1]
+        names(actual_group) <- r_data$sample_name
+        tbl <- data.frame(actual_group)
+        tbl$assigned_cluster <- r_data$meta$hierarchical_cluster
+    }
+    DT::datatable(tbl)
+```
 

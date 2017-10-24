@@ -33,7 +33,8 @@ output$pca_ui <- renderUI({
                            pivot_dataScale_UI("pca", include = c("Counts (raw)", "Counts (normalized)", "Log10 Counts"), selected = "Log10 Counts", width = 3),
                            column(3, selectInput("pca_scale", label = "PCA Scale", choices = list("Scale to Unit Varience" = T, "None" = F))),
                            pivot_groupBy_UI("pca", r_data$category, append_none = T, multiple = F, width = 6)
-                       )
+                       ),
+                       actionButton("run_pca", "Run", class = "btn-info btn_rightAlign")
                    )
             )
         ),
@@ -111,7 +112,7 @@ output$pca_ui <- renderUI({
 
 pcaList <- callModule(pivot_dataScale, "pca", r_data)
 
-observe({
+observeEvent(input$run_pca, {
     req(r_data$df, r_data$meta)
     pca_data <- pcaList()$df
     req(pca_data, input$pca_scale)

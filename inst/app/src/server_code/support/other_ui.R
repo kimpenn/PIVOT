@@ -23,7 +23,8 @@ output$input_submit_btn_ui <- renderUI({
     switch(input$file_format,
            dir = actionButton(inputId = "submit_dir", label = "Submit", class = "btn-primary btn_rightAlign"),
            single = actionButton(inputId = "submit_single", label = "Submit", class = "btn-primary btn_rightAlign"),
-           customtable = actionButton(inputId = "submit_cs", label = "Submit", class = "btn-primary btn_rightAlign")
+           customtable = actionButton(inputId = "submit_cs", label = "Submit", class = "btn-primary btn_rightAlign"),
+           tenx = actionButton(inputId = "submit_tenx", label = "Submit", class = "btn-primary btn_rightAlign")
     )
 })
 
@@ -119,23 +120,28 @@ output$data_pv_ui <- renderUI({
 # Data in editting preview
 output$data_inprocess <- DT::renderDataTable({
     if(is.null(r_data$df)) return ()
-    DT::datatable(r_data$df, options = list(scrollX = TRUE, scrollY = "500px", lengthMenu = c(20, 50, 100)))
+    if(ncol(r_data$df) > 100) {
+        tbl <- r_data$df[,1:100]
+    } else {
+        tbl <- r_data$df
+    }
+    DT::datatable(tbl, options = list(scrollX = TRUE, scrollY = "500px", lengthMenu = c(20, 50, 100)))
 })
 
 output$download_feature_stats_tbl <- downloadHandler(
     filename = "feature_stats_tbl.csv",
     content = function(file) {
-        ftbl <-r_data$feature_meta
-        ftbl <- ftbl[, -which(names(ftbl) %in% c("use_for_ordering", "cap_name", "STRING_id"))]
+        ftbl <-fData(r_data$sceset)
+        ftbl <- ftbl[, -which(names(ftbl) %in% c("use_for_ordering", "cap_name", "STRING_id","is_feature_control"))]
         write.csv(ftbl, file)
     }
 )
 
 # A copy of the above table to be put in feature filter tab
 output$input_feature_stats_tbl <- DT::renderDataTable({
-    if(is.null(r_data$feature_meta)) return()
-    ftbl <-r_data$feature_meta
-    ftbl <- ftbl[, -which(names(ftbl) %in% c("use_for_ordering", "cap_name", "STRING_id"))]
+    if(is.null(r_data$sceset)) return()
+    ftbl <-fData(r_data$sceset)
+    ftbl <- ftbl[, -which(names(ftbl) %in% c("use_for_ordering", "cap_name", "STRING_id","is_feature_control"))]
     DT::datatable(ftbl, selection = 'single', rownames = FALSE, options = list(
         scrollX = T, scrollY = "500px", lengthMenu = c(20, 50, 100)
     )

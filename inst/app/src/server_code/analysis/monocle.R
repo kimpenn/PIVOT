@@ -32,8 +32,7 @@ output$monocle_ui <- renderUI({
             tags$div(tags$b("STEP 0: Initiate Monocle CellDataSet"), class = "param_setting_title"),
             fluidRow(
                 column(4, uiOutput("mn_data_ui"), uiOutput("mn_norm_ui")),
-                column(4, numericInput("mn_min_expr", "Minimum expression level (detection limit)",  min = 0.01, value = 0.1, step = 1)),
-                column(4, numericInput("mn_min_cell", "Minimum cell number (>=2)",  min = 2, value = 2, step = 1))
+                column(4, numericInput("mn_min_expr", "Minimum expression level (detection limit)",  min = 0.01, value = 0.1, step = 1))
             ),
             fluidRow(
                 column(4,
@@ -45,10 +44,10 @@ output$monocle_ui <- renderUI({
                        uiOutput("mn_data_dist_text_ui")
                 )
             ),
-            tags$br(),
-                actionButton("init_monocle", "Create Monocle CellDataSet", class = "btn btn-info"),
-                tags$p(),
-                uiOutput("monocle_ok")
+            fluidRow(
+                column(4, actionButton("init_monocle", "Create Monocle CellDataSet", class = "btn btn-info")),
+                column(8, uiOutput("monocle_ok"))
+            )
         ),
         enhanced_box(
             title = NULL,
@@ -166,7 +165,7 @@ observeEvent(input$init_monocle, {
     sample_meta <- r_data$meta
     rownames(sample_meta) <- r_data$meta[,1]
     pd <- new("AnnotatedDataFrame", data = sample_meta)
-    feature_meta <- r_data$feature_meta
+    feature_meta <- Biobase::fData(r_data$sceset)
     colnames(feature_meta)[1] <- "gene_short_name"
     fd <- new("AnnotatedDataFrame", data = feature_meta)
 
@@ -175,27 +174,29 @@ observeEvent(input$init_monocle, {
                                        featureData = fd,
                                        lowerDetectionLimit = input$mn_min_expr,
                                        expressionFamily=do.call(input$mn_family_fun, list()))
-    expressed_genes <- row.names(subset(fData(cellset), num_cells_expressed >= input$mn_min_cell))
-    cellset <- cellset[expressed_genes,]
+
+    error_I <- 0
     if(input$mn_family_fun %in% c("negbinomial", "negbinomial.size")) {
         cellset <- estimateSizeFactors(cellset)
-        error_I <- 0
         tryCatch({
             cellset <- estimateDispersions(cellset)
         },
         error = function(e) {
             error_I <<- 1
         })
-        if(error_I) {
-            session$sendCustomMessage(type = "showalert", "Parametric dispersion fit failed, please set a different minimum expression level.")
-            return()
-        }
     } else {
         cellset <- estimateSizeFactors(cellset)
     }
-    r_data$cellset <- cellset
-    r_data$monocle_ok <- 1
-    session$sendCustomMessage(type = "showalert", "Monocle CellDataSet created.")
+    if(!error_I) {
+        r_data$cellset <- cellset
+        r_data$monocle_ok <- 1
+        session$sendCustomMessage(type = "showalert", "Monocle CellDataSet created.")
+    } else {
+        session$sendCustomMessage(type = "showalert", "Failed to initiate monocle cellset, please try a different minimum expression level.")
+        r_data$monocle_ok <- NULL
+        r_data$cellset <- NULL
+        return()
+    }
 })
 
 output$monocle_ok <- renderUI({
@@ -216,7 +217,7 @@ output$monocle_de_ui <- renderUI({
         infos[[length(infos) + 1]] <- tags$li("This module requires design information.")
     }
 
-    if(is.null(r_data$monocle_ok)) {
+    if(is.null(r_data$cellset)) {
         infos[[length(infos) + 1]] <- tags$li("Please initiate monocle celldataset first.")
     }
 
@@ -255,13 +256,14 @@ monocleModel <- callModule(pivot_deGroupBy, "monocle", meta = r_data$meta, reduc
 output$perform_monocle_ui <- renderUI({
     req(monocleModel())
     # examine if required monocle_sanity check are passed
-    list(
-        actionButton("perform_monocle_de", "Run DE", class = "btn-info btn_leftAlign")
+    fluidRow(
+        column(4, numericInput("monocle_de_ncore", "Number of cores:", value = 1, min = 1, step=1)),
+        column(4, tags$br(),actionButton("perform_monocle_de", "Run DE", class = "btn-info"))
     )
 })
 
 observeEvent(input$perform_monocle_de, {
-    req(r_data$cellset, monocleModel())
+    req(r_data$cellset, monocleModel(), input$monocle_de_ncore)
     if(!is.null(r_data$monocle_results)) {
         r_data$monocle_results <- NULL
     }
@@ -270,8 +272,8 @@ observeEvent(input$perform_monocle_de, {
     modelReduced = Reduce(paste, deparse(monocleModel()$model$reduced))
 
     withProgress(message = 'Processing...', value = 0.8, {
-        tmp_tbl <- differentialGeneTest(r_data$cellset, fullModelFormulaStr = modelFull, reducedModelFormulaStr = modelReduced, verbose = T)
-        r_data$monocle_results <- tmp_tbl[order(tmp_tbl$qval),] %>% dplyr::select(status, family, pval, qval, percent_cells_expressed)
+        tmp_tbl <- monocle::differentialGeneTest(r_data$cellset, fullModelFormulaStr = modelFull, reducedModelFormulaStr = modelReduced, verbose = T, cores = input$monocle_de_ncore)
+        r_data$monocle_results <- tmp_tbl[order(tmp_tbl$qval),] %>% dplyr::select(status, family, pval, qval)
     })
 })
 

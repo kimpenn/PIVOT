@@ -35,6 +35,7 @@ output$mds_ui <- renderUI({
                 column(3, selectInput("mds_dist", "Distance measure", choices = list("Euclidean" = "euclidean", "Maximum" = "maximum", "Manhattan" = "manhattan", "Canberra" = "canberra", "Binary" = "binary"), selected = "euclidean")),
                 pivot_groupBy_UI("mds", r_data$category, append_none = T, multiple = F, width = 6)
             ),
+            fluidRow(column(12,actionButton("run_mds", "Run", class = "btn-info btn_rightAlign"))),
             fluidRow(
                 column(6,
                        tags$div(tags$b("2D Projection:"), class = "param_setting_title"),
@@ -62,6 +63,7 @@ output$mds_ui <- renderUI({
                 column(3, selectInput("nds_dist", "Distance measure", choices = list("Euclidean" = "euclidean", "Maximum" = "maximum", "Manhattan" = "manhattan", "Canberra" = "canberra", "Binary" = "binary"), selected = "euclidean")),
                 pivot_groupBy_UI("nds", r_data$category, append_none = T, multiple = F, width = 6)
             ),
+            fluidRow(column(12,actionButton("run_nds", "Run", class = "btn-info btn_rightAlign"))),
             fluidRow(
                 column(6,
                        tags$div(tags$b("2D Projection:"), class = "param_setting_title"),
@@ -80,7 +82,7 @@ output$mds_ui <- renderUI({
 
 # Metric MDS
 mdsList <- callModule(pivot_dataScale, "mds", r_data)
-observe({
+observeEvent(input$run_mds,{
     req(r_data$df, r_data$meta)
     mds_data <- mdsList()$df
     req(mds_data, input$mds_dist)
@@ -119,14 +121,14 @@ observe({
 
 observe({
     req(mds_minfo(), r_data$mds)
-    callModule(pivot_Plot3d, "mds_plot3d", type = "mds", obj = NULL, proj = r_data$mds$mds_3d, minfo = mds_minfo())
+    callModule(pivot_Plot3d, "mds_plot3d", type = "mds", obj = NULL, proj = as.data.frame(r_data$mds$mds_3d), minfo = mds_minfo())
 })
 
 
 # Nonmetric MDS
 ndsList <- callModule(pivot_dataScale, "nds", r_data)
 
-observe({
+observeEvent(input$run_nds,{
     req(r_data$df)
     nds_data <- ndsList()$df
     req(nds_data, input$nds_dist)

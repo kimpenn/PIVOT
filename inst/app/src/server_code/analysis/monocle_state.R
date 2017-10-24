@@ -120,18 +120,22 @@ output$monocle_state_ui <- renderUI({
 })
 
 output$mn_run_params_ui <- renderUI({
+    dim_choices <- c("DDRTree","ICA")
+    names(dim_choices) <- dim_choices
+    cluster_choices <- c("DDRTree")
+    names(cluster_choices) <- cluster_choices
     if(input$mn_run_type == "state") {
         fluidRow(
-            column(4, selectInput("mn_rd_method", "Dimensionality reduction method", choices = list("DDRTree" = "DDRTree", "ICA" = "ICA"))),
-            column(4, uiOutput("mn_num_path_ui")),
+            column(4, selectInput("mn_rd_method", "Dimensionality reduction method", choices = dim_choices)),
+            column(4, numericInput_1("monocle_num_paths", "Number of end-point cell states allowed", value = 2)),
             column(4, radioButtons("monocle_reverse","Reverse the biological process?", choices = list("No Reverse" = F, "Reverse" = T), inline= T, selected = F))
         )
     } else {
         fluidRow(
-            column(4, numericInput("mn_cell_clust_num", "Number of clusters", min = 1, max = 20, step =1, value = 2))
+            column(4, numericInput("mn_cell_clust_num", "Number of clusters", min = 1, max = 20, step =1, value = 2)),
+            column(4, selectInput("mn_cell_clust_method", "Clustering method", choices = cluster_choices))
         )
     }
-
 })
 
 output$mn_order_gene_msg <- renderUI({
@@ -156,14 +160,6 @@ output$mn_order_gene_params <- renderUI({
         if(length(ordering_genes) > 1000) {
             return(sliderInput("state_order_top_gene", "Number of top genes (ranked by qval) to be used for ordering:", min = 2, max = length(ordering_genes), value = length(ordering_genes), step = 1, round = T))
         }
-    } else {
-        return()
-    }
-})
-
-output$mn_num_path_ui <- renderUI({
-    if(input$mn_rd_method == "ICA") {
-        numericInput_1("monocle_num_paths", "Number of end-point cell states allowed", value = 2)
     } else {
         return()
     }
@@ -265,11 +261,7 @@ observeEvent(input$mn_generate_state, {
     withProgress(message = 'Processing...', value = 0.8, {
         tryCatch({
             r_data$cellset <- reduceDimension(r_data$cellset, reduction_method = input$mn_rd_method)
-            if(input$mn_rd_method == "ICA") {
-                r_data$cellset <- orderCells(r_data$cellset, num_paths = input$monocle_num_paths, reverse = input$monocle_reverse)
-            } else if(input$mn_rd_method == "DDRTree") {
-                r_data$cellset <- orderCells(r_data$cellset, reverse = input$monocle_reverse)
-            }
+            r_data$cellset <- orderCells(r_data$cellset, num_paths = input$monocle_num_paths, reverse = input$monocle_reverse)
         },
         error = function(e){
             error_I <<- 1
@@ -287,7 +279,7 @@ observeEvent(input$mn_generate_clust, {
     error_I <- 0
     withProgress(message = 'Processing...', value = 0.8, {
         tryCatch({
-            r_data$cellset <- clusterCells(r_data$cellset, num_clusters=input$mn_cell_clust_num)
+            r_data$cellset <- clusterCells(r_data$cellset, num_clusters=input$mn_cell_clust_num, method = input$mn_cell_clust_method)
         },
         error = function(e){
             error_I <<- 1

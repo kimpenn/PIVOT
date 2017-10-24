@@ -23,11 +23,10 @@ generate_data_node <- function(his_tbl = NULL, reg_tbl = NULL) {
         }
     })
 
-    if(is.null(tbl_edges)) return()
-
-    tbl_edges <- as.data.frame(t(as.data.frame(tbl_edges[!sapply(tbl_edges, is.null)])))
-
-    colnames(tbl_edges) <- c("from", "to", "label")
+    if(!is.null(tbl_edges)) {
+        tbl_edges <- as.data.frame(t(as.data.frame(tbl_edges[!sapply(tbl_edges, is.null)])))
+        colnames(tbl_edges) <- c("from", "to", "label")
+    }
 
     return(list(
         nodes = tbl_nodes,
@@ -50,21 +49,26 @@ generate_data_map <- function(vis_nodes, vis_edges) {
         dplyr::mutate(title = title_content) %>%
         dplyr::select(id = name, label, group, title)
 
-    vis_edges <- vis_edges %>%
-        dplyr::mutate(width = ifelse(is.na(vis_edges$label), 1, 5)) %>%
-        dplyr::mutate(color = ifelse(is.na(vis_edges$label), "grey", "black")) %>%
-        dplyr::select(from, to, title = label, width, color)
+    if(!is.null(vis_edges)) {
+        vis_edges <- vis_edges %>%
+            dplyr::mutate(width = ifelse(is.na(vis_edges$label), 1, 5)) %>%
+            dplyr::mutate(color = ifelse(is.na(vis_edges$label), "grey", "black")) %>%
+            dplyr::select(from, to, title = label, width, color)
+    }
 
-    visNetwork(vis_nodes, vis_edges) %>%
+    visplt <- visNetwork(vis_nodes, vis_edges) %>%
         visNodes(labelHighlightBold = T) %>%
         visGroups(groupname = "Dataset", shape = "icon", icon = list(code = "f200", size = 75)) %>%
         visGroups(groupname = "Dataset_active", shape = "icon", icon = list(code = "f200", size = 75, color = "orange")) %>%
         visGroups(groupname = "Analysis", shape = "icon", icon = list(code = "f080", size = 30, color = "red")) %>%
         addFontAwesome() %>%
-        visLegend() %>%
         visOptions(nodesIdSelection = TRUE) %>%
         visInteraction(navigationButtons = TRUE) %>%
         visEvents(doubleClick = "function(properties){alert('selected nodes: '+ properties.nodes);}")
+    if(!is.null(vis_edges)) {
+        visplt <- visplt %>% visLegend()
+    }
+    return(visplt)
 }
 
 

@@ -37,6 +37,10 @@ get_heatmap_color <- function(palette) {
         RColorBrewer::brewer.pal(9,palette)
     } else if(palette %in% list("viridis" = "viridis", "magma" = "magma", "plasma" = "plasma", "inferno" = "inferno")) {
         viridis(n = 100, option = palette)
+    } else if(palette == "diverge_hcl") {
+        colorspace::diverge_hcl(7)
+    } else if(palette == "redgreen") {
+        rev(gplots::redgreen(75))
     }
 }
 
@@ -101,11 +105,13 @@ feature_plot <- function(df, selected_gene, plot_by = "sample", meta = NULL, pal
                 g1 <- g1 + geom_violin(aes_string(fill = plot_by, alpha = 0.2), trim = F)
             }
         }
-        g1 <- g1 + scale_color_brewer(palette = palette) +
-            scale_fill_brewer(palette = palette) +
+        col_man <- get_color_vector(unique(df[[plot_by]]), pal = palette)
+        names(col_man) <- unique(df[[plot_by]])
+        g1 <- g1 + scale_color_manual(values = col_man) +
+            scale_fill_manual(values = col_man) +
             ggtitle(paste0("Expression level of gene ", selected_gene))  +
             theme(text = element_text(size=textSize), legend.position=legend_pos, plot.title = element_text(hjust = 0.5)) +
-            guides(fill=FALSE, alpha = F)
+            guides(alpha = F, fill=F)
     }
 
     if(log_scale) {

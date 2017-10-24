@@ -41,17 +41,19 @@ output$scde_ui <- renderUI({
                 pivot_deGroupBy_UI("scde", r_data$meta, width = 12, reduced = "no", model = c("condition", "condition_batch"))
             ),
             fluidRow(
-                column(6,
+                column(4,
                        shinyBS::tipify(
                            checkboxInput("ifm_with_group", label = "Fit error model independently for each condition", value = F),
                            title = "If provided, the cross-fits and the expected expression magnitudes will be determined separately within each group",
                            placement = "right", options = list(container = "body")
                        )
                 ),
-                column(6,
+                column(4, numericInput("scde_ncore", "Number of cores:", value = 1, min = 1, step=1)),
+                column(4,
                        uiOutput("run_scde_model_ui")
                 )
             ),
+            tags$p("Note: currently there is a bug with SCDE package (https://github.com/hms-dbmi/scde/issues/48). This bug will cause SCDE modeling to fail. PIVOT will update as soon as the SCDE team comes up with a fix."),
             hr(),
             DT::dataTableOutput("scde_ifm"),
             uiOutput("scde_valid_cell"),
@@ -91,7 +93,10 @@ scdeModel <- callModule(pivot_deGroupBy, "scde", meta = r_data$meta, reduced = "
 
 output$run_scde_model_ui <- renderUI({
     req(scdeModel())
-    actionButton("run_scde_model", "Perform Error Modeling", class = "btn btn-info")
+    list(
+        tags$br(),
+        actionButton("run_scde_model", "Perform Error Modeling", class = "btn btn-info")
+    )
 })
 
 
@@ -119,9 +124,9 @@ observeEvent(input$run_scde_model, {
 
         tryCatch({
             if(!is.null(input$ifm_with_group) && input$ifm_with_group){
-                scde_tmp$scde_ifm <- scde::scde.error.models(counts = r_data$raw, groups = r_data$meta[, cond], n.cores = 1, threshold.segmentation = TRUE, save.crossfit.plots = F, save.model.plots = F, verbose = 1)
+                scde_tmp$scde_ifm <- scde::scde.error.models(counts = r_data$raw, groups = r_data$meta[, cond], n.cores = input$scde_ncore, threshold.segmentation = TRUE, save.crossfit.plots = F, save.model.plots = F, verbose = 1)
             } else {
-                scde_tmp$scde_ifm <- scde::scde.error.models(counts = r_data$raw, n.cores = 1, threshold.segmentation = TRUE, save.crossfit.plots = F, save.model.plots = F, verbose = 1)
+                scde_tmp$scde_ifm <- scde::scde.error.models(counts = r_data$raw, n.cores = input$scde_ncore, threshold.segmentation = TRUE, save.crossfit.plots = F, save.model.plots = F, verbose = 1)
             }
         },
             error = function(e) {
@@ -493,7 +498,7 @@ observeEvent(input$run_scde_distance, {
                 rownames(scd1) <- rownames(r_data$raw);
                 # calculate correlation on the complete observation pairs
                 cor(log10(scd1+1),use="pairwise.complete.obs");
-            },mc.cores=1)
+            },mc.cores=input$scde_ncore)
             # calculate average distance across sampling rounds
             r_data$scde_ddo <- as.dist(1-Reduce("+",dl)/length(dl))
         } else if(input$scde_dist_method =="rw") {
@@ -508,14 +513,14 @@ observeEvent(input$run_scde_distance, {
                     pnf <- sqrt((1-f1)*(1-f2))*k +(1-k);
                     boot::corr(log10(cbind(r_data$raw[,nam1],r_data$raw[,nam2])+1),w=pnf)
                 }))
-            },mc.cores=1))
+            },mc.cores=input$scde_ncore))
             rownames(rw.cor) <- cell.names
             colnames(rw.cor) <-cell.names
             r_data$scde_rw <- as.dist(1-rw.cor,upper=F)
         } else if(input$scde_dist_method =="mrw") {
             p.self.fail <- scde::scde.failure.probability(models=r_data$scde_ifm,counts = r_data$raw)
 
-            jp <- scde::scde.posteriors(models=r_data$scde_ifm,r_data$raw,r_data$scde_prior,return.individual.posterior.modes=T,n.cores=1)
+            jp <- scde::scde.posteriors(models=r_data$scde_ifm,r_data$raw,r_data$scde_prior,return.individual.posterior.modes=T,n.cores=input$scde_ncore)
             # find joint posterior modes for each gene - a measure of MLE of group-average expression
             jp$jp.modes <- log(as.numeric(colnames(jp$jp)))[max.col(jp$jp)]
             p.mode.fail <- scde::scde.failure.probability(models=r_data$scde_ifm,magnitudes=jp$jp.modes)
@@ -529,7 +534,7 @@ observeEvent(input$run_scde_distance, {
                 unlist(lapply(cell.names,function(nam2) {
                     boot::corr(cbind(mat[,nam1],mat[,nam2]),w=sqrt(sqrt(matw[,nam1]*matw[,nam2])))
                 }))
-            },mc.cores=1))
+            },mc.cores=input$scde_ncore))
             rownames(mrw.cor) <- cell.names
             colnames(mrw.cor) <-cell.names
 

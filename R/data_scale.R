@@ -17,7 +17,7 @@ generateRelativeFreq <- function(raw){
 pivot_dataScale_UI <- function(id, include = c("Counts (raw)", "Counts (normalized)", "Relative Frequency", "Log10 Counts", "Standardized Counts", "Log10 & Standardized", "Projection Matrix"), selected = "Counts (normalized)", width = 4, order = F) {
     ns<- NS(id)
     names(include) <- include
-    proj_lists <- c("PCA", "t-SNE", "MDS", "Nonmetric-MDS")
+    proj_lists <- c("PCA", "t-SNE", "MDS", "Nonmetric-MDS", "DiffusionMap")
     names(proj_lists) <- proj_lists
     if("Projection Matrix" %in% include) {
         tagList(
@@ -66,6 +66,10 @@ pivot_dataScale <- function(input, output, session, r_data, order=F, keep_stats 
             pcs<-colnames(r_data$pca$x)
             names(pcs) <- pcs
             selectInput(session$ns("pca_pcs"), label = "Choose PC", choices = pcs, multiple = T)
+        } else if(input$proj_matrix == "DiffusionMap") {
+            dcs<-colnames(r_data$dfm@eigenvectors)
+            names(dcs) <- dcs
+            selectInput(session$ns("dfm_dcs"), label = "Choose DC", choices = dcs, multiple = T)
         } else {
             dims<-c("2D", "3D")
             names(dims) <- dims
@@ -175,6 +179,17 @@ pivot_dataScale <- function(input, output, session, r_data, order=F, keep_stats 
                         return(t(as.data.frame(r_data$nds$nds_2d$points)))
                     } else {
                         return(t(as.data.frame(r_data$nds$nds_3d$points)))
+                    }
+                }
+            } else if(input$proj_matrix == "DiffusionMap") {
+                if(is.null(r_data$dfm)) {
+                    session$sendCustomMessage(type = "showalert", "Please run diffusion map first.")
+                    return()
+                } else {
+                    if(is.null(input$dfm_dcs)) {
+                        return(as.data.frame(t(r_data$dfm@eigenvectors)))
+                    } else {
+                        return(as.data.frame(t(r_data$dfm@eigenvectors[,input$dfm_dcs, drop = F])))
                     }
                 }
             } else {
@@ -314,7 +329,7 @@ pivot_dataScaleRange <- function(input, output, session, r_data, keep_stats = FA
 #' @description
 #' This is the ui part of the module.
 #' @export
-pivot_featureList_UI <- function(id, include = c("custom", "deseq", "edgeR", "scde", "monocle", "mwu"), selected = "custom", width = 6) {
+pivot_featureList_UI <- function(id, include = c("custom", "deseq", "edgeR", "scde", "monocle", "mwu"), selected = "custom", width = 8) {
     ns<- NS(id)
     map_include <- list(
         "Custom gene list" = "custom",
@@ -329,14 +344,21 @@ pivot_featureList_UI <- function(id, include = c("custom", "deseq", "edgeR", "sc
         column(width/2,
                selectInput(ns("feature_input"), "Feature Set", choices = options, selected = selected)
         ),
-        column(width/2,
-               conditionalPanel(sprintf("input['%s'] == 'custom'", ns("feature_input")),
-                                tags$br(),
-                                pivot_featureInputModal_UI(ns("custom_modal"), "Input custom gene list")
-               ),
-               conditionalPanel(sprintf("input['%s'] != 'custom'", ns("feature_input")),
-                                numericInput(ns("feature_alpha"), "Adjusted P cutoff", value = 0.1, min = 0, max = 0.5, step = 0.001)
-               )
+        conditionalPanel(
+            sprintf("input['%s'] == 'custom'", ns("feature_input")),
+            column(width/2,
+                   tags$br(),
+                   pivot_featureInputModal_UI(ns("custom_modal"), "Input custom gene list")
+            )
+        ),
+        conditionalPanel(
+            sprintf("input['%s'] != 'custom'", ns("feature_input")),
+            column(width/4,
+                   numericInput(ns("feature_alpha"), "Padj", value = 0.1, min = 0, max = 0.5, step = 0.001)
+            ),
+            column(width/4,
+                   selectInput(ns("feature_lfc"), "LFC", choices = list("All DEG" = "all", "LFC>0" = "plus", "LFC<0" = "minus"))
+            )
         )
     )
 }
@@ -355,22 +377,22 @@ pivot_featureList <- function(input, output, session, r_data) {
             req(input$feature_alpha)
             if(is.null(r_data$scde_results)) return()
             tbl<-r_data$scde_results %>% tibble::rownames_to_column("gene") %>%
-                dplyr::select(gene, mle, pval = p.values, padj = p.values.adj) %>% dplyr::filter(padj <= input$feature_alpha)
+                dplyr::select(gene, lfc_or_es = mle, pval = p.values, padj = p.values.adj) %>% dplyr::filter(padj <= input$feature_alpha)
         } else if(input$feature_input == "deseq") {
             req(input$feature_alpha)
             if(is.null(r_data$deseq_results)) return()
             tbl <- as.data.frame(r_data$deseq_results) %>% tibble::rownames_to_column("gene") %>%
-                dplyr::select(gene, log2FoldChange, pval = pvalue, padj = padj) %>% dplyr::filter(padj <= input$feature_alpha)
+                dplyr::select(gene, lfc_or_es = log2FoldChange, pval = pvalue, padj = padj) %>% dplyr::filter(padj <= input$feature_alpha)
         } else if(input$feature_input == "mwu") {
             req(input$feature_alpha)
             if(is.null(r_data$mww_results)) return()
             tbl <- r_data$mww_results %>% tibble::rownames_to_column("gene") %>%
-                dplyr::select(gene, effectSize, pval = P.value, padj = adjustedP) %>% dplyr::filter(padj <= input$feature_alpha)
+                dplyr::select(gene, lfc_or_es = effectSize, pval = P.value, padj = adjustedP) %>% dplyr::filter(padj <= input$feature_alpha)
         } else if(input$feature_input == "edgeR") {
             req(input$feature_alpha)
             if(is.null(r_data$edgeR_results)) return()
             tbl <- r_data$edgeR_results$table %>% tibble::rownames_to_column("gene") %>%
-                dplyr::select(gene, logFC, pval = PValue, padj = FDR) %>% dplyr::filter(padj <= input$feature_alpha)
+                dplyr::select(gene, lfc_or_es = logFC, pval = PValue, padj = FDR) %>% dplyr::filter(padj <= input$feature_alpha)
         } else if(input$feature_input == "monocle") {
             req(input$feature_alpha)
             if(is.null(r_data$monocle_results)) return()
@@ -379,6 +401,13 @@ pivot_featureList <- function(input, output, session, r_data) {
         } else if(input$feature_input == "custom") {
             res <- callModule(pivot_featureInputModal, "custom_modal", r_data = r_data)
             tbl <- data.frame(gene = res())
+        }
+        if(!is.null(tbl$lfc_or_es)) {
+            if(input$feature_lfc == "plus") {
+                tbl <-tbl %>% dplyr::filter(lfc_or_es > 0)
+            } else if(input$feature_lfc == "minus") {
+                tbl <- tbl %>% dplyr::filter(lfc_or_es < 0)
+            }
         }
         tbl
     })

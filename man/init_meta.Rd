@@ -4,7 +4,7 @@
 \alias{init_meta}
 \title{PIVOT Data Control}
 \usage{
-init_meta(r_data, type = "both")
+init_meta(r_data)
 }
 \description{
 Meta data generation

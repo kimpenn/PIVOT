@@ -54,8 +54,8 @@ shinyServer(function(input, output, session) {
                 if(not_pressed(input$session_clear_sc) &&
                    not_pressed(input$exit_and_save) &&
                    not_pressed(input$return_btn_sc) &&
-                   is.null(input$uploadState)) {
-
+                   is.null(input$uploadState) &&
+                   not_pressed(input$load_example)) {
                     assign(ip_inputs, lapply(reactiveValuesToList(input), unclass), envir = .GlobalEnv)
                     assign(ip_data, reactiveValuesToList(r_data), envir = .GlobalEnv)
                     assign(ip_module, r_module, envir = .GlobalEnv)
@@ -122,6 +122,42 @@ shinyServer(function(input, output, session) {
         }
     })
 
+
+    # Load example dataset
+    observe({
+        if(not_pressed(input$load_example)) return()
+        isolate({
+            withProgress(message = 'Loading data...', value = 0.5, {
+                tmpEnv <- new.env()
+                load("src/built_in_files/example_state_dueck.rda", envir=tmpEnv)
+                if (exists("r_data", envir=tmpEnv, inherits=FALSE)){
+                    assign(ip_data, tmpEnv$r_data, envir=.GlobalEnv)
+                }
+                if (exists("r_state", envir=tmpEnv, inherits=FALSE)) {
+                    assign(ip_inputs, tmpEnv$r_state, envir=.GlobalEnv)
+                    lapply(names(r_state),
+                           function(x) session$sendInputMessage(x, list(value = r_state[[x]]))
+                    )
+                }
+                if (exists("r_module", envir=tmpEnv, inherits=FALSE)){
+                    assign(ip_module, tmpEnv$r_module, envir=.GlobalEnv)
+                }
+                #assign(ip_dump, lubridate::now(), envir = .GlobalEnv)
+                rm(tmpEnv)
+                setProgress(1)
+            })
+        })
+    })
+
+
+    output$refreshOnExampleLoad <- renderUI({
+        if(not_pressed(input$load_example)) return()
+        return(tags$script("window.location.reload();"))
+    })
+
+
+
+    # Close app observer
     observe({
         if(not_pressed(input$return_btn_sc) && not_pressed(input$exit_and_save)) return()
         # quit R, unless you are running an interactive session
@@ -133,7 +169,7 @@ shinyServer(function(input, output, session) {
             if(not_pressed(input$exit_and_save)) {
                 isolate({
                     stopApp("All change saved, returning to launcher...")
-                    rstudioapi::sendToConsole("pivot()", execute = T)
+                    rstudioapi::sendToConsole("pivot_launcher()", execute = T)
                 })
             } else {
                 isolate({
@@ -147,8 +183,29 @@ shinyServer(function(input, output, session) {
         }
     })
 
-    saveStateOnRefresh(session)
+    # Alert user if DLL exceeds maximum.
 
+    observe({
+        num_dll <- length(getLoadedDLLs())
+        if(num_dll >= 95 & num_dll < 100) {
+            showNotification(
+                paste0("Current loaded DLLs: ", num_dll, ". Note there is an R limit (100 by default) for package loading.
+                       You can solve this problem by restarting R session and launch PIVOT with less modules. Check PIVOT website for details."),
+                duration = NULL,
+                type = "warning"
+            )
+        } else if(num_dll >= 100) {
+            showNotification(
+                paste0("Current loaded DLLs: ", num_dll, ". Note you already reached maximum DLL with default R setting. Functions are expected to fail.
+                       You can solve this problem by restarting R session and launch PIVOT with less modules. Check PIVOT website for details."),
+                duration = NULL,
+                action = a(href = "https://github.com/qinzhu/PIVOT"),
+                type = "error"
+            )
+        }
+    })
+
+    saveStateOnRefresh(session)
 })
 
 

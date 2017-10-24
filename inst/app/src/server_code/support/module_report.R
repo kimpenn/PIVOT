@@ -362,6 +362,36 @@ output$hierarchical_clust_html <- downloadHandler(
 )
 
 
+####### SC3 #######
+
+# id = sc3_clust
+observeEvent(input$"sc3_clust_report", {
+    r_data$rmd <- update_rmd(session, r_data$rmd, id = "sc3_clust")
+})
+
+observeEvent(input$"sc3_clust_reg", {
+    id = "sc3_clust"
+    withProgress(message = 'Processing...', value = 0.6, {
+        tmp_path <- generate_block_report(id, mode = "html_document")
+        if(!is.null(tmp_path)){
+            rawHTML <- paste(readLines(tmp_path), collapse="\n")
+            r_data <- update_reg_history(r_data, lists = rawHTML, action = "SC3 Clustering")
+            session$sendCustomMessage(type = "showalert", "Analysis report generated and linked to the current dataset.")
+        }
+    })
+})
+
+output$sc3_clust_html <- downloadHandler(
+    filename = function() {
+        id = "sc3_clust"
+        paste0(id, ".html")
+    },
+    content = function(file) {
+        id = "sc3_clust"
+        generate_block_report(id, file, mode = "html_document")
+    }
+)
+
 ####### SCDE #######
 # id = scde
 
@@ -886,6 +916,36 @@ output$nds_html <- downloadHandler(
     }
 )
 
+
+####### Diffusion map #######
+
+# id = dfm
+observeEvent(input$"dfm_report", {
+    r_data$rmd <- update_rmd(session, r_data$rmd, id = "dfm")
+})
+
+observeEvent(input$"dfm_reg", {
+    id = "dfm"
+    withProgress(message = 'Processing...', value = 0.6, {
+        tmp_path <- generate_block_report(id, mode = "html_document")
+        if(!is.null(tmp_path)){
+            rawHTML <- paste(readLines(tmp_path), collapse="\n")
+            r_data <- update_reg_history(r_data, lists = rawHTML, action = "Diffusion Map")
+            session$sendCustomMessage(type = "showalert", "Analysis report generated and linked to the current dataset.")
+        }
+    })
+})
+
+output$dfm_html <- downloadHandler(
+    filename = function() {
+        id = "dfm"
+        paste0(id, ".html")
+    },
+    content = function(file) {
+        id = "dfm"
+        generate_block_report(id, file, mode = "html_document")
+    }
+)
 
 ####### Penalized LDA ######
 # id = plda

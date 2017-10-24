@@ -93,7 +93,6 @@ output$data_man_net <- renderPlot({
 
 output$data_inter_net <- visNetwork::renderVisNetwork({
     if(is.null(r_data$his_nodes)) return()
-    if(nrow(r_data$his_nodes) < 2) return() # If less than two nodes, not enough for a tree graph
     generate_data_map(r_data$his_nodes, r_data$his_edges)
 })
 

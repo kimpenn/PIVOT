@@ -17,6 +17,11 @@ dbHeader <- pivotboardHeader(
     dropdownMenu(type = "support",
                  top_msg = "PIVOT Support",
                  systemItem(
+                     title = "Load Example",
+                     text = actionButton("load_example","An example dataset from Dueck, Hannah, et al.", class = "btn_no_border"),
+                     icon = icon("database")
+                 ),
+                 systemItem(
                      title = "Technical Support",
                      text = actionButton("bug_Sc","General qustions, bug reports.", class = "btn_no_border"),
                      icon = icon("wrench"),

@@ -23,7 +23,7 @@ output$input_file_box <- renderInfoBox({
         if(r_data$file_info$type == "single"){
             valueBox(value = r_data$file_info$name, "Input file", icon = icon("credit-card"), color = "olive")
         }
-        else if(r_data$file_info$type == "dir") {
+        else if(r_data$file_info$type %in% c("dir","tenx")) {
             valueBox(value = r_data$file_info$path[[length(r_data$file_info$path)]], "Input folder", icon = icon("credit-card"), color = "olive")
         }
     }

@@ -48,7 +48,7 @@ output$plda_ui <- renderUI({
                 pivot_groupBy_UI("plda", r_data$category, multiple = F, width = 8, append_sample = F),
                 column(4, uiOutput("plda_K_ui"))
             ),
-            actionButton("run_plda", "Run", class = "btn-info"),
+            actionButton("run_plda", "Run", class = "btn-info btn_rightAlign"),
             tags$hr(),
             tags$div(tags$b("Discriminant Vectors:"), class = "param_setting_title"),
             plotOutput("plda_feature_plot"),

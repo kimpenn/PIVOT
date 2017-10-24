@@ -16,33 +16,37 @@
 # normalization method
 output$proc_method_ui <- renderUI({
     if(input$file_format %in% c("dir", "single")) {
-        selectInput("proc_method", label = "Normalization Method",
-                    choices = list("DESeq" = "DESeq",
-                                   "Modified DESeq" = "Modified_DESeq",
-                                   "Trimmed Mean of M-values (TMM)" = "TMM",
-                                   "Trimmed Mean of M-values (TMM) - RPKM" = "TMM-RPKM",
-                                   "Upperquartile" = "upperquartile",
-                                   "Upperquartile-RPKM" = "upperquartile-RPKM",
-                                   "Counts per Million (CPM)" = "CPM",
-                                   "Reads per Kilobase per Million (RPKM)" = "RPKM",
-                                   "Transcripts per Million (TPM)" = "TPM",
-                                   "ERCC normalization with robust linear regression" = "ERCC-RLM",
-                                   "Census normalization" = "Census",
-                                   "RUVg" = "RUVg",
-                                   "None" = "none"),
-                    selected = "DESeq")
+        column(4,        selectInput("proc_method", label = "Normalization Method",
+                                     choices = list("DESeq" = "DESeq",
+                                                    "Modified DESeq" = "Modified_DESeq",
+                                                    "Trimmed Mean of M-values (TMM)" = "TMM",
+                                                    "Trimmed Mean of M-values (TMM) - RPKM" = "TMM-RPKM",
+                                                    "Upperquartile" = "upperquartile",
+                                                    "Upperquartile-RPKM" = "upperquartile-RPKM",
+                                                    "Counts per Million (CPM)" = "CPM",
+                                                    "Reads per Kilobase per Million (RPKM)" = "RPKM",
+                                                    "Transcripts per Million (TPM)" = "TPM",
+                                                    "ERCC normalization with robust linear regression" = "ERCC-RLM",
+                                                    "Census normalization" = "Census",
+                                                    "RUVg" = "RUVg",
+                                                    "None" = "none"),
+                                     selected = "DESeq"))
     } else {
         return()
     }
 })
 
+
 output$norm_text_ui <- renderUI({
     if(input$file_format == "state") {
         return()
     }
+    if(input$file_format == "tenx") {
+        return(tags$p("Input must be CellRanger output folder (the one contain folder `outs`). Data will be normalized by 10x CellRangerRkit."))
+    }
     if(is.null(input$proc_method)) return()
     if(input$proc_method == "DESeq") {
-        tags$p("Input must be raw read counts. The data will be normalized using the DESeq2 package. ")
+        tags$p("Input must be raw read counts. Data will be normalized using the DESeq2 package. ")
     } else if(input$proc_method == "Modified_DESeq") {
         tags$p("Input must be raw read counts. The original DESeq2 uses genes expressed in ALL cells to calculate size factors.
                This modified method uses more genes (genes expressed in x% samples) to estimate size factors,
@@ -125,18 +129,20 @@ gene_length$tbl <- NULL
 output$gene_length_ui <- renderUI({
     if(!is.null(input$proc_method)) {
         if(grepl("RPKM", input$proc_method) || input$proc_method == "TPM") {
-            list(
+            column(4,
                 tags$br(),
                 actionButton("gene_length_custom_btn", label = "Upload Lengths", class = "btn-info")
             )
         } else if(input$proc_method %in% c("Census", "ERCC-RLM")) {
-            shinyBS::tipify(
-                numericInput("expected_capture_rate", "RNA capture rate", min = 0.01, max = 1, step = 0.01, value = 0.25),
-                title = "the expected fraction of RNA molecules in the lysate that will be captured as cDNAs during reverse transcription",
-                placement = "right", options = list(container = "body")
+            column(4,
+                shinyBS::tipify(
+                    numericInput("expected_capture_rate", "RNA capture rate", min = 0.01, max = 1, step = 0.01, value = 0.25),
+                    title = "the expected fraction of RNA molecules in the lysate that will be captured as cDNAs during reverse transcription",
+                    placement = "right", options = list(container = "body")
+                )
             )
         } else if(input$proc_method %in% c("RUVg")) {
-            list(
+            column(4,
                 tags$br(),
                 pivot_featureInputModal_UI("RUVg", "Set Control Genes")
             )
@@ -250,7 +256,10 @@ observe({
 # Switch to normalization details
 output$norm_details_ui <- renderUI({
     if(is.null(r_data$norm_param)) return()
-    actionButton("norm_details", label = "Normalization Details", class = "btn-warning")
+    if(input$file_format == "tenx" || r_data$file_info$type == "tenx") {
+        return()
+    }
+    actionButton("norm_details", label = "Normalization Details", class = "btn-success")
 })
 
 observeEvent(input$norm_details, {

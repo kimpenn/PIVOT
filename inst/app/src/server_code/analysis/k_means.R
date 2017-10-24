@@ -37,7 +37,8 @@ output$kmeans_ui <- renderUI({
                                           title = "A random set of (distinct) samples is chosen as the initial k centres", placement = "bottom", options = list(container = "body"))),
                 shinyBS::tipify(column(4, numericInput("km_nstart", label = "nstart", min = 1, max = 500, value = 10, step = 1)),
                                 title = "The number of initial random sets to be chosen.", placement = "bottom", options = list(container = "body"))
-            )
+            ),
+            fluidRow(column(12,actionButton("run_kmeans", "Run", class = "btn-info btn_rightAlign")))
         ),
         box(
             title = NULL,
@@ -66,7 +67,7 @@ output$kmeans_ui <- renderUI({
 
 kmeansList <- callModule(pivot_dataScale, "kmeans", r_data)
 # k-means
-observe({
+observeEvent(input$run_kmeans, {
     req(input$km_centers, input$km_nstart, input$kmeans_seed)
     set.seed(input$kmeans_seed)
     req(kmeansList()$df)

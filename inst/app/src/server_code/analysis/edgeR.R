@@ -55,7 +55,10 @@ output$edgeR_ui <- renderUI({
                        uiOutput("edgeR_test_explain")
                 )
             ),
-            actionButton("perform_edgeR", "Run Modeling", class = "btn-info btn_leftAlign")
+            fluidRow(
+                column(9),
+                column(3, actionButton("perform_edgeR", "Run Modeling", class = "btn-info"))
+            )
         ),
         uiOutput("edgeR_results_box"),
         box(
