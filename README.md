@@ -1,6 +1,7 @@
 # PIVOT: Platform for Interactive analysis and Visualization Of Transcriptomics data
 
 ## About this package
+
 This program is developed based on the Shiny framework, a set of R packages and a 
 collection of scripts written by members of Junhyong Kim Lab at University of Pennsylvania. 
 Its goal is to facilitate fast and interactive RNA-Seq data analysis and visualization. 
@@ -12,6 +13,7 @@ saved, loaded and shared.
   * See http://kim.bio.upenn.edu/software/pivot.shtml for more details.
 
 ## Installation
+
   * Main Program: Please copy and paste the following command to R console. 
   * Upgrading R and Rstudio to the latest version (R > 3.2, Rstudio > 1.0.0) is strongly recommended. 
 
@@ -30,11 +32,14 @@ biocLite("DESeq2")
 install_github("qinzhu/PIVOT")
 install_github("qinzhu/PIVOT.launcher")
 ```
- * (Optional but strongly recommended) Dependencies:
+ * (Optional but strongly recommended):
+   * We recommend setting the R environmental variable R_MAX_NUM_DLLS to be 150 or greater because the default 100 limits the number of packages that can be loaded at one time. (https://stackoverflow.com/questions/36974206/error-maximal-number-of-dlls-reached).
+   For linux, simply use “export R_MAX_NUM_DLLS=150” before launching R. For macOS system, one can locate and add “R_MAX_NUM_DLLS=150” to the .Renviron file in /Library/Frameworks/R.framework/Resources/etc.
    * For report generation, you need Pandoc: http://pandoc.org/installing.html
    * For PDF report generation, you need Latex: https://www.latex-project.org/get/
 
 ## Running PIVOT
+
   * Note you MUST launch PIVOT with Rstudio.
   * To run PIVOT, in Rstudio console, use command 
 ```
@@ -43,9 +48,11 @@ pivot()
 ```
 
 ## User manual
+
 See here: https://cdn.rawgit.com/qinzhu/PIVOT/60489858/inst/app/manual/manual_file.html.
 
 ## Troubleshooting
+
  * URL 'http://xxx.tgz': status was '404 Not Found'
    * Call `chooseCRANmirror()` to select another CRAN mirror.
    
