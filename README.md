@@ -41,9 +41,41 @@ install_github("qinzhu/PIVOT.launcher")
 ## Running PIVOT
 
   * Note you MUST launch PIVOT with Rstudio.
-  * To run PIVOT, in Rstudio console, use command 
+  * To run PIVOT, in Rstudio console, first use command 
 ```
 library(PIVOT)
+```
+to load the PIVOT library.
+Then you can either use 
+```
+pivot_module()
+```
+which shows the available modules in PIVOT:
+
+    |ID|         Module|
+    |--------|-----------
+     | 1| PIVOT.analysis|
+      |2|         DESeq2|
+      |3|          edgeR|
+      |4|           scde|
+      |5|        monocle|
+      |6|  PIVOT.network|
+      |7|          caret|
+      |8|  PIVOT.toolkit|
+
+Then use `pivot(#ID_vector)` to launch selected modules, e.g., pivot(c(1,2,3)) to launch PIVOT with the base PIVOT module, DESeq2 and edgeR.
+
+Alternatively, use
+```
+pivot_launcher()
+```
+to launch a window to directly pick modules or install required components.
+
+![alt text](https://github.com/qinzhu/PIVOT/tree/master/inst/app/manual/figures/launcher.png)
+
+Press set module when ready, then launch PIVOT by calling
+
+```
 pivot()
 ```
 
