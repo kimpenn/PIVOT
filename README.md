@@ -39,11 +39,14 @@ install_github("qinzhu/PIVOT.launcher")
 ## Running PIVOT
 
   * Note you MUST launch PIVOT with Rstudio.
-  * To run PIVOT, in Rstudio console, first use command 
+  * To run PIVOT, in Rstudio console, use command 
 ```
 library(PIVOT)
+pivot()
 ```
-to load the PIVOT library.
+
+* For advanced users, if you want to only load needed modules,
+
 Then you can either use 
 ```
 pivot_module()
@@ -71,11 +74,7 @@ to launch a window to directly pick modules or install required components.
 
 ![ScreenShot](https://github.com/qinzhu/PIVOT/tree/master/inst/app/manual/figures/launcher.png)
 
-Press set module when ready, then launch PIVOT by calling
-
-```
-pivot()
-```
+Press set module when ready, then launch PIVOT by calling `pivot`.
 
 ## User manual
 
