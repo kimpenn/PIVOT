@@ -33,8 +33,6 @@ install_github("qinzhu/PIVOT")
 install_github("qinzhu/PIVOT.launcher")
 ```
  * (Optional but strongly recommended):
-   * We recommend setting the R environmental variable R_MAX_NUM_DLLS to be 150 or greater because the default 100 limits the number of packages that can be loaded at one time. (https://stackoverflow.com/questions/36974206/error-maximal-number-of-dlls-reached).
-   For linux, simply use “export R_MAX_NUM_DLLS=150” before launching R. For macOS system, one can locate and add “R_MAX_NUM_DLLS=150” to the .Renviron file in /Library/Frameworks/R.framework/Resources/etc.
    * For report generation, you need Pandoc: http://pandoc.org/installing.html
    * For PDF report generation, you need Latex: https://www.latex-project.org/get/
 
