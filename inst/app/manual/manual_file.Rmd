@@ -106,25 +106,35 @@ We have included a multitude of normalization methods in PIVOT. Some normalizati
 
 * If DESeq failed on your data, one possibility is that you have low counts samples, which leads to all the genes contain at least one 0 in the counts matrix. You can either find out and remove these samples, or choose the "modified DESeq" normalization method. Setting sample inclusion 100% is equivalent to the original DESeq.
 
-* Before submitting data, please check the threshold. The program will first filter input counts based on row means or row sums, and then apply normalization. By default features with zero count will be filtered out.
+* Some normalization method require additional information from the user. For example, if you choose ERCC normalization then you must provide experimental parameters. Please also make sure the ERCC feature names matches those in the standard table: (<a href = "https://tools.thermofisher.com/content/sfs/manuals/cms_095046.txt">https://tools.thermofisher.com/content/sfs/manuals/cms_095046.txt</a>).
+
+<img src="figures/ercc_norm.png" width="80%"/>
+
+* PIVOT applies a pre-filtering step before doing normalization. By default, PIVOT will filter out genes with all 0 expressions. Users can also specify a different row mean or row sum threshold to remove those low confidence features. 
 
 * Once data have been normalized, you can check the normlization details which contain information such as the estimated size factors.
 
 <img src="figures/threshold.png" width="100%"/>
 
-## Design Information
+<p style="clear:both;">
 
-<img src="figures/design_input.png" width="60%" style= "margin: 20px" align = "left"/>
+## Input Design Information
+
+<img src="figures/design_upload.png" width="80%" style= "margin: 20px"/>
 
 * The design infomation are used for sample point coloring and differential expression analysis. Users can input the entire sample meta sheet as design information, or manually specify groups or batches for each sample.
 
-* The first column of the design table should always be the sample name list, which must include all samples that's in the expression matrix. The rest columns will be treated as "categories", which can be "condition", "batch", "operator", "experiment date", etc. You will be able to choose which category to be used for analysis such as DE, or which groups in the category should be tested.
+* The first column of the design table should always be the sample name list, which must include all samples that's in the expression matrix. The rest columns will be treated as "categories" or "design variables", which can be "condition", "batch", "operator", "experiment date", etc. You will be able to choose which category to be used for analysis such as DE, as well as if the category should be treated as categorical or numerical. 
 
-* You can make a design-info file in the manual mode, and download it for later upload.
+* You can also manually make a design-info file by specifying the sample grouping in PIVOT, and download it for later upload.
+
+<img src="figures/design_manual.png" width="80%" style= "margin: 20px"/>
 
 * Empty or NA entries are allowed in design table. But You need to make sure the categories used for DE testing (conditions/time points/batches) do not contain NAs.
 
-* Most modules allow you to color the samples with the design info.
+* The design categories will be used as "meta" info for sample coloring in many modules, such as PCA or heatmap.
+
+<p style="clear:both;">
 
 # Data Manipulation
 
