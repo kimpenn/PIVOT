@@ -23,55 +23,82 @@ See http://kim.bio.upenn.edu/software/pivot.shtml for more details.
 
 # Launch PIVOT
 
-In R, use command `library(PIVOT)` to attach the package. Once loaded, you can use one of the following methods to launch PIVOT. Normally users just need to use `pivot()` to launch the default pivot modules. For advanced use see explanations below.
 
-## Launch with PIVOT Launcher
+  * To run PIVOT, in Rstudio console, use command 
+```
+library(PIVOT)
+pivot()
+```
+
+* For advanced users, if you want to only load needed modules,
+
+Then you can either use 
+```
+pivot_module()
+```
+which shows the available modules in PIVOT:
+
+|ID|Module|
+|---|---|
+|1|PIVOT.analysis|
+|2|DESeq2|
+|3|edgeR|
+|4|scde|
+|5|monocle|
+|6|PIVOT.network|
+|7|caret|
+|8|PIVOT.toolkit|
+
+Then use `pivot(#ID_vector)` to launch selected modules, e.g., pivot(c(1,2,3)) to launch PIVOT with the base PIVOT module, DESeq2 and edgeR.
 
 <img src="figures/launcher.png" align = "left" style= "margin-right: 20px" width="350px"/>
 
-* By calling `pivot_launcher()`, you will see the window like the left image. This launcher serves as a gateway to multiple pivot modules you can use. Just check the boxes of modules that you want to load, and then press launch module. 
+Alternatively, use
+```
+pivot_launcher()
+```
+to launch a window to directly pick modules or install required components.
 
-* It is recommended that a user only launch needed modules, because using too many modules will lead to too many loaded DLLs (current R only support up to 100 DLLs per session) and potential namespace conflicts. The launcher also serves as a DLL monitor and cleaner. Simply press the clean DLLs button when there are too many DLLs loaded. Note that the best way to clean loaded DLLs is using Rstudio -> Session -> Restart R.
 
 <p style="clear:both;">
 
-## Launch using R command
-
-* `pivot_module()` command will list out current available modules in PIVOT. Use` pivot(#ID_vector))` such as `pivot(c(1,3,5))` to launch selected modules.
-
 # Data Input
-
-The input file format can be a set of count files in a folder (choose "directory"), or a single file containing all counts (choose "counts table").
 
 ## Input expression matrix
 
-* To input expression matrix, select "Counts Table" as input file type.
+* To input expression matrix, select "Counts Table" as input file type. PIVOT expects the count matrix to have rows as genes and samples as columns. Gene names and sample names should be the first column and the first row, respectively.
 
 * PIVOT support expression matrix in csv, txt, xls or xlsx formats. Choose proper settings on the left file input panel until the right "Loaded File Preview" correctly shows the data frame.
 
 <img src="figures/file_in.png" width="100%"/>
 
-* you need to make sure that the data table:
+* you need to make sure that the data matrix:
 
     + *Contains no NA or non-numeric values.*
     
     + *Does not have duplicated feature or sample names (PIVOT will alert the user if it detects any).*
 
-    + *Sample names are column names (first row) and gene names are row names (first column). (Check transpose matrix if necessary)*
-
 <p style="clear:both;">
 
 ## Input counts directory
 
-* If you have counts files with genes in the first column and gene counts in the second column. You can input the entire data folder. PIVOT will automatically combine the counts files into an expression matrix. Note you need to make sure that the files are all quatified using the same pipeline with the same annotation file.
+* If you have counts files with genes in the first column and gene counts in the second column. You can input the entire data folder. PIVOT will automatically combine the counts files into an expression matrix. Note you need to make sure that the files are all quantified using the same pipeline with the same annotation file.
 
 <img src="figures/directory_input.png" style= "margin: 20px" width="80%"/>
 
-* If you only want to input a subset of samples from the selected directory, you can type key words in the filter or directly choose the samples.
+* PIVOT also allows you to select subset of files in the folder. E.g., type 'exon' in the filter textbox to only select files with "exon" in the file name.
 
 <p style="clear:both;">
 
-## Normalization
+
+## Input 10x Cell Ranger Output
+
+* You need to install Cell Ranger R Kit from 10x Genomics to allow PIVOT to directly read in 10x data:
+https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/rkit
+
+* Then choose "10x Directoy" for input file type, and use the "Select 10x Folder" button to point PIVOT to the Cell Ranger output directory (the folder containing the "outs" folder).
+
+## Data Normalization
 
 We have included a multitude of normalization methods in PIVOT. Some normalization methods are mostly used for bulk RNA-Seq data, while others may only be applicable to single-cell data. Users should be aware of which method best suits their data. 
 

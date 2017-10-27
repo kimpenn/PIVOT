@@ -35,10 +35,11 @@ install_github("qinzhu/PIVOT.launcher")
  * (Optional but strongly recommended):
    * For report generation, you need Pandoc: http://pandoc.org/installing.html
    * For PDF report generation, you need Latex: https://www.latex-project.org/get/
+   * If you have 10x data output from Cell Ranger, please install Cell Ranger R Kit from https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/rkit
+   to allow PIVOT to directly read in the data.
 
 ## Running PIVOT
 
-  * Note you MUST launch PIVOT with Rstudio.
   * To run PIVOT, in Rstudio console, use command 
 ```
 library(PIVOT)

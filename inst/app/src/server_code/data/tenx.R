@@ -15,6 +15,7 @@
 ################################# 10x data folder processor #####################################
 
 output$tenx_package_check_ui <- renderUI({
+    if(input$file_format != "tenx") return()
     if(!"cellrangerRkit" %in% installed.packages()) {
         return(
             column(8,
