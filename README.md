@@ -15,7 +15,7 @@ saved, loaded and shared.
 ## Installation
 
   * Main Program: Please copy and paste the following command to R console. 
-  * Upgrading R and Rstudio to the latest version (R > 3.2, Rstudio > 1.0.0) is strongly recommended. 
+  * Upgrading R and Rstudio to the latest version (R >= 3.4, Rstudio > 1.0.0) is strongly recommended. 
 
 ```
 # dependecies that needs to be manually installed
