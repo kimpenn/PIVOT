@@ -51,7 +51,7 @@ which shows the available modules in PIVOT:
 
 Then use `pivot(#ID_vector)` to launch selected modules, e.g., pivot(c(1,2,3)) to launch PIVOT with the base PIVOT module, DESeq2 and edgeR.
 
-<img src="figures/launcher.png" align = "left" style= "margin-right: 20px" width="350px"/>
+<img src="figures/launcher.png" style= "margin-right: 20px" width="70%"/>
 
 Alternatively, use
 ```
@@ -136,6 +136,14 @@ We have included a multitude of normalization methods in PIVOT. Some normalizati
 
 <p style="clear:both;">
 
+## Load Example Dataset
+
+<img src="figures/load_example.png" width="35%" style= "margin: 20px" align = "left"/>
+
+* We have included in PIVOT an example dataset from Dueck, Hannah, et al., 2015. This data consists of a subset of cells from 5 different cell types (brown adipocytes (BA), cardiomyocytes (CM), cortical pyramidal neurons (CPN) and hippocampal pyramidal neuron (HPN)). User can press the question mark button on the top right corner of PIVOT and the "Load Example" button to load this example dataset. Results of many modules have already been pre-computed for users to explore all features of PIVOT.
+
+<p style="clear:both;">
+
 # Data Manipulation
 
 ## Feature Filtering
@@ -158,7 +166,13 @@ We have included a multitude of normalization methods in PIVOT. Some normalizati
     
 * Some of the features in your marker list may not be found in the dataset, because they may have already been removed due to 0 expression in all your samples.
 
-** P-Value Filter**:
+**P-Value Filter**:
+
+<img src="figures/filter_pval.png" width="80%" style= "margin: 20px"/>
+
+* Once users have performed DE analysis, PIVOT will automatically load the results to the P-value filter to allow users to filter the data with significant DEGs. You can change the P value threshold, as well as the direction of log fold change. 
+
+**Removing Filtering Effects**
 
 * Applying ![](figures/undo_filter.png) will return the data to the unfiltered state, i.e., if you have performed sample subsetting prior to filtering, the dataset will return to the sample subset.
 
