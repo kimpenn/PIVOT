@@ -79,7 +79,7 @@ Press set module when ready, then launch PIVOT by calling `pivot`.
 
 ## User manual
 
-See here: https://cdn.rawgit.com/qinzhu/PIVOT/60489858/inst/app/manual/manual_file.html.
+See here: https://rawgit.com/qinzhu/PIVOT/master/inst/app/manual/manual_file.html.
 
 ## Troubleshooting
 
