@@ -185,25 +185,25 @@ shinyServer(function(input, output, session) {
 
     # Alert user if DLL exceeds maximum.
 
-    observe({
-        num_dll <- length(getLoadedDLLs())
-        if(num_dll >= 95 & num_dll < 100) {
-            showNotification(
-                paste0("Current loaded DLLs: ", num_dll, ". Note there is an R limit (100 by default) for package loading.
-                       You can solve this problem by restarting R session and launch PIVOT with less modules. Check PIVOT website for details."),
-                duration = NULL,
-                type = "warning"
-            )
-        } else if(num_dll >= 100) {
-            showNotification(
-                paste0("Current loaded DLLs: ", num_dll, ". Note you already reached maximum DLL with default R setting. Functions are expected to fail.
-                       You can solve this problem by restarting R session and launch PIVOT with less modules. Check PIVOT website for details."),
-                duration = NULL,
-                action = a(href = "https://github.com/qinzhu/PIVOT"),
-                type = "error"
-            )
-        }
-    })
+    # observe({
+    #     num_dll <- length(getLoadedDLLs())
+    #     if(num_dll >= 95 & num_dll < 100) {
+    #         showNotification(
+    #             paste0("Current loaded DLLs: ", num_dll, ". Note there is an R limit (100 by default) for package loading.
+    #                    You can solve this problem by restarting R session and launch PIVOT with less modules. Check PIVOT website for details."),
+    #             duration = NULL,
+    #             type = "warning"
+    #         )
+    #     } else if(num_dll >= 100) {
+    #         showNotification(
+    #             paste0("Current loaded DLLs: ", num_dll, ". Note you already reached maximum DLL with default R setting. Functions are expected to fail.
+    #                    You can solve this problem by restarting R session and launch PIVOT with less modules. Check PIVOT website for details."),
+    #             duration = NULL,
+    #             action = a(href = "https://github.com/qinzhu/PIVOT"),
+    #             type = "error"
+    #         )
+    #     }
+    # })
 
     saveStateOnRefresh(session)
 })

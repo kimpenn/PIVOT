@@ -91,7 +91,7 @@ to launch a window to directly pick modules or install required components.
 <p style="clear:both;">
 
 
-## Input 10x Cell Ranger Output
+## Input 10x Cell Ranger output
 
 * You need to install Cell Ranger R Kit from 10x Genomics to allow PIVOT to directly read in 10x data:
 https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/rkit
@@ -140,21 +140,25 @@ We have included a multitude of normalization methods in PIVOT. Some normalizati
 
 ## Feature Filtering
 
-* You can filter the dataset with various criteria to only keep features (rows) of interest. More specifically, you can choose to filter the dataset with certain expression/dispersion thresholds, a marker gene list or the DE results obtained from any DE tests.
+* There are currently 3 types of feature filter in PIVOT: the expression filter, which filters based on various expression statistics; the feature list filter, which filters based on user input gene list; and the P-value filter, which filters data with differentially expressed genes.
 
-<img src="figures/filter_type.png" width="30%" style= "margin: 10px"/>
+<img src="figures/filter_type.png" width="35%" style= "margin: 10px"/>
+
+**Expression Filter**: PIVOT incorperates the `scater` package to provide users various QC plots for feature filtering. You can choose any of the stats and select range to only keep those features within the specified range.
+
+<img src="figures/filter_expr.png" width="80%" style= "margin: 20px"/>
 
 * Filter can be either positive (selecting the genes that satisfy the condition) or negative (delete the genes). 
     
-<img src="figures/filter_pos_neg.png" width="30%" style= "margin: 10px"/>
+<img src="figures/filter_pos_neg.png" width="35%" style= "margin: 10px"/>
 
-* Keep filtering the dataset means that the effect of filtration is additive. This mode is useful if you want to apply multiple criteria, e.g., first filter with marker features, then remove low count features, and finally remove features that's not expressed in a certain proportion of your samples. If this option is unchecked, you are always filtering the current sample subset.
+**Feature List Filter**: You can provide a marker feature list to get a marker feature expression subset.
+    
+* The marker features should appear as the first column in your file.
+    
+* Some of the features in your marker list may not be found in the dataset, because they may have already been removed due to 0 expression in all your samples.
 
-* You can provide a marker feature list to get a marker feature expression subset.
-    
-    + The marker features should appear as the first column in your file.
-    
-    + Some of the features in your marker list may not be found in the dataset, because they may have already been removed due to 0 expression in all your samples.
+** P-Value Filter**:
 
 * Applying ![](figures/undo_filter.png) will return the data to the unfiltered state, i.e., if you have performed sample subsetting prior to filtering, the dataset will return to the sample subset.
 
