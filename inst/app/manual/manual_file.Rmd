@@ -51,7 +51,7 @@ which shows the available modules in PIVOT:
 
 Then use `pivot(#ID_vector)` to launch selected modules, e.g., pivot(c(1,2,3)) to launch PIVOT with the base PIVOT module, DESeq2 and edgeR.
 
-<img src="figures/launcher.png" style= "margin-right: 20px" width="70%"/>
+<img src="figures/launcher.png" style= "margin-right: 20px; outline-style: double; outline-color: Gainsboro;" width="70%"/>
 
 Alternatively, use
 ```
@@ -70,7 +70,7 @@ to launch a window to directly pick modules or install required components.
 
 * PIVOT support expression matrix in csv, txt, xls or xlsx formats. Choose proper settings on the left file input panel until the right "Loaded File Preview" correctly shows the data frame.
 
-<img src="figures/file_in.png" width="100%"/>
+<img src="figures/file_in.png" width="100%" style= "margin-right: 20px; outline-style: double; outline-color: Gainsboro;"/>
 
 * you need to make sure that the data matrix:
 
@@ -84,7 +84,7 @@ to launch a window to directly pick modules or install required components.
 
 * If you have counts files with genes in the first column and gene counts in the second column. You can input the entire data folder. PIVOT will automatically combine the counts files into an expression matrix. Note you need to make sure that the files are all quantified using the same pipeline with the same annotation file.
 
-<img src="figures/directory_input.png" style= "margin: 20px" width="80%"/>
+<img src="figures/directory_input.png" style= "margin-right: 20px; outline-style: double; outline-color: Gainsboro;" width="80%"/>
 
 * PIVOT also allows you to select subset of files in the folder. E.g., type 'exon' in the filter textbox to only select files with "exon" in the file name.
 
@@ -108,7 +108,7 @@ We have included a multitude of normalization methods in PIVOT. Some normalizati
 
 * Some normalization method require additional information from the user. For example, if you choose ERCC normalization then you must provide experimental parameters. Please also make sure the ERCC feature names matches those in the standard table: (<a href = "https://tools.thermofisher.com/content/sfs/manuals/cms_095046.txt">https://tools.thermofisher.com/content/sfs/manuals/cms_095046.txt</a>).
 
-<img src="figures/ercc_norm.png" width="80%"/>
+<img src="figures/ercc_norm.png" style= "margin-right: 20px; outline-style: double; outline-color: Gainsboro;" width="80%"/>
 
 * PIVOT applies a pre-filtering step before doing normalization. By default, PIVOT will filter out genes with all 0 expressions. Users can also specify a different row mean or row sum threshold to remove those low confidence features. 
 
@@ -120,7 +120,7 @@ We have included a multitude of normalization methods in PIVOT. Some normalizati
 
 ## Input Design Information
 
-<img src="figures/design_upload.png" width="80%" style= "margin: 20px"/>
+<img src="figures/design_upload.png" width="80%" style= "margin: 20px; outline-style: double; outline-color: Gainsboro;"/>
 
 * The design infomation are used for sample point coloring and differential expression analysis. Users can input the entire sample meta sheet as design information, or manually specify groups or batches for each sample.
 
@@ -128,7 +128,7 @@ We have included a multitude of normalization methods in PIVOT. Some normalizati
 
 * You can also manually make a design-info file by specifying the sample grouping in PIVOT, and download it for later upload.
 
-<img src="figures/design_manual.png" width="80%" style= "margin: 20px"/>
+<img src="figures/design_manual.png" width="80%" style= "margin: 20px; outline-style: double; outline-color: Gainsboro;"/>
 
 * Empty or NA entries are allowed in design table. But You need to make sure the categories used for DE testing (conditions/time points/batches) do not contain NAs.
 
@@ -138,13 +138,23 @@ We have included a multitude of normalization methods in PIVOT. Some normalizati
 
 ## Load Example Dataset
 
-<img src="figures/load_example.png" width="35%" style= "margin: 20px" align = "left"/>
+<img src="figures/load_example.png" width="35%" style= "margin-right: 20px; outline-style: double; outline-color: Gainsboro;" align = "left"/>
 
 * We have included in PIVOT an example dataset from Dueck, Hannah, et al., 2015. This data consists of a subset of cells from 5 different cell types (brown adipocytes (BA), cardiomyocytes (CM), cortical pyramidal neurons (CPN) and hippocampal pyramidal neuron (HPN)). User can press the question mark button on the top right corner of PIVOT and the "Load Example" button to load this example dataset. Results of many modules have already been pre-computed for users to explore all features of PIVOT.
 
 <p style="clear:both;">
 
 # Data Manipulation
+
+## Feature ID/Name Conversion
+
+<img src="figures/feature_id_name.png" width="80%" style= "margin: 20px; outline-style: double; outline-color: Gainsboro;";/>
+
+PIVOT supports automatic ID/Name conversion and supports most of the ID/Names listed in the BioMart database. Despite this powerful feature, we still recommend users to get the feature name right in the first place (i.e., use proper gene id/name output when doing the count quantification), as id/name conversion could inevitably lead to id or name duplicates, and unmapped features.
+
+* For features that has no match in the database, PIVOT will keep its original ID.
+* For features that map to multiple entries in the database, PIVOT will use the first matched entry.
+* For multiple features that map to one entry in the database, PIVOT will name the duplicates as 'name.1', 'name.2',etc.
 
 ## Feature Filtering
 
@@ -154,7 +164,7 @@ We have included a multitude of normalization methods in PIVOT. Some normalizati
 
 **Expression Filter**: PIVOT incorperates the `scater` package to provide users various QC plots for feature filtering. You can choose any of the stats and select range to only keep those features within the specified range.
 
-<img src="figures/filter_expr.png" width="80%" style= "margin: 20px"/>
+<img src="figures/filter_expr.png" width="80%" style= "margin: 20px; outline-style: double; outline-color: Gainsboro;"/>
 
 * Filter can be either positive (selecting the genes that satisfy the condition) or negative (delete the genes). 
     
@@ -168,7 +178,7 @@ We have included a multitude of normalization methods in PIVOT. Some normalizati
 
 **P-Value Filter**:
 
-<img src="figures/filter_pval.png" width="80%" style= "margin: 20px"/>
+<img src="figures/filter_pval.png" width="80%" style= "margin: 20px; outline-style: double; outline-color: Gainsboro;"/>
 
 * Once users have performed DE analysis, PIVOT will automatically load the results to the P-value filter to allow users to filter the data with significant DEGs. You can change the P value threshold, as well as the direction of log fold change. 
 
@@ -180,17 +190,19 @@ We have included a multitude of normalization methods in PIVOT. Some normalizati
 
 * Subsetter allows you to choose a subset of samples for analysis. You can either manually select samples, groups, upload a sample list or subset based on sample statistics.
 
+* To filter based on sample statitics, you can directly drag on the sample stats plot to specify a range. 
+
+<img src="figures/sample_stats_filter.png" width="80%" style= "margin: 20px; outline-style: double; outline-color: Gainsboro;" />
+
 * You can choose whether or not the subset should be renormalized. You can change the re-normalization method and associated parameters in the "FILE" panel. 
 
-* An implicit filtration will occur to get nonzero count genes for the subset. This procedure prevents some downstream analysis from breaking on 0s.
-
-* When subsetting based on the bar plot featureing selected sample statistics, you can directly drag a range on the plot and only choose those samples within this range.
+* An implicit filtering will occur to get nonzero count genes for the subset. This procedure prevents some downstream analysis from breaking on 0s.
 
 * Applying ![](figures/undo_subset.png) will return the data to the original input dataset, which means all filtering or subsetting effects will be removed.
 
 ## Data Map
 
-<img src="figures/data_map.png" width="90%" style= "margin: 10px"/>
+<img src="figures/data_map.png" width="90%" style= "margin: 10px; outline-style: double; outline-color: Gainsboro;"/>
 
 * With each data filtering/subsetting operation, you are creating data subsets whose lineage can be tracked using the data map. Mouse over each edge in the map will show you the operation details, and you can switch between data subsets, rename nodes, delete subsets or add notes by simply selecting the nodes and click buttons.
 
