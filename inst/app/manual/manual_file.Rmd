@@ -98,6 +98,8 @@ https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/l
 
 * Then choose "10x Directoy" for input file type, and use the "Select 10x Folder" button to point PIVOT to the Cell Ranger output directory (the folder containing the "outs" folder).
 
+* By default, PIVOT will use gene symbol as row names for the expression matrix, the other option is the gene id, which is the default setting of Cell Ranger output.
+
 ## Data Normalization
 
 We have included a multitude of normalization methods in PIVOT. Some normalization methods are mostly used for bulk RNA-Seq data, while others may only be applicable to single-cell data. Users should be aware of which method best suits their data. 
@@ -155,6 +157,7 @@ PIVOT supports automatic ID/Name conversion and supports most of the ID/Names li
 * For features that has no match in the database, PIVOT will keep its original ID.
 * For features that map to multiple entries in the database, PIVOT will use the first matched entry.
 * For multiple features that map to one entry in the database, PIVOT will name the duplicates as 'name.1', 'name.2',etc.
+* Note that feature name conversion will be performed globally. To keep the consistency of downstream subsetting, filtering and analysis, all previous data subsets will be deleted from the current session. Thus, we recommend users convert feature IDs first before generating any data subsets, if necessary. 
 
 ## Feature Filtering
 
@@ -211,7 +214,9 @@ PIVOT supports automatic ID/Name conversion and supports most of the ID/Names li
 
 # Analysis Modules
 
-## Data Scale
+## Data Scale & Data Table
+
+<img src="figures/data_table.png" width="100%" style= "margin: 10px; outline-style: double; outline-color: Gainsboro;"/>
 
 * For most analysis modules, you can choose one of the four data scales: 
 
@@ -225,26 +230,52 @@ PIVOT supports automatic ID/Name conversion and supports most of the ID/Names li
     
 * For each individual analysis, please choose the most proper data scale. Some modules have fixed data scale choice (e.g., raw counts input for DESeq differential analysis) so this option is not available.
 
-## Data Table
-
-* You can download data table with different data scales and ordering. If your original data is multiple counts files in a folder, you can also download the combined raw count table or normalized table for single file input. 
-    
-    ![alt text](figures/data_table.png)
+* You can download data table with different data scales and ordering. 
     
 * The `relative frequency` of a gene is defined as its raw count divided by the total counts of the sample.
+
+* Clicking features in the data table will plot its expression in the bottom panel, you can choose various plot types including point/bar plot, box plot or violin plot. You can also convert the plot to an interactive plot.
+
+<img src="figures/expression_plot.png" width="100%" style= "margin: 10px; outline-style: double; outline-color: Gainsboro;"/>
     
-## Basic Data Statistics
+## Meta Data (Design) Composition 
 
-* This module contains simple statistics of your data, including some useful plots and table for quality control.
-     
-## ERCC 
+<img src="figures/design_tbl_pie.png" width="100%" style= "margin: 10px; outline-style: double; outline-color: Gainsboro;"/>
 
-* If your data contains ERCC spike-in, PIVOT will plot the ERCC read distribution and the estimated molecules based 
-the standard table (<a href = "https://tools.thermofisher.com/content/sfs/manuals/cms_095046.txt">https://tools.thermofisher.com/content/sfs/manuals/cms_095046.txt</a>).
+* You can visualize the composition of each design category as pie chart. For example, you may use this pie chart to assess the cell type composition of your data.
 
-* The default parameter is 0.9 µL ERCC with 1:4000000 dilution added per sample. The user will need to adjust the parameters according to the protocol used. 
+## Sample/Feature Statistics
+
+<img src="figures/sample_stats.png" width="100%" style= "margin: 10px; outline-style: double; outline-color: Gainsboro;"/>
+
+* The sample statistics panel allow you to visualize various important sample statistics. For example, clicking a sample in the left table will plot the feature count distribution. Normlization method like Census have strong assumptions on the count distribution, so you can use this to check if your data matches their assumption.
+
+* You can also visualize important sample statistics as bar plot, histogram or density plots across samples.
+
+* Similarly, the feature statistics table can be clicked and the selected gene expression can be visualized.
+
+## Data Distribution
+
+* This module provides multiple useful plots for examining the distribution and dispersion of the data. For example, with the mean-variability plotted using the `Seurat` package, a user can identify the variably expressed genes with any expression and dispersion cutoff, and download the gene list for input into other modules like heatmap.
+
+<img src="figures/seurat_meanvar.png" width="100%" style= "margin: 10px; outline-style: double; outline-color: Gainsboro;"/>
+
+## Spike-in (ERCC) Analysis
+
+* If your data contains ERCC spike-in, PIVOT will automatically find the spike-in features based on
+the standard table (<a href = "https://tools.thermofisher.com/content/sfs/manuals/cms_095046.txt">https://tools.thermofisher.com/content/sfs/manuals/cms_095046.txt</a>), and compute the count-molecule relationship, linear regression fit for each sample (direct click on the bars in the bar plot) and binomical logistic regression fit for the ERCC detection rate.
+
+<img src="figures/ercc1.png" width="100%" style= "margin: 10px; outline-style: double; outline-color: Gainsboro;"/>
+
+<img src="figures/ercc2.png" width="100%" style= "margin: 10px; outline-style: double; outline-color: Gainsboro;"/>
+
+<img src="figures/ercc3.png" width="100%" style= "margin: 10px; outline-style: double; outline-color: Gainsboro;"/>
+
+<img src="figures/ercc4.png" width="100%" style= "margin: 10px; outline-style: double; outline-color: Gainsboro;"/>
+
+
     
-    ![alt text](figures/ercc_info.png)
+
     
 ## Differential Expression Analysis
 
