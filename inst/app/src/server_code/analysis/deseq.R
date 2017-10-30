@@ -39,7 +39,7 @@ output$deseq_ui <- renderUI({
                 pivot_deGroupBy_UI("deseq", r_data$meta, width = 12, reduced = "maybe", model = c("condition", "condition_batch", "custom"))
             ),
             fluidRow(
-                column(4, selectInput("deseq_test_method", "Test Method", choices = list("Wald" = "Wald", "LRT" = "LRT"), selected = "Wald")),
+                column(4, uiOutput("deseq_test_method_ui")),
                 column(8,
                        uiOutput("deseq_test_explain")
                 )
@@ -79,6 +79,14 @@ output$deseq_ui <- renderUI({
 
 
 deseqModel <- callModule(pivot_deGroupBy, "deseq", meta = r_data$meta, reduced = "maybe")
+
+output$deseq_test_method_ui <- renderUI({
+    if(!is.null(deseqModel()) && deseqModel()$design == "condition"){
+        selectInput("deseq_test_method", "Test Method", choices = list("Wald" = "Wald", "LRT" = "LRT"), selected = "Wald")
+    } else {
+        selectInput("deseq_test_method", "Test Method", choices = list("LRT" = "LRT"))
+    }
+})
 
 output$deseq_test_explain <- renderUI({
     req(input$deseq_test_method)

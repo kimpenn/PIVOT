@@ -1,5 +1,5 @@
 ---
-title: "PIVOT User Manual"
+title: "PIVOT: Platform for Interactive analysis and Visualization Of Transcriptomics data"
 author: "Qin Zhu, Junhyong Kim Lab, University of Pennsylvania"
 date: "Oct 26th, 2017"
 output:
@@ -21,8 +21,35 @@ This program is developed based on the Shiny framework, a set of R packages and 
 
 See http://kim.bio.upenn.edu/software/pivot.shtml for more details.
 
-# Launch PIVOT
+# Installation
 
+* Main Program: Please copy and paste the following command to R console. 
+  * Upgrading R and Rstudio to the latest version (R >= 3.4, Rstudio > 1.0.0) is strongly recommended. 
+
+```
+# dependecies that needs to be manually installed, you may need to paste the code line by line
+install.packages("devtools")
+library("devtools")
+source("http://bioconductor.org/biocLite.R")  
+biocLite("GO.db")
+biocLite("HSMMSingleCell")
+biocLite("org.Mm.eg.db")
+biocLite("org.Hs.eg.db")
+biocLite("DESeq2")
+
+# Install PIVOT
+install_github("qinzhu/PIVOT")
+install_github("qinzhu/PIVOT.launcher")
+```
+ * (Optional but strongly recommended):
+   * For report generation, you need Pandoc: http://pandoc.org/installing.html
+   * For PDF report generation, you need Latex: https://www.latex-project.org/get/
+   * If you have 10x data output from Cell Ranger, please install Cell Ranger R Kit from https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/rkit
+   to allow PIVOT to directly read in the data.
+ 
+ * We are moving PIVOT to bioconductor for easier installation in the future, stay tuned.
+
+# Launch PIVOT
 
   * To run PIVOT, in Rstudio console, use command 
 ```
@@ -212,7 +239,7 @@ PIVOT supports automatic ID/Name conversion and supports most of the ID/Names li
 * To attach analysis to the nodes, simply click the magnet ![](figures/small_btns.png) button on the top right corner of each analysis box. The rest of the buttons are for pasteing R markdown reports to the report module, generating HTML reports and box collapsing.
 
 
-# Analysis Modules
+# Basic Statistics
 
 ## Data Scale & Data Table
 
@@ -273,45 +300,106 @@ the standard table (<a href = "https://tools.thermofisher.com/content/sfs/manual
 
 <img src="figures/ercc4.png" width="100%" style= "margin: 10px; outline-style: double; outline-color: Gainsboro;"/>
 
-
     
+# Differential Expression Analysis
 
-    
-## Differential Expression Analysis
-
-### DESeq Differential Expression Analysis
+## DESeq
 
 * This module is a graphical interface for the DESeq2 package (<a href="https://bioconductor.org/packages/release/bioc/html/DESeq2.html">https://bioconductor.org/packages/release/bioc/html/DESeq2.html</a>). Because DESeq requires raw counts input, if the input file is a normalized counts table, this analysis will not be available.
 
-### SCDE
+<img src="figures/deseq.png" width="100%" style= "margin: 10px; outline-style: double; outline-color: Gainsboro;"/>
+
+* You can specify any design formula to be used in the test. To do this, choose "use custom design formula" for experimental design and click the "Custom Formula" button. You'll see the following pop-up window.
+
+<img src="figures/custom_formula.png" width="60%" style= "margin: 10px; outline-style: double; outline-color: Gainsboro;"/>
+
+You can specify the full model formula and reduced model formula used for DESeq LRT test. The model formula must be constructed with valid design variables such as the input design categories, 0 or 1.
+
+* Once DE result is obtained. You can click the entries in the table to visualize the gene expression across groups.
+
+## edgeR
+
+* Similarly to DESeq, edgeR require raw count input. To keep the consistency between PIVOT and edgeR package, PIVOT will renormalize the raw count using the edgeR supported methods, including TMM, RLE(DESeq) and UpperQuantile. PIVOT implements all three tests provided by edgeR: exact text, GLM likelihood ratio test and GLM quasi-likelihood F test. For details of these tests, please refer to the edgeR user manual: https://www.bioconductor.org/packages/devel/bioc/vignettes/edgeR/inst/doc/edgeRUsersGuide.pdf
+
+<img src="figures/edgeR1.png" width="100%" style= "margin: 10px; outline-style: double; outline-color: Gainsboro;"/>
+
+**If use exact test**:
+
+Simply choose which pair to compare.
+
+**If use GLM model**
+:
+If model contains intercept (formula ~0+XYZ), use contrast, e.g., contrast: (1)A (-1)B) for pairwise group comparison
+
+If model does not contain intercept (default), the first group will be treated as the baseline. The coefficient B will be B vs A and coefficient C will be C vs A. To compare B vs C use contrast: (1)B (-1)C.
+
+See edgeR manual for more detailed explanation.
+
+## SCDE
 
 * This module is a graphical interface for the SCDE package (<a href="http://hms-dbmi.github.io/scde/diffexp.html">http://hms-dbmi.github.io/scde/diffexp.html</a>). 
+* Note currently there is a bug causing SCDE to fail in multiple occasions: https://github.com/hms-dbmi/scde/issues/48. PIVOT will update as soon as the SCDE team comes up with a fix.
 
 * The SCDE error modeling must be performed first before you can use other SCDE analysis. For large dataset the modeling process can be very slow. You can monitor the progress in the background R session.
 
 * You can use SCDE distance for hierarchical clustering and minimum-spanning-tree generation. There are three types of adjustment method you can choose: direct drop-out, reciprocal weighting and mode relative weighting. For details of these methods please check the SCDE website. Once a distance has been computed, it is loaded into PIVOT to be used in other modules.
 
-    ![alt text](figures/scde_distance.png)
-    
-### Mann-Whitney Test
+<img src="figures/scde_distance.png" width="50%" style= "margin: 10px; outline-style: double; outline-color: Gainsboro;"/>
+
+## Mann-Whitney Test
 
 * Also known as wilcoxon rank sum test. The null hypothesis is that the distributions of the gene expression in the two groups has no difference and the alternative is that they differ by some non-zero location shift.
 
-* You can choose the P adjustment method. The default method is Bonferroni correction.
+# Monocle Workflow
 
-### Monocle Differential Expression Analysis
+## Initiate Monocle Cellset and Differential Expression
 
-* This module is a graphical interface for the Monocle package (<a href="http://cole-trapnell-lab.github.io/monocle-release/">http://cole-trapnell-lab.github.io/monocle-release/</a>).
+* PIVOT follows the monocle vignette (http://cole-trapnell-lab.github.io/monocle-release/docs/) and provide a graphical interface for the Monocle package.
 
-* This analysis is most proper for groups that represent the progress of a biological process, such as time of cell collection, cell state or media change. For details of this analysis please check the monocle paper and website.
+* To start, first initate monocle cellset object by choosing a proper distribution for your data, set a minimum expression level (corresponds to min_expr argument), and press "Create Monocle CellDataSet".
+
+<img src="figures/monocle1.png" width="100%" style= "margin: 10px; outline-style: double; outline-color: Gainsboro;"/>
+
+* The DE test in monocle is can be performed in a similar fashion as other DE tests. Note it is generally very slow so we recommend filter your data and choose multiple cores to reduce the computation time.
 
 ## Monocle Cell State Ordering
 
-* Currently you can only use less than 1000 features for cell state ordering. It is recommended that you use a marker feature list, the top genes ranked by overdispersion or the significant differentially expressed genes for ordering.
+<img src="figures/monocle2.png" width="100%" style= "margin: 10px; outline-style: double; outline-color: Gainsboro;"/>
 
-* If you have provided group information, the comparison between monocle assigned state and your group will be available.
+* You can use all genes (not recommended), variably expressed genes or monocle detected DEGs for cell state ordering. Once you select your ordering gene set, simply press "Set Ordering Genes". You should be able to see the right side dispersion plot highlighting the selected ordering genes.
+
+* As described in the monocle documentation, it offers two anaylsis cell types: cell state ordering and unsupervised clustering. Once you choose the analysis type and specified the relavant parameters, press the run button to proceed. 
+
+* If the analysis type is ordering, the result will add two columns to the sample meta sheet: Pseudotime and State. Clustering will generate a "Cluster" column.
+
+* If you have provided group information, PIVOT will automatically compare the assigned state/cluster to your groups by generating a confusion matrix and a comparison plot.
+
+* Cell state ordering will also generate a cell trajectory plot. You can click the gene list to view the expression level of the selected gene plotted on the graph or as a function of pseudotime or cell state. **Note because the example dataset is composed of different cell types, the assigned state in the plot below does not have any biological meaning but only serve as a demo.**
     
-* You can click the gene list to view the expression level of the selected gene plotted on the graph or as a function of pseudotime.
+<img src="figures/monocle_trajectory.png" width="100%" style= "margin: 10px; outline-style: double; outline-color: Gainsboro;"/>
+
+## Monocle Gene Expression Pattern Analysis
+
+* Once cell state ordering is done, you can visualize the gene expression pattern across states by simply click the gene entries in the table.
+
+<img src="figures/monocle_gene_expr.png" width="100%" style= "margin: 10px; outline-style: double; outline-color: Gainsboro;"/>
+
+* You can also cluster DE genes or any custom gene set by their pseudotemporal expression pattern. Note if you have large number of genes to cluster, it is recommended to use multiple cores to reduce the computing time.
+
+<img src="figures/monocle_gene_hm.png" width="100%" style= "margin: 10px; outline-style: double; outline-color: Gainsboro;"/>
+
+# Clustering
+
+## Hieararchical Clustering
+
+<img src="figures/hierarchical_cluster.png" width="100%" style= "margin: 10px; outline-style: double; outline-color: Gainsboro;"/>
+
+* You can perform hierarchical clustering on various transformations of the expression matrix, as well as projection matrix of PCA, t-SNE, MDS or diffusion map. The latter requires you to have performed corresponding analysis first. For projections by PCA or diffusion map, you can further choose which sets of PC/DCs should be used as input for clustering.
+
+* You can color the leaves of the dendrogram by multiple sample meta data (design categories). You can use different color sets for different categories by specifying the same number of color palettes in the "group color" input box.
+
+* You can compare the clustering result to existing design categories using the confusion matrix. 
+
 
 ## Correlation Analysis
 

@@ -63,10 +63,12 @@ pivot_dataScale <- function(input, output, session, r_data, order=F, keep_stats 
     output$pc_choice <- renderUI({
         req(input$data_scale == "Projection Matrix")
         if(input$proj_matrix == "PCA") {
+            req(r_data$pca)
             pcs<-colnames(r_data$pca$x)
             names(pcs) <- pcs
             selectInput(session$ns("pca_pcs"), label = "Choose PC", choices = pcs, multiple = T)
         } else if(input$proj_matrix == "DiffusionMap") {
+            req(r_data$dfm)
             dcs<-colnames(r_data$dfm@eigenvectors)
             names(dcs) <- dcs
             selectInput(session$ns("dfm_dcs"), label = "Choose DC", choices = dcs, multiple = T)
@@ -182,6 +184,7 @@ pivot_dataScale <- function(input, output, session, r_data, order=F, keep_stats 
                     }
                 }
             } else if(input$proj_matrix == "DiffusionMap") {
+                print("test")
                 if(is.null(r_data$dfm)) {
                     session$sendCustomMessage(type = "showalert", "Please run diffusion map first.")
                     return()

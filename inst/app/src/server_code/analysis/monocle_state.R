@@ -41,7 +41,6 @@ output$monocle_state_ui <- renderUI({
                                                   "Use Monocle DE (qval < 0.1)" = "de"))
                 ),
                 column(8,
-                       uiOutput("mn_order_gene_msg"),
                        uiOutput("mn_order_gene_params")
                 )
             ),
@@ -138,13 +137,6 @@ output$mn_run_params_ui <- renderUI({
     }
 })
 
-output$mn_order_gene_msg <- renderUI({
-    num_order <- sum(fData(r_data$cellset)$use_for_ordering)
-    msg <- list()
-    if(num_order > 1000) {
-        return(tags$p("Warning: Ordering can be very slow with > 1000 genes."))
-    }
-})
 
 output$mn_order_gene_params <- renderUI({
     if(input$ordering_genes_type == "all") {
