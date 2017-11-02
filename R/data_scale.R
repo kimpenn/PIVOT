@@ -225,23 +225,13 @@ pivot_dataScaleRange_UI <- function(id, bound = 500, value = 100, include = c("C
     tagList(
         fluidRow(
             pivot_dataScale_UI(ns("hm_scale"), include = include, selected = "Log10 Counts", width = 6, order = T),
-            column(3, selectInput(ns("rank_method"), label = "Select features by", choices = list("None" = "none", "Variance" = "variance", "Fano Factor" = "fano_factor", "Row Average" = "row_average", "Row Median" = "row_median", "Custom feature list" = "custom"), selected = "fano_factor")),
-            column(3, sliderInput(ns("feature_range"), label = "Rank Range", min = 1, max = max_bound, value = c(1, value), step = 1))
+            column(6, sliderInput(ns("feature_range"), label = "Rank Range", min = 1, max = max_bound, value = c(1, value), step = 1))
         ),
-        conditionalPanel(sprintf("input['%s'] != 'custom'", ns("rank_method")),
-                         fluidRow(
-                             column(3,tags$b("Manually input a range:")),
-                             column(3, uiOutput(ns("min_rank_ui"))),
-                             column(3, uiOutput(ns("max_rank_ui"))),
-                             column(3, actionButton(ns("update_range"), "Update Range", class = "btn btn-info"))
-                         )
-        ),
-        conditionalPanel(sprintf("input['%s'] == 'custom'", ns("rank_method")),
-                         fluidRow(
-                             column(12, pivot_featureInputModal_UI(ns("ft_hmap"), label = "Input custom feature list"))
-                         ),
-                         tags$br()
-
+        fluidRow(
+            column(3,tags$b("Manually input a range:")),
+            column(3, uiOutput(ns("min_rank_ui"))),
+            column(3, uiOutput(ns("max_rank_ui"))),
+            column(3, actionButton(ns("update_range"), "Update Range", class = "btn btn-info"))
         )
     )
 }
@@ -291,19 +281,11 @@ pivot_dataScaleRange <- function(input, output, session, r_data, keep_stats = FA
 
     data0 <- reactive({
         hm_data <- hmapList()$df
-
-        if(input$rank_method == "custom") {
-            if(is.null(flist())){
-                return(NULL)
-            }
-            rs<-hm_data[flist(),]
-        } else {
-            if(is.null(hm_data) || is.null(input$feature_range)) return()
-            if(input$feature_range[2] > nrow(hm_data)) {
-                return(NULL)
-            }
-            rs<-hm_data[input$feature_range[1]:input$feature_range[2],]
+        if(is.null(hm_data) || is.null(input$feature_range)) return()
+        if(input$feature_range[2] > nrow(hm_data)) {
+            return(NULL)
         }
+        rs<-hm_data[input$feature_range[1]:input$feature_range[2],]
         if(nrow(rs) == 0) {
             return(NULL)
         } else {
@@ -317,7 +299,7 @@ pivot_dataScaleRange <- function(input, output, session, r_data, keep_stats = FA
         } else {
             list(
                 df = data0(),
-                order = input$rank_method,
+                order = hmapList()$order,
                 range = c(input$feature_range[1],input$feature_range[2])
             )
         }

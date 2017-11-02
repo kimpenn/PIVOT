@@ -400,12 +400,62 @@ See edgeR manual for more detailed explanation.
 
 * You can compare the clustering result to existing design categories using the confusion matrix. 
 
+## K-means Clustering
 
-## Correlation Analysis
+* The procedure is similar to hierarchical clustering. For result summary, between_SS / total_SS is a measure of the clustering result quality. SS stands for Sum of Squares, so it's the usual decomposition of deviance in deviance "Between" and deviance "Within". Ideally you want a clustering that has the properties of internal cohesion and external separation, i.e. the BSS/TSS ratio should approach 1. (Explanation from LambdaVu@stackexchange: https://stats.stackexchange.com/questions/82776/what-does-total-ss-and-between-ss-mean-in-k-means-clustering)
 
-* You can generate pairwise scatterplot if you have less than 50 samples. This module will fail if you have too many samples.
+## SC3 Clustering
 
-* The sample correlation heatmap provides a more intuitive way of visualizing the correlation between your samples. If you specifies color by group, a color bar will be added to the heatmap to show the group info. You can only use the correlation distance for hierarchical clustering in a correlation heatmap. 
+* This module is a graphical interface for the SC3 package. You can find the full manual for SC3 here: https://bioconductor.org/packages/release/bioc/vignettes/SC3/inst/doc/SC3.html.
+
+* It is recommended to estimate best K first to determine a range of ks for SC3 to explore. Clicking the button and you'll see the k_estimation. Then you can proceed to run SC3. For large dataset we recommend using multiple cores.
+
+<img src="figures/sc3_cluster.png" width="100%" style= "margin: 10px; outline-style: double; outline-color: Gainsboro;"/>
+
+* Once SC3 finishes, you should be able to see the average Silhouette plot and Silhouette plot as above. The former tells you the Silhouette statistics across ks, while the latter shows the Silhouette for each cluster and each k. See https://en.wikipedia.org/wiki/Silhouette_(clustering) for detailed explanation on Silhouette.
+
+<img src="figures/sc3_consensus.png" width="100%" style= "margin: 10px; outline-style: double; outline-color: Gainsboro;"/>
+
+* You can visualize the consensus matrix computed by SC3. It show the similarity between cells based on the consensus clustering result. The SC3 result table can be downloaded, and the cluster assignment will be automatically loaded as sample meta information for visualization in other modules, e.g., PCA.
+
+## Community Detection
+
+* The community detection module uses the procedure described in Darmanis, Spyros, et al. "A survey of human brain transcriptome diversity at the single cell level." Proceedings of the National Academy of Sciences 112.23 (2015): 7285-7290. 
+
+<img src="figures/community.png" width="100%" style= "margin: 10px; outline-style: double; outline-color: Gainsboro;"/>
+
+* The user can choose which pairwise distance metric should be used to generate the minimum spanning tree as well as the parameters of the walktrap community detection algorithm. You can also adjust multiple aesthetics of the graph.
+
+
+# Correlation Analysis
+
+## Pairwise Scatterplot
+
+* You can generate pairwise scatterplot if you have less than 50 samples. DO NOT run this module if you have too many samples/cells. You should instead use sample correlation heatmap.
+
+<img src="figures/corr_scatter.png" width="100%" style= "margin: 10px; outline-style: double; outline-color: Gainsboro;"/>
+
+* The plot shows pairwise comparison between your samples. The x and y axis of each plot show log10 RPM estimates in the cell corresponding to a given column and row respectively. The set of smoothed scatter plots on the lower left shows the overall correspondence between the transcript abundances estimated in two given cells. The upper right corner shows three-component mixture model, separating genes that “drop-out” in one of the cells (green component shows drop/out events in the column cell, red component shows drop-out events in the row cell). The correlated component is shown in blue. The percent of genes within each component is shown in the legend.
+
+* This module is adapted from the SCDE package.
+
+## Sample Correlation Heatmap
+
+<img src="figures/sample_correlation.png" width="100%" style= "margin: 10px; outline-style: double; outline-color: Gainsboro;"/>
+
+* The sample correlation heatmap provides a more intuitive way of visualizing the correlation between your samples. If you specifies color by group, a color bar will be added to the heatmap to show the group info. 
+
+* You can also adjust multiple aesthetics of the plot, and choose if the plot should be static or interactive by changing the plotting package.
+
+## Feature Correlation Heatmap
+
+<img src="figures/feature_correlation.png" width="100%" style= "margin: 10px; outline-style: double; outline-color: Gainsboro;"/>
+
+* Similar to sample correlation, feature correlation heatmap shows the block correlation structure of your features. You can adjust various parameters of this analysis, including distance measure (absolute correlation means neglecting signs of correlation coefficient), correlation method (pearson, spearman or kendall) and agglomeration method for the hierarchical clustering built on top of the heatmap.
+
+<img src="figures/gene_corr.png" width="100%" style= "margin: 10px; outline-style: double; outline-color: Gainsboro;"/>
+
+* Additionally, you can use this module to find genes correlated/co-expressed with a target gene of interest, as shown in the figure above. Simply type in the gene name, correlation method and direction, and the correlation coefficient threshold, and press "Search". PIVOT will list out genes above the threshold and plot them along with the search gene in an expression heatmap.
 
 ## Feature Heatmap
 
