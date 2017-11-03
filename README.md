@@ -23,10 +23,12 @@ install.packages("devtools")
 library("devtools")
 source("http://bioconductor.org/biocLite.R")  
 biocLite("GO.db")
+biocLite("BiocGenerics")
 biocLite("HSMMSingleCell")
 biocLite("org.Mm.eg.db")
 biocLite("org.Hs.eg.db")
 biocLite("DESeq2")
+biocLite("SingleCellExperiment")
 biocLite("scater")
 
 # Install PIVOT
