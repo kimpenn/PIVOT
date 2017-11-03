@@ -204,7 +204,7 @@ output$filters <- renderUI({
     scater_plot_choices <- c("highest-expression", "exprs-freq-vs-mean", "pairwise feature metadata plots")
     names(scater_plot_choices) <- scater_plot_choices
 
-    scater_feature_choices <- c('mean_exprs', 'exprs_rank', 'n_cells_exprs', 'total_feature_exprs', 'pct_total_exprs', 'pct_dropout', 'total_feature_counts', 'log10_total_feature_counts', 'pct_total_counts')
+    scater_feature_choices <- c("mean_counts","log10_mean_counts","rank_counts","n_cells_counts", "pct_dropout_counts", "total_counts","log10_total_counts")
     names(scater_feature_choices) <- scater_feature_choices
 
     if(input$feature_filter_type == "range") {
@@ -281,14 +281,14 @@ output$scater_feature_plot <- renderPlot({
 # define range and output ui
 output$scater_filter_range_ui <- renderUI({
     req(r_data$sceset, input$scater_filter_type)
-    ftbl <- Biobase::fData(r_data$sceset)
+    ftbl <- fInfo(r_data$sceset)
     feature_vec <- ftbl[[input$scater_filter_type]]
     sliderInput("scater_filter_range", label = paste("Range of", input$scater_filter_type), min = floor(min(feature_vec)), max = ceiling(max(feature_vec)), value = c(floor(min(feature_vec)), ceiling(max(feature_vec))))
 })
 
 output$scater_min_ui <- renderUI({
     req(input$scater_filter_type, input$scater_filter_range)
-    ftbl <- Biobase::fData(r_data$sceset)
+    ftbl <- fInfo(r_data$sceset)
     feature_vec <- ftbl[[input$scater_filter_type]]
     cur_value = input$scater_filter_range[1]
     numericInput("scater_min", label = "Min", value = cur_value, min = floor(min(feature_vec)), max = ceiling(max(feature_vec)))
@@ -296,7 +296,7 @@ output$scater_min_ui <- renderUI({
 
 output$scater_max_ui <- renderUI({
     req(input$scater_filter_type, input$scater_filter_range)
-    ftbl <- Biobase::fData(r_data$sceset)
+    ftbl <- fInfo(r_data$sceset)
     feature_vec <- ftbl[[input$scater_filter_type]]
     cur_value = input$scater_filter_range[2]
     numericInput("scater_max", label = "Max", value = cur_value, min = floor(min(feature_vec)), max = ceiling(max(feature_vec)))
@@ -320,7 +320,7 @@ observeEvent(input$range_filter_btn, {
     req(r_data$sceset, input$scater_filter_type, input$scater_filter_range)
 
     negf <- as.logical(input$is_neg_filter)
-    ftbl <- Biobase::fData(r_data$sceset)
+    ftbl <- fInfo(r_data$sceset)
     feature_vec <- ftbl[[input$scater_filter_type]]
 
     if(input$scater_min > input$scater_max) {

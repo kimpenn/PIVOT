@@ -142,10 +142,11 @@ clear_results <-function(r_data) {
 #'
 #' @description
 #' fData from Biobase
-#' @import Biobase
+#' @import SummarizedExperiment
 #' @export
-fData <- Biobase::fData
-
+fInfo <- function(x){
+    as.data.frame(SummarizedExperiment::rowData(x))
+}
 #' Get pheno data
 #'
 #' @description
@@ -209,14 +210,14 @@ init_meta <- function(r_data) {
     r_data$category <- colnames(r_data$meta)
 
     # Initiate sceset
-    pd <- new("AnnotatedDataFrame", data = cbind(r_data$sample_stats, r_data$meta))
-    fd <- new("AnnotatedDataFrame", data = data.frame(gene = r_data$feature_list, cap_name = toupper(r_data$feature_list)))
+    pd <- cbind(r_data$sample_stats, r_data$meta)
+    fd <- data.frame(gene = r_data$feature_list, cap_name = toupper(r_data$feature_list))
     rownames(fd) <-rownames(r_data$df)
-    r_data$sceset<-scater::newSCESet(countData = r_data$raw, phenoData = pd, featureData = fd, logExprsOffset = 1, lowerDetectionLimit = 0)
+    r_data$sceset<-SingleCellExperiment::SingleCellExperiment(assays = list(counts = as.matrix(r_data$raw),
+                                                                            normcounts = as.matrix(r_data$df),
+                                                                            logcounts = as.matrix(log2(r_data$df + 1))),
+                                                              colData = pd, rowData = fd)
     r_data$sceset <- scater::calculateQCMetrics(r_data$sceset)
-
-    # There is a bug in scater package which needs to be fixed: the mean and sum of exprs when it is log scale. Also need future investication of the normalization used by scater.
-
     return(r_data)
 }
 

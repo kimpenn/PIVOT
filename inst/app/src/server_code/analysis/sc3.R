@@ -83,10 +83,10 @@ observeEvent(input$run_sc3_kest, {
 })
 
 output$sc3_k_est <- renderUI({
-    req(r_data$sceset@sc3)
+    req(metadata(r_data$sceset)$sc3)
     tagList(
         tags$br(),
-        tags$b(paste0("k_estimation: ",r_data$sceset@sc3$k_estimation))
+        tags$b(paste0("k_estimation: ",metadata(r_data$sceset)$sc3$k_estimation))
     )
 })
 
@@ -112,10 +112,10 @@ observeEvent(input$run_sc3, {
 })
 
 output$sc3_avg_silw <- renderPlot({
-    req(r_data$sc3_krange, r_data$sceset@sc3, r_data$sceset@sc3$consensus)
+    req(r_data$sc3_krange, metadata(r_data$sceset)$sc3, metadata(r_data$sceset)$sc3$consensus)
     krange <- r_data$sc3_krange
     silw<-sapply(krange, function(i) {
-         mean(r_data$sceset@sc3$consensus[[as.character(i)]]$silhouette[,"sil_width"])
+         mean(metadata(r_data$sceset)$sc3$consensus[[as.character(i)]]$silhouette[,"sil_width"])
     })
     plot(krange, silw, type="n", xlab="k", ylab="Average Silhouette", ylim = c(0,1), xaxt="n")
     lines(krange, silw, type="b", lwd=1.5,lty=1, col="black", pch=18)
@@ -123,18 +123,18 @@ output$sc3_avg_silw <- renderPlot({
 })
 
 output$sc3_silw_k_ui <- renderUI({
-    req(r_data$sc3_krange, r_data$sceset@sc3, r_data$sceset@sc3$consensus)
+    req(r_data$sc3_krange, metadata(r_data$sceset)$sc3, metadata(r_data$sceset)$sc3$consensus)
     krange <- r_data$sc3_krange
     numericInput("sc3_silw_k", "Choose k", min=min(krange), max = max(krange), value = min(krange))
 })
 
 output$sc3_silw_plot <- renderPlot({
-    req(r_data$sc3_krange, r_data$sceset@sc3, input$sc3_silw_k)
+    req(r_data$sc3_krange, metadata(r_data$sceset)$sc3, input$sc3_silw_k)
     SC3::sc3_plot_silhouette(r_data$sceset, k = input$sc3_silw_k)
 })
 
 output$sc3_consensus_k_ui <- renderUI({
-    req(r_data$sceset@sc3, r_data$sceset@sc3$consensus)
+    req(r_data$sc3_krange, metadata(r_data$sceset)$sc3, metadata(r_data$sceset)$sc3$consensus)
     krange <- r_data$sc3_krange
     column(4,numericInput("sc3_consensus_k", "Choose k", min=min(krange), max = max(krange), value = min(krange)))
 })
@@ -142,14 +142,14 @@ output$sc3_consensus_k_ui <- renderUI({
 output$sc3_consensus <- renderPlot({
     input$sc3_consensus_btn
     isolate({
-        req(r_data$sc3_krange, r_data$sceset@sc3, input$sc3_consensus_k)
+        req(r_data$sc3_krange, metadata(r_data$sceset)$sc3, input$sc3_consensus_k)
         SC3::sc3_plot_consensus(r_data$sceset, input$sc3_consensus_k, show_pdata = paste0("sc3_", r_data$sc3_krange, "_clusters"))
     })
 })
 
 output$sc3_assignment <- DT::renderDataTable({
-    req(r_data$sc3_krange, r_data$sceset@sc3)
-    p_data <- pData(r_data$sceset)
+    req(r_data$sc3_krange, metadata(r_data$sceset)$sc3)
+    p_data <- as.data.frame(colData(r_data$sceset))
     if(all(paste0("sc3_", r_data$sc3_krange, "_clusters") %in% colnames(p_data))) {
         tbl <- p_data[,paste0("sc3_", r_data$sc3_krange, "_clusters")]
     } else {

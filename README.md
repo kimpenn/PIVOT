@@ -27,6 +27,7 @@ biocLite("HSMMSingleCell")
 biocLite("org.Mm.eg.db")
 biocLite("org.Hs.eg.db")
 biocLite("DESeq2")
+biocLite("scater")
 
 # Install PIVOT
 install_github("qinzhu/PIVOT")

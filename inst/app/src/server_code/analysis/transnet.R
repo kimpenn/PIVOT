@@ -541,7 +541,7 @@ observeEvent(input$loadStringSpecies, {
         })
         if(!is.null(r_data$string_meta)) r_data$string_meta <- NULL
         message_alert <- capture.output({
-            fmeta <- fData(r_data$sceset)
+            fmeta <- fInfo(r_data$sceset)
             if(!is.null(fmeta$STRING_id)) {
                 tbl <- fmeta %>% dplyr::select(-STRING_id)
             } else {
@@ -711,7 +711,7 @@ output$tf_net_all <- renderPlot({
         cap_id <-cap_id[which(str_in %in% V(g0)$name)]
         tbl <- tbl[match(cap_id, toupper(tbl$gene)), ]
     } else if(input$tf_interactome_selection == "reg"){
-        fmeta <- fData(r_data$sceset)
+        fmeta <- fInfo(r_data$sceset)
         tbl_in <-fmeta$cap_name[match(toupper(tbl$gene), fmeta$cap_name)]
         tbl_in<-as.character(tbl_in[which(tbl_in %in% V(g0)$name)])
         tbl <- tbl[match(tbl_in, toupper(tbl$gene)), ]
@@ -838,7 +838,7 @@ observeEvent(input$tf_sum_score, {
             for(i in 1: nrow(tfs)) {
                 if(input$tf_interactome_selection == "reg") {
                     cur_mode = input$tf_nbs_direction
-                    meta_tbl <- fData(r_data$sceset)
+                    meta_tbl <- fInfo(r_data$sceset)
                 } else {
                     cur_mode = "all"
                     meta_tbl <- r_data$string_meta
@@ -998,7 +998,7 @@ output$tf_gp1_net_show <- renderUI({
 
             if(input$tf_interactome_selection == "reg") {
                 cur_mode = input$tf_nbs_direction
-                meta_tbl <- fData(r_data$sceset)
+                meta_tbl <- fInfo(r_data$sceset)
             } else {
                 cur_mode = "all"
                 meta_tbl <- r_data$string_meta
@@ -1129,7 +1129,7 @@ output$tf_gp2_net_show <- renderUI({
 
             if(input$tf_interactome_selection == "reg") {
                 cur_mode = input$tf_nbs_direction
-                meta_tbl <- fData(r_data$sceset)
+                meta_tbl <- fInfo(r_data$sceset)
             } else {
                 cur_mode = "all"
                 meta_tbl <- r_data$string_meta

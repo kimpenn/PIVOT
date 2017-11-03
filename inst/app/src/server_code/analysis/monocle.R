@@ -165,7 +165,7 @@ observeEvent(input$init_monocle, {
     sample_meta <- r_data$meta
     rownames(sample_meta) <- r_data$meta[,1]
     pd <- new("AnnotatedDataFrame", data = sample_meta)
-    feature_meta <- Biobase::fData(r_data$sceset)
+    feature_meta <- fInfo(r_data$sceset)
     colnames(feature_meta)[1] <- "gene_short_name"
     fd <- new("AnnotatedDataFrame", data = feature_meta)
 

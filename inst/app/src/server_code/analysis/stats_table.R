@@ -248,7 +248,7 @@ output$sample_count_distribution <- render_Plotly({
 output$download_feature_info_tbl <- downloadHandler(
     filename = "feature_info_tbl.csv",
     content = function(file) {
-        ftbl <- Biobase::fData(r_data$sceset)
+        ftbl <- fInfo(r_data$sceset)
         ftbl <- ftbl[, -which(names(ftbl) %in% c("use_for_ordering", "cap_name", "STRING_id", "is_feature_control"))]
         write.csv(ftbl, file)
     }
@@ -257,7 +257,7 @@ output$download_feature_info_tbl <- downloadHandler(
 # A copy of the above table to be put in feature filter tab
 output$feature_info_tbl <- DT::renderDataTable({
     req(r_data$sceset)
-    ftbl <-fData(r_data$sceset)
+    ftbl <-fInfo(r_data$sceset)
     ftbl <- ftbl[, -which(colnames(ftbl) %in% c("use_for_ordering", "cap_name", "STRING_id", "is_feature_control"))]
     DT::datatable(ftbl, selection = 'single', rownames = FALSE, options = list(
         scrollX = T, scrollY = "450px", lengthMenu = c(20, 50, 100)
@@ -268,7 +268,7 @@ output$feature_info_tbl <- DT::renderDataTable({
 observe({
     req(r_data$sceset)
     s = input$feature_info_tbl_row_last_clicked
-    tbl<-as.data.frame(fData(r_data$sceset))
+    tbl<-as.data.frame(fInfo(r_data$sceset))
 
     if (length(s)) {
         selected_gene <- rownames(tbl[s, , drop = FALSE])

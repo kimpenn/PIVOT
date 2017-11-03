@@ -131,7 +131,7 @@ output$data_inprocess <- DT::renderDataTable({
 output$download_feature_stats_tbl <- downloadHandler(
     filename = "feature_stats_tbl.csv",
     content = function(file) {
-        ftbl <-fData(r_data$sceset)
+        ftbl <-fInfo(r_data$sceset)
         ftbl <- ftbl[, -which(names(ftbl) %in% c("use_for_ordering", "cap_name", "STRING_id","is_feature_control"))]
         write.csv(ftbl, file)
     }
@@ -140,7 +140,7 @@ output$download_feature_stats_tbl <- downloadHandler(
 # A copy of the above table to be put in feature filter tab
 output$input_feature_stats_tbl <- DT::renderDataTable({
     if(is.null(r_data$sceset)) return()
-    ftbl <-fData(r_data$sceset)
+    ftbl <-fInfo(r_data$sceset)
     ftbl <- ftbl[, -which(names(ftbl) %in% c("use_for_ordering", "cap_name", "STRING_id","is_feature_control"))]
     DT::datatable(ftbl, selection = 'single', rownames = FALSE, options = list(
         scrollX = T, scrollY = "500px", lengthMenu = c(20, 50, 100)
