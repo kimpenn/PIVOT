@@ -87,6 +87,15 @@ See here: https://rawgit.com/qinzhu/PIVOT/master/vignettes/manual_file.html.
 
  * URL 'http://xxx.tgz': status was '404 Not Found'
    * Call `chooseCRANmirror()` to select another CRAN mirror.
+  
+ * 'SingleCellExperiment' package cannot be correctly installed
+    * Please update your bioconductor to the latest version (>=3.6) and retry installation using the following command:
+    
+```
+source("http://bioconductor.org/biocLite.R")  
+biocLite("BiocUpgrade") 
+biocLite("SingleCellExperiment")
+```
    
  * Linux specific: Dependency openssl configuration failed
    * Please install the latest libgdal-dev package (apt-get install libgdal-dev)
