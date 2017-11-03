@@ -27,12 +27,11 @@ See http://kim.bio.upenn.edu/software/pivot.shtml for more details.
   * Upgrading R and Rstudio to the latest version (R >= 3.4, Rstudio > 1.0.0) is strongly recommended. 
 
 ```
-# dependecies that needs to be manually installed, you may need to paste the code line by line
-install.packages("devtools")
+# dependecies that needs to be manually installed 
+install.packages("devtools") # First run this line alone then paste rest.
 library("devtools")
 source("http://bioconductor.org/biocLite.R")  
 biocLite("GO.db")
-biocLite("BiocGenerics")
 biocLite("HSMMSingleCell")
 biocLite("org.Mm.eg.db")
 biocLite("org.Hs.eg.db")
@@ -42,6 +41,7 @@ biocLite("scater")
 
 # Install PIVOT
 install_github("qinzhu/PIVOT")
+biocLite("BiocGenerics") # You need the latest BiocGenerics >=0.23.3
 ```
  * (Optional but strongly recommended):
    * For report generation, you need Pandoc: http://pandoc.org/installing.html

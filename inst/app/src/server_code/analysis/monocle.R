@@ -167,6 +167,7 @@ observeEvent(input$init_monocle, {
     pd <- new("AnnotatedDataFrame", data = sample_meta)
     feature_meta <- fInfo(r_data$sceset)
     colnames(feature_meta)[1] <- "gene_short_name"
+    rownames(feature_meta) <- feature_meta$gene_short_name
     fd <- new("AnnotatedDataFrame", data = feature_meta)
 
     cellset <- monocle::newCellDataSet(as.matrix(df),
