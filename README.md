@@ -30,7 +30,6 @@ biocLite("DESeq2")
 
 # Install PIVOT
 install_github("qinzhu/PIVOT")
-install_github("qinzhu/PIVOT.launcher")
 ```
  * (Optional but strongly recommended):
    * For report generation, you need Pandoc: http://pandoc.org/installing.html
@@ -56,7 +55,7 @@ which shows the available modules in PIVOT:
 
 |ID|Module|
 |---|---|
-|1|PIVOT.analysis|
+|1|PIVOT.base|
 |2|DESeq2|
 |3|edgeR|
 |4|scde|

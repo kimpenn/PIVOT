@@ -1,6 +1,6 @@
-Package: PIVOT.analysis
+Package: PIVOT
 Type: Package
-Title: PIVOT.analysis: Main interface of PIVOT
+Title: PIVOT: Platform for Interactive analysis and Visualization Of Transcriptomics data
 Version: 1.0.0
 Author: Qin Zhu
 Maintainer: Qin Zhu <qinzhu@outlook.com>
@@ -59,7 +59,10 @@ Imports:
     org.Hs.eg.db, 
     org.Mm.eg.db,
     destiny,
-    SC3
+    SC3,
+    miniUI, 
+    rstudioapi,
+    htmlwidgets
 License: http://kim.bio.upenn.edu/software/LICENSE
 Encoding: UTF-8
 LazyData: true

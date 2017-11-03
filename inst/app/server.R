@@ -37,7 +37,7 @@ shinyServer(function(input, output, session) {
     lapply(list.files("src/server_code", pattern = "\\.(r|R)$", recursive = TRUE, full.names = TRUE), function(x){source(file = x, local = TRUE)})
 
     if(!exists("r_module")) {
-        r_module <- c('PIVOT.analysis')
+        r_module <- c('PIVOT.base')
     } else {
         r_module <- r_module
     }

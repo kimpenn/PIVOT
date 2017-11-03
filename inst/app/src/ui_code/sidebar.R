@@ -20,7 +20,7 @@ sidebarwell <- function (...)
 }
 
 if(!exists("r_module")) {
-    r_module <- "PIVOT.analysis"
+    r_module <- "PIVOT.base"
 }
 
 if('DESeq2' %in% r_module) {
@@ -72,7 +72,7 @@ if('caret' %in% r_module) {
     caret_side_ui <- NULL
 }
 
-if('PIVOT.analysis' %in% r_module) {
+if('PIVOT.base' %in% r_module) {
     side_ui <- list(
         menuItem("Basic Statistics", icon = icon("area-chart"),
                  menuSubItem("Data Table", tabName="table", icon = icon("angle-right")),
