@@ -87,7 +87,6 @@ observeEvent(input$run_dfm,{
     req(dfm_data, input$dfm_dist)
 
     tryCatch({
-        assign("test1",dfm_data, env=.GlobalEnv)
         r_data$dfm <- destiny::DiffusionMap(t(dfm_data), verbose = T,
                                distance = input$dfm_dist, sigma=input$dfm_sigma)
         r_data$dpt <- destiny::DPT(r_data$dfm)

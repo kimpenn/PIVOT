@@ -368,7 +368,7 @@ See edgeR manual for more detailed explanation.
 
 * You can use all genes (not recommended), variably expressed genes or monocle detected DEGs for cell state ordering. Once you select your ordering gene set, simply press "Set Ordering Genes". You should be able to see the right side dispersion plot highlighting the selected ordering genes.
 
-* As described in the monocle documentation, it offers two anaylsis cell types: cell state ordering and unsupervised clustering. Once you choose the analysis type and specified the relavant parameters, press the run button to proceed. 
+* As described in the monocle documentation, it offers two anaylsis cell types: cell state ordering and unsupervised clustering. Once you choose the analysis type and specified the relevant parameters, press the run button to proceed. 
 
 * If the analysis type is ordering, the result will add two columns to the sample meta sheet: Pseudotime and State. Clustering will generate a "Cluster" column.
 
@@ -459,73 +459,136 @@ See edgeR manual for more detailed explanation.
 
 ## Feature Heatmap
 
-* You can rank features by fano factor, variance or mean expression. You are not allowed to use standardized data for ranking because all feature will have the same mean (0) and variance (1). However, if you want to plot in standardized scale, you can choose rank by "Row order". 
-    ![alt text](figures/hm_gene_rank.png)
+<img src="figures/feature_hmap_ui.png" width="100%" style= "margin: 10px; outline-style: double; outline-color: Gainsboro;"/>
 
-* The ranking of the heatmap is used for choosing the top ranked features to be plotted in the heatmap. You can use the slider to choose the features to be plotted. By default if the number of features is greater than 500, only the top 500 features will be plotted. Using the manual input, you can choose any rank range other than the top 500. The only limit is that you can only plot 1000 features at a time.
+* You can set multiple parameters for the feature heatmap. By default, PIVOT will only plot the top 100 genes ranked by a chosen statistic (variance, fano-factor, row mean or median). You can change the number of genes to plot by using the range slider, or manually input a range. If you want to plot a specific set of genes, please use the feature filter in the File panel.
 
-    ![alt text](figures/hmap_range.png)
+<img src="figures/feature_hmap.png" width="100%" style= "margin: 10px; outline-style: double; outline-color: Gainsboro;"/>
 
-* By default, the order of the samples (columns) and features (rows) shown in the heatmap will be determined by hierarchical clustering. Alternatively, if "Do not cluster sample/feature" is specifed, the samples/features will be ordered by the rank. If the user also specifies "rank by row order", then the heatmap order will be exactly the same as the input row/column order.
+* Multiple aethetics can be adjusted in the visualization setting.
 
-    ![alt text](figures/hm_order.png)
+# Dimension Reduction
 
-* d3heatmap package allows zoom in (click and drag) and zoom out (double click).
+## PCA
 
-* Press ![alt text](figures/change_hm_color.png) to try different colors!
+* To run PCA, simply choose the type of input data and whether the data should be scaled, then press Run. You can specify the coloring of points and the palette for coloring after you have run PCA. You can download the tables for explained variance, feature loading and data projection. The Scree plot shows how much variance is explained by each PC.
 
-## Dimension Reduction
+<img src="figures/pca1.png" width="100%" style= "margin: 10px; outline-style: double; outline-color: Gainsboro;"/>
 
-### PCA
+* You can visualzie the 1D, 2D and 3D projection by PCA, and adjust relevant aesthetics. For example, you can choose which PC combination should be used for 2D PCA plot. Additionally, you can use ggplot or ggbiplot package (require installation from github) to visualize the 2D PCA plot. 
 
-* You can look at any principal component. Percentage shown on each axis is the percent variance explained by that principal component.
+* You can directly drag on the plotly version of the 2D plot to specify groups for each sample (point). The grouping will be added as a meta column (pca_group), which can be used for coloring points and by other analysis such as DE.
+
+<img src="figures/pca2.png" width="100%" style= "margin: 10px; outline-style: double; outline-color: Gainsboro;"/>
     
-    ![alt text](figures/PC_choose.png)
-    
-### T-SNE
+## T-SNE
 
-* 1D, 2D and 3D T-SNE are results of 3 different t-SNE processes (dims = 1, 2 or 3).
+* Note that unlike PCA, 1D, 2D and 3D T-SNE are results of 3 different t-SNE runs (parameter dims = 1, 2 or 3).
 
 * According to http://lvdmaaten.github.io/tsne/, 
     
     *"Perplexity is a measure for information that is defined as 2 to the power of the Shannon entropy. The perplexity of a fair die with k sides is equal to k. In t-SNE, the perplexity may be viewed as a knob that sets the number of effective nearest neighbors. It is comparable with the number of nearest neighbors k that is employed in many manifold learners."*
     
-    ![alt text](figures/tsne.png)
+* Similar to PCA, you can specify groups directly on the 2D plot.
     
-## Classification
+<img src="figures/tsne1.png" width="100%" style= "margin: 10px; outline-style: double; outline-color: Gainsboro;"/>
+    
+## Metric and Non-metric MDS
 
-* This module is a graphical interface for the caret package (<a href="http://topepo.github.io/caret/index.html">http://topepo.github.io/caret/index.html</a>). Currently it allows the user to choose almost all classification models listed in (<a href="http://topepo.github.io/caret/modelList.html"> http://topepo.github.io/caret/modelList.html</a>). 
+* See https://en.wikipedia.org/wiki/Multidimensional_scaling for details about this method.
+
+## Diffusion Map
+
+* The diffusion map module provides a graphical interface for the "destiny" package (http://bioconductor.org/packages/release/bioc/html/destiny.html). We suggest users to read relevant literature to understand the logic behind this method. 
+
+<img src="figures/df1.png" width="100%" style= "margin: 10px; outline-style: double; outline-color: Gainsboro;"/>
+    
+<img src="figures/dpt.png" width="100%" style= "margin: 10px; outline-style: double; outline-color: Gainsboro;"/>
+
+## PenalizedLDA
+
+* This module provides a graphical interface for the "penalizedLDA" package, which implements the penalized classification using Fisher's linear discriminant algorithm. The plot below shows the feature weight on each of the discriminant vector. One can also visualize the 1D, 2D and 3D data projection.
+
+<img src="figures/plda1.png" width="100%" style= "margin: 10px; outline-style: double; outline-color: Gainsboro;"/>
+
+# Gene Enrichment Analysis
+
+* This module provides a graphical interface for limma's goana and kegga function, which performs GO enrichment analysis and KEGG pathway analysis, respectively.
+
+* To start, select the analysis type (GO or KEGG), species of your data and whether you want to convert gene names to ID. Note the goana or kegga function can only take entrez ID as input, so you should either convert them outside of PIVOT, or inside PIVOT using the feature name/ID converter (Feature panel), or simply input gene name and check the "Convert gene name to ID" option. PIVOT will automatically find corresponding entrez IDs for your genes using the BioMart database.
+
+* You can test custom gene set, or any of the previously computed DEGs. You need to specify the adjusted P value threshold as well as the direction of the log fold change. You can preview the gene set to be tested by clicking the green preview button.
+
+* By default, PIVOT will show the top 100 enriched GO terms. Increase the number if you want to see more. This value will be sent to the topGO function of limma.
+
+<img src="figures/enrich1.png" width="100%" style= "margin: 10px; outline-style: double; outline-color: Gainsboro;"/>
+
+# Network Analysis
+
+* This module facilitates the visualization of the gene network with different databases, and predicts potential lists of transdifferentiation factors based on a modified version of the Mogrify algorithm (https://www.nature.com/ng/journal/v48/n3/full/ng.3487.html).
+
+* To start, choose your DEGs and species. PIVOT will automatically load previously computed DE results into this module. The gene score is computed based on the log fold change (LFC) and P-value to facilitate the ranking of the DEGs.
+
+<img src="figures/tfnet1.png" width="100%" style= "margin: 10px; outline-style: double; outline-color: Gainsboro;"/>
+
+* Next, choose your network database. PIVOT currently includes the STRING protein-protein interaction database and the Regnetwork regulatory network database. For STRING, you need to specify a threshold for the combined scores of the interactions (score_threshold in STRINGdb$new function). By default, the top DEGs will be plotted in the network with the igraph package. You can change multiple aesthetics of the plot. Note STRING will produce an undirected graph while Regnetwork will produce a directed graph, showing the regulatory relationship.
+
+<img src="figures/tfnet2.png" width="100%" style= "margin: 10px; outline-style: double; outline-color: Gainsboro;"/>
+
+* For STRING database, we also provides interface for direct query to the main website (string-db.org). You can query up to 350 top genes and visualize their network relationship, as well as clicking the node and see detailed information about a particular gene.
+
+<img src="figures/tfnet3.png" width="100%" style= "margin: 10px; outline-style: double; outline-color: Gainsboro;"/>
+
+* We adapted the Mogrify algorithm for predicting potential transdifferentiation factors with pairwise differential expression analysis results. Because there are no consensus on how to define a "Network influence score" for a transcription factor, we provide several ways for doing this, including the method described in the Mogrify paper. Thus, the resulting list should only be used as a "potential" guide list for further exploration. Nonetheless, we have found good agreement between the transdifferention list from literature and the predicted list using the FANTOM5 ES-fibroblast data.
+
+<img src="figures/tfnet4.png" width="100%" style= "margin: 10px; outline-style: double; outline-color: Gainsboro;"/>
+
+* Once the lists have been computed, one can click genes and see their neighborhood network.
+
+<img src="figures/tfnet5.png" width="100%" style= "margin: 10px; outline-style: double; outline-color: Gainsboro;"/>
+
+# Classification
+
+* This module is a graphical interface for the caret package (<a href="http://topepo.github.io/caret/index.html">http://topepo.github.io/caret/index.html</a>). Currently it allows the user to choose most classification models listed in (<a href="http://topepo.github.io/caret/modelList.html"> http://topepo.github.io/caret/modelList.html</a>). 
 
 * Some methods may require new packages to be installed. In such cases, the background R session will ask you to install it. Choose yes if you want to proceed.
 
-    ![alt text](figures/caret_install.png)
+<img src="figures/caret_install.png" width="100%" style= "margin: 10px; outline-style: double; outline-color: Gainsboro;"/>
     
-* Users are expected to have the knowledge of which model is most suitable for their data. The details of these models can be found in the caret website.
-    
-* Many methods contains built-in feature selection. For those having explicit coefficients for the features, the feature coefficient table will be available for download.
+* Users are expected to have the knowledge of which model is most suitable for their data. The details of these models can be found in the caret website. Also, a user is expected to split the input data into training groups and testing groups by including relevant info in the design information for the samples (such as a design category with "train_A", "train_B" and "test").
 
-* You can specify the cross-validation parameters to be used in the training.
+# Toolkit
 
-    ![alt text](figures/caret_cv.png)
-    
-* For methods containing internal feature selection and explicit feature coefficients, the information will be available in the "Feature Coefficient" table.
+## Venn Diagram
 
-* The trained model can be used as a classifier for new data, or be used for the testing of the model. For example, if you train the classifier using data of group A and group B, and then perform testing on group A-t and group B-t. Then samples in group A-t and B-t will be classified as group A or group B, so that you can tell how well the model is performing. Alternatively, you can use the model to classify the unknow samples in e.g. group C.
+* If you have three feature lists produced by e.g., different DE methods, and you want to know what's their union and intersection. You can upload each of them (feature list as first column) and see the Venn diagram.
 
-    
+<img src="figures/venn1.png" width="100%" style= "margin: 10px; outline-style: double; outline-color: Gainsboro;"/>
+
+## Gene Annotation
+
+* PIVOT provides interface for querying BioMart database. For example, if you want to find ensembl ID, chromosome location and description for a set of genes, simply click external_gene_name in the filter table, and choose "ensemble_gene_id", "description" and "chromosome_name" in the attributes table. Click "external_gene_name" to input the gene set, then press "Query Biomart".
+
+<img src="figures/biomart1.png" width="100%" style= "margin: 10px; outline-style: double; outline-color: Gainsboro;"/>
+
+
 # Report Module
 
-* The code has been pre-written for you -- you only need to add it. Please always run the module before you add it to report, because PIVOT requires the module has a last state to capture all the parameters. 
+* The code has been pre-written for you -- you only need to add it. Simply click the "add to report" button once you've run the analysis, the code will be pasted to the report module.  
 
-    ![alt text](figures/report0.png)
-    
+<img src="figures/report1.png" width="20%" style= "margin: 10px; outline-style: double; outline-color: Gainsboro;"/>
+
 * The report code is based on R-markdown v2 (http://rmarkdown.rstudio.com/). You can add comments, change titles or modify the code (not recommended) according to the syntax.
+
+<img src="figures/report2.png" width="100%" style= "margin: 10px; outline-style: double; outline-color: Gainsboro;"/>
+
+* You can also directly generate report or attach it to the current data node in the data map by clicking the buttons on the top right corner of the module.
 
 # System Control
 
-* The system control menu is located at the top right corner. Users can use this panel to save the program state, launch new session or go to data management panels.
+* The system control menu is located at the top right corner. Users can use this panel to save the program state, launch new session or go to launcher.
 
-    ![alt text](figures/sys_control.png)
+<img src="figures/sys_control.png" width="25%" style= "margin: 10px; outline-style: double; outline-color: Gainsboro;"/>
 
 ## Program State Saving and Loading
 
@@ -533,55 +596,19 @@ See edgeR manual for more detailed explanation.
 
 * To load the saved state, go to File panel and choose PIVOT state in input file type. The session will auto refresh and immediately switch to the loaded state when the state uploading is complete. 
 
-    ![alt text](figures/load_state.png)
-    
-* Please note that although every analysis result will be kept in the state, PIVOT is not able to return the parameter choices to the ones you chose when the analysis was performed. In other words, the results and plots shown in the loaded state will stay the same, but the new parameter UI will return to the defaults. 
+<img src="figures/load_state.png" width="80%" style= "margin: 10px; outline-style: double; outline-color: Gainsboro;"/>
 
 * Each time you exit, PIVOT will automatically save the state into the background R session. If you don't close the R session, or save the workspace image before exiting R, the next time you launch PIVOT it will automatically load the state for you.
 
-* To clear the state, click ![alt text](figures/clear_session.png).
+* To clear the state, click ![](figures/clear_session.png) or simply remove the R objects in the current R environment.
 
 ## Launch New Session
 
-* Clicking the ![alt text](figures/new_session.png) button will launch new PIVOT session for you. In this way you can do different things in different sessions. There is a limitation for this: because R is single-thread, you can only perform one analysis at a time. While R is busy computing in one session, the other sessions will have to wait in a queue. 
+* Clicking the ![alt text](figures/new_session.png) button will launch new PIVOT session for you. In this way you can do different things in different sessions. There is a limitation for this: because one R session can only have one shiny instance running at a time, you can only perform one analysis at a time, no matter how many open PIVOT sessions you have. While R is busy computing for one session, the other sessions will have to wait in a queue.
 
-* If you really want to simultaneously perform multiple analysis in multiple sessions, currently the only way is to open multiple copies of R, and launch PIVOT using the command "pivot()" in each R session.
 
-# Other Useful Information
 
-## Gene Expression Plot
 
-* In all differential expression analysis modules, you can click the result table to view the expression plot of individual genes.
-
-    ![alt text](figures/gene_plot.png)
-
-## Size of the Plot
-
-* You can change the width of most plots by resizing the window.
-
-* You can resize ggvis plots by using the bottom right triangle, and download the plot by clicking the cog icon on top right.
-
-    ![alt text](figures/ggvis.png)
-    
-## Citation Infomation
-
-* The citation and licensing information can be found at the bottom of each module.
-
-    ![alt text](figures/citation.png)
-
-    
-## Built-in Help Infomation
-
-* You can find ![alt text](figures/help_icon.png) in many places in PIVOT. You can click it to view the relavant information of the module.
-
-* Many parameter inputs has tooltips containing the relavant info.
-
-    ![alt text](figures/tool_tip.png)
-    
-    
-<br><br>
-    
-    
 
 
 
