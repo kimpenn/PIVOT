@@ -28,7 +28,7 @@
 ## Assignment Results
 
 ```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 6}
-    p_data <- pData(r_data$sceset)
+    p_data <- colData(r_data$sceset)
     if(all(paste0("sc3_", r_data$sc3_krange, "_clusters") %in% colnames(p_data))) {
         tbl <- p_data[,paste0("sc3_", r_data$sc3_krange, "_clusters")]
     } else {
