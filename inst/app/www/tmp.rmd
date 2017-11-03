@@ -1,28 +1,25 @@
+---
+title: ''
+author: ''
+date: '2017-11-02'
+output:
+  html_document:
+    toc: true
+    number_sections: true
+    theme: default
+---
 
-# T-SNE
+For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+You can embed an R code chunk like this:
 
-## T-SNE Projection Plots
-
-```{r echo = FALSE, warning=FALSE, message = FALSE}
-    tsne_minfo<- reactive(callModule(pivot_groupBy, "tsne", meta = r_data$meta))
+```{r}
+summary(cars)
 ```
 
-### 1D Projection
+You can also embed plots, for example:
 
-```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 6}
-callModule(pivot_Plot1d, "tsne_plot1d", type = "tsne", obj = NULL, proj = r_data$tsne$tsne_1d, minfo = tsne_minfo())
+```{r, echo=FALSE}
+plot(cars)
 ```
 
-### 2D Projection
-
-```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 6}
-    obj <- callModule(pivot_Plot2d, "tsne_plot2d", type = "tsne", obj = NULL, proj = r_data$tsne$tsne_2d, minfo = tsne_minfo())
-    obj$plot
-```
-
-### 3D Projection
-
-```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 8, fig.height = 6}
- callModule(pivot_Plot3d, "tsne_plot3d", type = "tsne", obj = NULL, proj = r_data$tsne$tsne_3d, minfo = tsne_minfo())
-```
 
