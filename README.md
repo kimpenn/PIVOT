@@ -72,13 +72,13 @@ pivot_launcher()
 ```
 to launch a window to directly pick modules or install required components.
 
-![ScreenShot](https://github.com/qinzhu/PIVOT/tree/master/inst/app/manual/figures/launcher.png)
+![ScreenShot](https://github.com/qinzhu/PIVOT/tree/master/vignettes/figures/launcher.png)
 
 Press set module when ready, then launch PIVOT by calling `pivot`.
 
 ## User manual
 
-See here: https://rawgit.com/qinzhu/PIVOT/master/inst/app/manual/manual_file.html.
+See here: https://rawgit.com/qinzhu/PIVOT/master/vignettes/manual_file.html.
 
 ## Troubleshooting
 

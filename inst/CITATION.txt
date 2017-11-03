@@ -1,0 +1,11 @@
+citEntry(
+    entry = "article",
+    author = "Qin Zhu, Stephen A Fisher, Hannah Dueck, Sarah Middleton, Mugdha Khaladkar, Junhyong Kim",
+    title = "PIVOT: Platform for Interactive Analysis and Visualization of Transcriptomics Data",
+    journal = "bioRxiv (Preprint)",
+    year = "2017",
+    volume = "",
+    url = "https://www.biorxiv.org/content/early/2017/07/06/053348",
+    doi =  "http://dx.doi.org/10.1101/053348",
+    textVersion = "Qin Zhu, Stephen A Fisher, Hannah Dueck, Sarah Middleton, Mugdha Khaladkar, Junhyong Kim. PIVOT: Platform for Interactive Analysis and Visualization of Transcriptomics Data (Preprint) bioRxiv 053348; doi: http://dx.doi.org/10.1101/053348"
+)

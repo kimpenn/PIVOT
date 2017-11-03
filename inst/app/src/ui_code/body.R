@@ -407,7 +407,7 @@ body <- dashboardBody(
 
 
         tabItem(tabName = "about",
-                includeMarkdown("./manual/about.Rmd"),
+                includeMarkdown("www/about.Rmd"),
                 fluidRow(
                     HTML("
                                <div class = 'kimlab_footer'>
