@@ -81,7 +81,7 @@ Press set module when ready, then launch PIVOT by calling `pivot`.
 
 ## User manual
 
-See here: https://rawgit.com/qinzhu/PIVOT/master/inst/app/www/manual_file.html.
+See here: https://rawgit.com/qinzhu/PIVOT/master/inst/app/www/manual_file.html or http://qinsr.com/wp-content/uploads/2017/11/manual_file.html
 
 ## Troubleshooting
 
