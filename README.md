@@ -19,7 +19,7 @@ saved, loaded and shared.
 
 ```
 # dependecies that needs to be manually installed 
-install.packages("devtools") # First run this line alone then paste rest.
+install.packages("devtools") 
 library("devtools")
 source("http://bioconductor.org/biocLite.R")  
 biocLite("GO.db")
@@ -29,6 +29,7 @@ biocLite("org.Hs.eg.db")
 biocLite("DESeq2")
 biocLite("SingleCellExperiment")
 biocLite("scater")
+biocLite("monocle")
 
 # Install PIVOT
 install_github("qinzhu/PIVOT")
