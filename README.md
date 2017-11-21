@@ -22,6 +22,7 @@ saved, loaded and shared.
 install.packages("devtools") 
 library("devtools")
 source("http://bioconductor.org/biocLite.R")  
+biocLite("BiocUpgrade") 
 biocLite("GO.db")
 biocLite("HSMMSingleCell")
 biocLite("org.Mm.eg.db")
