@@ -21,6 +21,7 @@ saved, loaded and shared.
 # dependecies that needs to be manually installed.
 # You may need to paste the following code line by line 
 # and choose if previously installed packages should be updated (recommended).
+
 install.packages("devtools") 
 library("devtools")
 source("http://bioconductor.org/biocLite.R")  
