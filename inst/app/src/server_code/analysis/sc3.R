@@ -151,7 +151,7 @@ output$sc3_assignment <- DT::renderDataTable({
     req(r_data$sc3_krange, S4Vectors::metadata(r_data$sceset)$sc3)
     p_data <- as.data.frame(colData(r_data$sceset))
     if(all(paste0("sc3_", r_data$sc3_krange, "_clusters") %in% colnames(p_data))) {
-        tbl <- p_data[,paste0("sc3_", r_data$sc3_krange, "_clusters")]
+        tbl <- p_data[,paste0("sc3_", r_data$sc3_krange, "_clusters"), drop=F]
     } else {
         return()
     }
@@ -163,7 +163,7 @@ output$sc3_download <- downloadHandler(
         "sc3_assigment.csv"
     },
     content = function(file) {
-        tbl <- colData(r_data$sceset)[,paste0("sc3_", r_data$sc3_krange, "_clusters")]
+        tbl <- colData(r_data$sceset)[,paste0("sc3_", r_data$sc3_krange, "_clusters"), drop=F]
         write.csv(tbl, file, row.names = T)
     }
 )

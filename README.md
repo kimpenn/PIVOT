@@ -92,6 +92,10 @@ See here: https://rawgit.com/qinzhu/PIVOT/master/inst/app/www/manual_file.html o
 
  * URL 'http://xxx.tgz': status was '404 Not Found'
    * Call `chooseCRANmirror()` to select another CRAN mirror.
+   
+ * "Maximum DLL loaded error". Unfortunately current R only permits maximum of 100 loaded DLLs. This issue will be fixed with the release of the developmental version of R (See https://stackoverflow.com/questions/36974206/error-maximal-number-of-dlls-reached). 
+ 
+ For now, we suggest only load necessary modules when launching PIVOT. If your analysis require entire workflow, consider adding the environmental variable "R_MAX_NUM_DLLS=150" to .Renviron file located at "/Library/Frameworks/R.framework/Resources/etc"(MacOs); or .bash_profile with "export R_MAX_NUM_DLLS=150" (Linux). 
   
  * 'SingleCellExperiment' package cannot be correctly installed
     * Please update your bioconductor to the latest version (>=3.6) and retry installation using the following command:
@@ -109,7 +113,7 @@ biocLite("SingleCellExperiment")
    
 ## Citation
 
-* Qin Zhu, Stephen A Fisher, Hannah Dueck, Sarah Middleton, Mugdha Khaladkar, Junhyong Kim. PIVOT: Platform for Interactive Analysis and Visualization of Transcriptomics Data (Preprint) bioRxiv 053348; doi: http://dx.doi.org/10.1101/053348
+* Zhu, Q., Fisher, S. A., Dueck, H., Middleton, S., Khaladkar, M., & Kim, J. (2018). PIVOT: platform for interactive analysis and visualization of transcriptomics data. BMC bioinformatics, 19(1), 6.
 
 * For specific analysis, please check the citation listed in the module.
 
