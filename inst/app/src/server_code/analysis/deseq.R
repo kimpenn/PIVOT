@@ -256,11 +256,10 @@ output$download_deseq_result <- downloadHandler(
     },
     content = function(file) {
         if(input$deseq_cuttbl) {
-            deseq_results <- BiocGenerics::subset(resOrdered, padj <= input$deseq_alpha)
+            tbl<- as.data.frame(BiocGenerics::subset(r_data$deseq_results, padj <= input$deseq_alpha))
         } else {
-            deseq_results <- resOrdered
+            tbl<- as.data.frame(r_data$deseq_results)
         }
-        tbl<-as.data.frame(deseq_results)
         if(nrow(tbl) == 0) return()
         write.csv(as.data.frame(tbl), file)
     }

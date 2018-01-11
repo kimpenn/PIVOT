@@ -258,7 +258,8 @@ output$filters <- renderUI({
 
 output$scater_feature_pair_ui <- renderUI({
     req(r_data$sceset, input$scater_feature_plot_type == "pairwise feature metadata plots")
-    choices <- c('mean_exprs', 'exprs_rank', 'n_cells_exprs', 'total_feature_exprs', 'pct_total_exprs', 'pct_dropout', 'total_feature_counts', 'log10_total_feature_counts', 'pct_total_counts')
+    choices <- colnames(rowData(r_data$sceset))
+    choices <- choices[!choices %in% c("gene", "cap_name", "is_feature_control")]
     names(choices) <- choices
     list(
         column(4, selectInput("scater_feature_plot_x", "X Var", choices = choices)),
