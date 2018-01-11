@@ -18,7 +18,7 @@ saved, loaded and shared.
   * Upgrading R and Rstudio to the latest version (R >= 3.4, Rstudio > 1.0.0) is strongly recommended. 
 
 ```
-# dependecies that needs to be manually installed 
+# dependecies that needs to be manually installed, you might need to paste the following code line by line and choose if previously installed packages should be updated (recommend to update).
 install.packages("devtools") 
 library("devtools")
 source("http://bioconductor.org/biocLite.R")  
