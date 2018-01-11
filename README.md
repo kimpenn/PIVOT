@@ -19,9 +19,10 @@ saved, loaded and shared.
 
 ```
 # dependecies that needs to be manually installed 
-install.packages("devtools") # First run this line alone then paste rest.
+install.packages("devtools") 
 library("devtools")
 source("http://bioconductor.org/biocLite.R")  
+biocLite("BiocUpgrade") 
 biocLite("GO.db")
 biocLite("HSMMSingleCell")
 biocLite("org.Mm.eg.db")
@@ -29,6 +30,7 @@ biocLite("org.Hs.eg.db")
 biocLite("DESeq2")
 biocLite("SingleCellExperiment")
 biocLite("scater")
+biocLite("monocle")
 
 # Install PIVOT
 install_github("qinzhu/PIVOT")
@@ -90,12 +92,14 @@ See here: https://rawgit.com/qinzhu/PIVOT/master/inst/app/www/manual_file.html o
   
  * 'SingleCellExperiment' package cannot be correctly installed
     * Please update your bioconductor to the latest version (>=3.6) and retry installation using the following command:
-    
-```
+ 
+ ```
 source("http://bioconductor.org/biocLite.R")  
 biocLite("BiocUpgrade") 
 biocLite("SingleCellExperiment")
 ```
+ 
+ * If you ran into any problems like 'SingleCellExperiment'，'SCESet' or 'pData', its likely that you have old scater installed. The new scater package changes all the grammar so you need to first remove the old package by calling `remove.packages("scater")` and reinstall the latest version by using `biocLite("scater")`.
    
  * Linux specific: Dependency openssl configuration failed
    * Please install the latest libgdal-dev package (apt-get install libgdal-dev)
