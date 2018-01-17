@@ -21,7 +21,7 @@ normalize_data <- function(method, params = NULL, raw, ercc = NULL) {
     if(method == "DESeq") {
         tryCatch({
             samplesAll <- data.frame(row.names=colnames(raw), celltype=rep("nt",length(colnames(raw))))
-            dds <- DESeq2::DESeqDataSetFromMatrix(countData = raw, colData=samplesAll, design = ~ 1)
+            dds <- DESeq2::DESeqDataSetFromMatrix(countData = round(raw), colData=samplesAll, design = ~ 1)
             dds <- DESeq2::estimateSizeFactors(dds)
             sizeFactorRefAll <- data.frame(size_factor = SummarizedExperiment::colData(dds)$sizeFactor)
             norm_param <- list(method = method, sizeFactor = sizeFactorRefAll)
@@ -38,7 +38,7 @@ normalize_data <- function(method, params = NULL, raw, ercc = NULL) {
         tryCatch({
             suppressWarnings({
                 samplesAll <- data.frame(row.names=colnames(raw), celltype=rep("nt",length(colnames(raw))))
-                dds <- DESeq2::DESeqDataSetFromMatrix(countData = raw, colData=samplesAll, design = ~ 1)
+                dds <- DESeq2::DESeqDataSetFromMatrix(countData = round(raw), colData=samplesAll, design = ~ 1)
                 sf_list <- estimateSizeFactorsForMatrix_MK(raw, threshold = params$deseq_threshold)
                 DESeq2::sizeFactors(dds) <- sf_list$sf
                 norm_param <- list(method = method, sizeFactor = data.frame(size_factor = sf_list$sf), numGenes = sf_list$numGenes, deseq_threshold = params$deseq_threshold)

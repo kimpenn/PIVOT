@@ -111,12 +111,12 @@ observeEvent(input$submit_dir, {
         }
 
         rownames(allCountsRaw) <- allCountsRaw$feature
-        colnames(allCountsRaw) <- make.names(colnames(allCountsRaw)) # Make sure the sample names are converted to the format accepted by R
+        colnames(allCountsRaw) <- make.names(colnames(allCountsRaw), unique=T) # Make sure the sample names are converted to the format accepted by R
         allCountsRaw <- allCountsRaw %>% dplyr::select(-feature)
 
         r_data$glb.raw <- allCountsRaw # global raw
         # Make sure the names are good
-        tmp_sample_name <- make.names(colnames(r_data$glb.raw), unique = TRUE)
+        tmp_sample_name <- colnames(r_data$glb.raw)
         colnames(r_data$glb.raw) <- tmp_sample_name
         tmp_feature_name <- make.names(rownames(r_data$glb.raw), unique = TRUE)
         rownames(r_data$glb.raw) <- tmp_feature_name
@@ -133,7 +133,6 @@ observeEvent(input$submit_dir, {
             r_data <- clear_design(r_data)
             return()
         }
-
         # Extract and exclude ERCC
         r_data$ercc <- r_data$glb.raw[grep("ERCC(-|[.])\\d{5}", rownames(r_data$glb.raw)),]
         if(grepl("ERCC", input$proc_method) && nrow(r_data$ercc) == 0) {
@@ -145,6 +144,7 @@ observeEvent(input$submit_dir, {
         if(input$exclude_ercc && nrow(r_data$ercc) > 0) {
             r_data$glb.raw<-r_data$glb.raw[-which(rownames(r_data$glb.raw) %in% rownames(r_data$ercc)), ]
         }
+        #assign("raw", r_data$glb.raw , env=.GlobalEnv)
 
         r_data$sample_name <- colnames(r_data$glb.raw) # Get the sample_key
         r_data$feature_list <- rownames(r_data$glb.raw) # Get the feature_key
