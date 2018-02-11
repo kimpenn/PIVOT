@@ -38,7 +38,6 @@ Imports:
     grid,
     DESeq2,
     dendextend,
-    plotly,
     readr,
     pryr,
     dplyr,
@@ -62,11 +61,10 @@ Imports:
     destiny,
     SC3,
     miniUI, 
-    rstudioapi,
     htmlwidgets,
     viridis,
     tibble
-License: http://kim.bio.upenn.edu/software/LICENSE
+License: GPL-3
 Encoding: UTF-8
 LazyData: true
 biocViews: Software
