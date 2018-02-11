@@ -22,7 +22,6 @@ Imports:
     networkD3,
     penalizedLDA,
     threejs,
-    igraph,
     gplots,
     heatmaply,
     STRINGdb,
