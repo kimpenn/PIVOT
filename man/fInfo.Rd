@@ -7,5 +7,5 @@
 fInfo(x)
 }
 \description{
-fData from Biobase
+fData from SummarizedExperiment
 }

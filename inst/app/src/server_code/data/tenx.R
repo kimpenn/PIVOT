@@ -107,7 +107,7 @@ observeEvent(input$submit_tenx, {
             return()
         }
 
-        feature_tbl <- fData(r_data$gbm_bcnorm)
+        feature_tbl <- fData(gbm_bcnorm)
 
         r_data$sample_name <- colnames(r_data$glb.raw)
         r_data$feature_list <- rownames(r_data$glb.raw)

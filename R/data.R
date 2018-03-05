@@ -141,12 +141,21 @@ clear_results <-function(r_data) {
 #' Get feature data
 #'
 #' @description
-#' fData from Biobase
+#' fData from SummarizedExperiment
 #' @import SummarizedExperiment
 #' @export
 fInfo <- function(x){
     as.data.frame(SummarizedExperiment::rowData(x))
 }
+
+#' Get feature data
+#'
+#' @description
+#' fData from Biobase
+#' @import Biobase
+#' @export
+fData <- Biobase::fData
+
 #' Get pheno data
 #'
 #' @description
