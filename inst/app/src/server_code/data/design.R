@@ -319,7 +319,7 @@ observeEvent(input$submit_design_upload, {
 
     # assign('df_tmp', df_tmp, env = .GlobalEnv)
     # Take first column as sample column
-    sample_col <- df_tmp[,1]
+    sample_col <- make.names(df_tmp[,1])
     matched_sp <- match(colnames(r_data$glb.raw), sample_col) # If contain NA, some sample are not found in sample_col
     if(any(is.na(matched_sp)))
     {
