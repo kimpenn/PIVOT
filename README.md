@@ -10,6 +10,7 @@ differential expression analysis, dimension reduction, correlation analysis, clu
 classification. Users can complete workflows of DESeq2, monocle and scde package with
 just a few button clicks. All analysis reports can be exported, and the program state can be
 saved, loaded and shared.
+
   * See http://kim.bio.upenn.edu/software/pivot.shtml for more details.
 
 ## Installation

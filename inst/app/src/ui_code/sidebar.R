@@ -1,4 +1,4 @@
-# Copyright (c) 2015,2016, Qin Zhu and Junhyong Kim, University of Pennsylvania.
+# Copyright (c) 2015-2018 Qin Zhu and Junhyong Kim, University of Pennsylvania.
 # All Rights Reserved.
 #
 # You may not use this file except in compliance with the Kim Lab License
