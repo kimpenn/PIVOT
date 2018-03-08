@@ -242,7 +242,7 @@ pivot_launcher <- function() {
         })
 
 
-        output$workflow_tbl = DT::renderDataTable(
+        output$workflow_tbl <- DT::renderDataTable(
             info_tbl()[,c("ID", "Pick", "Module", "Status", "Description")], rownames = F, escape = FALSE, selection = 'none', options = list(
                 dom = 't', paging = FALSE, ordering = FALSE,
                 preDrawCallback = JS('function() { Shiny.unbindAll(this.api().table().node()); }'),

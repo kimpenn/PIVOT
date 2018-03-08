@@ -74,16 +74,6 @@ which shows the available modules in PIVOT:
 
 Then use `pivot(#ID_vector)` to launch selected modules, e.g., pivot(c(1,2,3)) to launch PIVOT with the base PIVOT module, DESeq2 and edgeR.
 
-Alternatively, use
-```
-pivot_launcher()
-```
-to launch a window to directly pick modules or install required components.
-
-![ScreenShot](https://github.com/qinzhu/PIVOT/tree/master/vignettes/figures/launcher.png)
-
-Press set module when ready, then launch PIVOT by calling `pivot`.
-
 ## User manual
 
 See here: https://rawgit.com/qinzhu/PIVOT/master/inst/app/www/manual_file.html or http://qinsr.com/wp-content/uploads/2017/11/manual_file.html

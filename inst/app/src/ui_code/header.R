@@ -69,11 +69,11 @@ dbHeader <- pivotboardHeader(
                      tags$a(id = "new_session", href = "./", target = "_blank", "New Session", class = "btn btn-default btn_no_border shiny-bound-input", style = "margin-left:5px")
                  ), style ="padding:10px;border-bottom:1px solid #f4f4f4;background-color:transparent; display:block;"
                  ),
-                 systemItem(
-                     text = actionButton("return_btn_sc","Return to Launcher", class = "btn_no_border", onclick = "setTimeout(function(){window.close();}, 100); "),
-                     icon = icon("sign-out"),
-                     status = "return"
-                 ),
+                 # systemItem(
+                 #     text = actionButton("return_btn_sc","Return to Launcher", class = "btn_no_border", onclick = "setTimeout(function(){window.close();}, 100); "),
+                 #     icon = icon("sign-out"),
+                 #     status = "return"
+                 # ),
                  systemItem(
                      text = actionButton("exit_and_save","EXIT PIVOT", class = "btn_no_border", onclick = "setTimeout(function(){window.close();}, 100); "),
                      icon = icon("power-off"),
