@@ -234,7 +234,6 @@ init_meta <- function(r_data) {
 
 #' PIVOT Data Control
 #'
-#' @description
 #' @import S4Vectors
 #'
 #' @export

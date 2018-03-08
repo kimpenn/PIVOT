@@ -6,3 +6,6 @@
 \usage{
 metadata(x, ...)
 }
+\description{
+PIVOT Data Control
+}
