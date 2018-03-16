@@ -99,9 +99,16 @@ biocLite("SingleCellExperiment")
  
  * If you ran into any problems like 'SingleCellExperiment'，'SCESet' or 'pData', its likely that you have old scater installed. The new scater package changes all the grammar so you need to first remove the old package by calling `remove.packages("scater")` and reinstall the latest version by using `biocLite("scater")`.
    
- * Linux specific: Dependency openssl configuration failed
-   * Please install the latest libgdal-dev package (apt-get install libgdal-dev)
-   
+ * Dependency openssl configuration failed
+   * Linux: Please install the latest libgdal-dev package (apt-get install libgdal-dev)
+   * MacOS: Please install brew (https://brew.sh/) first, then in terminal `brew install openssl`. Then try install PIVOT again.
+  
+ * MacOS specific: you might need to install xcode developer tools if you encounter installation error such as 'missing xcrun'.
+ 
+ To install, Open Terminal, and run the following:
+
+`xcode-select --install`
+ 
 ## Citation
 
 * Zhu, Q., Fisher, S. A., Dueck, H., Middleton, S., Khaladkar, M., & Kim, J. (2018). PIVOT: platform for interactive analysis and visualization of transcriptomics data. BMC bioinformatics, 19(1), 6.
