@@ -2,10 +2,10 @@ citEntry(
     entry = "article",
     author = "Qin Zhu, Stephen A Fisher, Hannah Dueck, Sarah Middleton, Mugdha Khaladkar, Junhyong Kim",
     title = "PIVOT: Platform for Interactive Analysis and Visualization of Transcriptomics Data",
-    journal = "bioRxiv (Preprint)",
-    year = "2017",
+    journal = "BMC bioinformatics",
+    year = "2018",
     volume = "",
-    url = "https://www.biorxiv.org/content/early/2017/07/06/053348",
-    doi =  "http://dx.doi.org/10.1101/053348",
-    textVersion = "Qin Zhu, Stephen A Fisher, Hannah Dueck, Sarah Middleton, Mugdha Khaladkar, Junhyong Kim. PIVOT: Platform for Interactive Analysis and Visualization of Transcriptomics Data (Preprint) bioRxiv 053348; doi: http://dx.doi.org/10.1101/053348"
+    url = "https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-017-1994-0",
+    doi =  "https://doi.org/10.1186/s12859-017-1994-0",
+    textVersion = "Zhu, Q., Fisher, S. A., Dueck, H., Middleton, S., Khaladkar, M., & Kim, J. (2018). PIVOT: platform for interactive analysis and visualization of transcriptomics data. BMC bioinformatics, 19(1), 6."
 )
