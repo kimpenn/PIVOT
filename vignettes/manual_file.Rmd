@@ -28,7 +28,8 @@ See http://kim.bio.upenn.edu/software/pivot.shtml for more details.
 
 ```
 # dependecies that needs to be manually installed 
-install.packages("devtools") # First run this line alone then paste rest.
+# Copy the following line by line.
+install.packages("devtools") 
 library("devtools")
 source("http://bioconductor.org/biocLite.R")  
 biocLite("GO.db")
@@ -58,38 +59,6 @@ biocLite("BiocGenerics") # You need the latest BiocGenerics >=0.23.3
 library(PIVOT)
 pivot()
 ```
-
-* For advanced users, if you want to only load needed modules,
-
-Then you can either use 
-```
-pivot_module()
-```
-which shows the available modules in PIVOT:
-
-|ID|Module|
-|---|---|
-|1|PIVOT.base|
-|2|DESeq2|
-|3|edgeR|
-|4|scde|
-|5|monocle|
-|6|PIVOT.network|
-|7|caret|
-|8|PIVOT.toolkit|
-
-Then use `pivot(#ID_vector)` to launch selected modules, e.g., pivot(c(1,2,3)) to launch PIVOT with the base PIVOT module, DESeq2 and edgeR.
-
-<img src="figures/launcher.png" style= "margin-right: 20px; outline-style: double; outline-color: Gainsboro;" width="70%"/>
-
-Alternatively, use
-```
-pivot_launcher()
-```
-to launch a window to directly pick modules or install required components.
-
-
-<p style="clear:both;">
 
 # Data Input
 
