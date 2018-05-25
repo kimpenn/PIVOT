@@ -54,27 +54,6 @@ library(PIVOT)
 pivot()
 ```
 
-* For advanced users, if you want to only load needed modules,
-
-Then you can either use 
-```
-pivot_module()
-```
-which shows the available modules in PIVOT:
-
-|ID|Module|
-|---|---|
-|1|PIVOT.base|
-|2|DESeq2|
-|3|edgeR|
-|4|scde|
-|5|monocle|
-|6|PIVOT.network|
-|7|caret|
-|8|PIVOT.toolkit|
-
-Then use `pivot(#ID_vector)` to launch selected modules, e.g., pivot(c(1,2,3)) to launch PIVOT with the base PIVOT module, DESeq2 and edgeR.
-
 ## User manual
 
 See here: https://rawgit.com/qinzhu/PIVOT/master/inst/app/www/manual_file.html or http://qinsr.com/wp-content/uploads/2017/11/manual_file.html
