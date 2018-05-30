@@ -263,8 +263,8 @@ output$filters <- renderUI({
 
 output$scater_feature_pair_ui <- renderUI({
     req(r_data$sceset, input$scater_feature_plot_type == "pairwise feature metadata plots")
-    choices <- colnames(rowData(r_data$sceset))
-    choices <- choices[!choices %in% c("gene", "cap_name", "is_feature_control")]
+    choices <- colnames(SingleCellExperiment::rowData(r_data$sceset))
+    choices <- choices[!choices %in% c("gene", "feature_symbol","cap_name", "is_feature_control","is_feature_control_ERCC")]
     names(choices) <- choices
     list(
         column(4, selectInput("scater_feature_plot_x", "X Var", choices = choices)),
@@ -280,7 +280,7 @@ output$scater_feature_plot <- renderPlot({
         scater::plotQC(r_data$sceset, type = input$scater_feature_plot_type)
     } else {
         req(input$scater_feature_plot_x, input$scater_feature_plot_y)
-        scater::plotFeatureData(r_data$sceset, ggplot2::aes_string(x = input$scater_feature_plot_x, y = input$scater_feature_plot_y))
+        scater::plotRowData(r_data$sceset, x = input$scater_feature_plot_x, y = input$scater_feature_plot_y)
     }
 })
 

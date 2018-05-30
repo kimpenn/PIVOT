@@ -330,7 +330,7 @@ observe({
     }
 
     # Here use monocle normalized counts
-    df <- as.data.frame(exprs(r_data$cellset)/pData(r_data$cellset)$Size_Factor)
+    df <- as.data.frame(Biobase::exprs(r_data$cellset)/pData(r_data$cellset)$Size_Factor)
 
     d <- as.data.frame(t(df[selected_gene,])) %>% tibble::rownames_to_column()
     colnames(d) <- c("sample", "expression_level")

@@ -243,7 +243,7 @@ init_meta <- function(r_data) {
                                                                             normcounts = as.matrix(r_data$df),
                                                                             logcounts = as.matrix(log2(r_data$df + 1))),
                                                               colData = pd, rowData = fd)
-    rowData(r_data$sceset)$feature_symbol <- rownames(r_data$df)
+    SingleCellExperiment::rowData(r_data$sceset)$feature_symbol <- rownames(r_data$df)
     SingleCellExperiment::isSpike(r_data$sceset, "ERCC") <- grepl("ERCC", SummarizedExperiment::rowData(r_data$sceset)$feature_symbol)
     r_data$sceset <- scater::calculateQCMetrics(r_data$sceset)
     return(r_data)

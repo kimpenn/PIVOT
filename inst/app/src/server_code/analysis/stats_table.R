@@ -272,15 +272,14 @@ observe({
     req(r_data$sceset)
     s = input$feature_info_tbl_row_last_clicked
     tbl<-as.data.frame(fInfo(r_data$sceset))
-
     if (length(s)) {
-        selected_gene <- rownames(tbl[s, , drop = FALSE])
+        selected_gene <- tbl$gene[s]
     } else {
         return()
     }
-
-    d <- as.data.frame(t(r_data$df[selected_gene,])) %>% tibble::rownames_to_column()
+    d <- as.data.frame(t(r_data$df[s,])) %>% tibble::rownames_to_column()
     colnames(d) <- c("sample", "expression_level")
     callModule(pivot_featurePlot, "meta_tbl_plt", meta = r_data$meta, df = d, gene = selected_gene)
 })
+
 

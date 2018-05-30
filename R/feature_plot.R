@@ -92,7 +92,6 @@ get_color_vector <- function(labels, pal="Set1", maxCol=9)
 #' @import ggplot2 plotly
 #' @export
 feature_plot <- function(df, selected_gene, plot_by = "sample", meta = NULL, palette = "Set1", style = "box", log_scale = F, legend_pos = "top", textSize = 15, pointSize = 3){
-
     if(is.null(df) || nrow(df) == 0) {
         return()
     }
