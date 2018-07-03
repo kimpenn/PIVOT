@@ -263,7 +263,7 @@ output$filters <- renderUI({
 
 output$scater_feature_pair_ui <- renderUI({
     req(r_data$sceset, input$scater_feature_plot_type == "pairwise feature metadata plots")
-    choices <- colnames(SingleCellExperiment::rowData(r_data$sceset))
+    choices <- colnames(SummarizedExperiment::rowData(r_data$sceset))
     choices <- choices[!choices %in% c("gene", "feature_symbol","cap_name", "is_feature_control","is_feature_control_ERCC")]
     names(choices) <- choices
     list(
