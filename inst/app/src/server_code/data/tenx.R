@@ -49,17 +49,6 @@ output$tenx_folder_show <- renderPrint(
     }
 )
 
-observe({
-    if(is.null(input$tenx_folder)) return()
-    isolate({
-        if(!is.null(r_data$glb.raw)) {
-            if(!identical(r_data$file_info$path, input$tenx_folder$path)){
-                r_data <- init_state(r_data)
-                r_data <- clear_design(r_data)
-            }
-        }
-    })
-})
 
 ##### Single file data submission module #####
 observeEvent(input$submit_tenx, {

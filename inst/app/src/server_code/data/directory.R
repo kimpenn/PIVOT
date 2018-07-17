@@ -23,23 +23,14 @@
 shinyFiles::shinyDirChoose(input, 'data_folder', session=session, roots=c(home='~'))
 
 output$data_folder_show <- renderPrint(
-    if(is.null(input$data_folder))
+    if(is.null(input$data_folder)) {
         "No folder is selected"
-    else
+    }
+    else {
         shinyFiles::parseDirPath(roots=c(home='~'), input$data_folder)
+    }
 )
 
-observe({
-    if(is.null(input$data_folder)) return()
-    isolate({
-        if(!is.null(r_data$glb.raw)) {
-            if(!identical(r_data$file_info$path, input$data_folder$path)){
-                r_data <- init_state(r_data)
-                r_data <- clear_design(r_data)
-            }
-        }
-    })
-})
 
 output$select_data <- renderUI({
     if(is.null(input$data_folder)) return()

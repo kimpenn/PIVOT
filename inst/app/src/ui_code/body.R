@@ -69,7 +69,7 @@ body <- dashboardBody(
                                            ),
                                            fluidRow(
                                                column(6,
-                                                      shinyFiles::shinyDirButton('data_folder', 'Select Data Folder', 'Please select a folder', FALSE, class = "btn-info")
+                                                      shinyFiles::shinyDirButton('data_folder', 'Select Data Folder', title='Please select a folder', FALSE, class = "btn-info")
                                                ),
                                                column(6, verbatimTextOutput("data_folder_show"))
                                            ),
