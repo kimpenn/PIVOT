@@ -1,44 +1,25 @@
+---
+title: ''
+author: ''
+date: '2018-10-04'
+output:
+  html_document:
+    toc: true
+    number_sections: true
+    theme: default
+---
 
-# Mann–Whitney U Test Result
+For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+You can embed an R code chunk like this:
 
-**`r paste("Mann–Whitney U test Results of", r_data$mww_group[1], "vs", r_data$mww_group[2])`**
-
-```{r echo = FALSE, warning=FALSE, message = FALSE, fig.width = 10, fig.height = 8}
-if(is.null(r_data$mww_results)) return()
-    if(input$mww_cuttbl) {
-        tbl <- subset(r_data$mww_results, adjustedP <= input$mww_alpha)
-    } else {
-        tbl <- r_data$mww_results
-    }
-    if(nrow(tbl) == 0) return()
-    DT::datatable(tbl, selection = 'single', options = list(scrollX = TRUE, scrollY = "250px", searching=F, order = list(list(3, 'asc')) , orderClasses = T))
+```{r}
+summary(cars)
 ```
 
+You can also embed plots, for example:
 
-* `r paste0("Total number of significant genes: ", sum(r_data$mww_results$adjustedP < input$mww_alpha, na.rm = T), ".")`
-    
-## Gene Expression Plot
-
-```{r echo = FALSE, warning=FALSE, message = FALSE}
-    if(is.null(r_data$mww_results)) return()
-    if(is.null(input$mww_cuttbl)) return()
-    s = input$mww_result_tbl_row_last_clicked
-    tbl<-as.data.frame(r_data$mww_results)
-    if(input$mww_cuttbl) {
-        tbl <- subset(r_data$mww_results, adjustedP <= input$mww_alpha)
-    } else {
-        tbl <- r_data$mww_results
-    }
-    if (length(s)) {
-        selected_gene <- rownames(tbl[s, , drop = FALSE])
-        d <- as.data.frame(t(r_data$df[selected_gene,])) %>% tibble::rownames_to_column()
-        colnames(d) <- c("sample", "expression_level")
-
-        samples = r_data$meta[,1][which(r_data$meta[,r_data$mww_cate] %in% r_data$mww_group)]
-
-        callModule(pivot_featurePlot, "mww_gene_plt", meta = r_data$meta, df = d, gene = selected_gene, ids = samples)
-    } else {
-        return()
-    }
+```{r, echo=FALSE}
+plot(cars)
 ```
+
 

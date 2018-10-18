@@ -136,9 +136,8 @@ output$cor_ft_plotly <- plotly::renderPlotly({
     } else if(input$cor_ft_dist == "corr2") {
         distfun1 = function(c) as.dist(1 - abs(c))
     }
-    hmap<-heatmaply::heatmapr(feature_cor, scale="none", Rowv = T, symm=TRUE, dendrogram="both", revC=T,
+    heatmaply::heatmaply(feature_cor, colors=get_heatmap_color(input$cor_ft_hmcolor), scale="none", Rowv = T, symm=TRUE, dendrogram="both", revC=T,
                               distfun=distfun1,hclustfun =hclustfun1)
-    heatmaply::heatmaply(hmap, colors=get_heatmap_color(input$cor_ft_hmcolor))
 })
 
 

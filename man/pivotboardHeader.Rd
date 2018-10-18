@@ -5,8 +5,8 @@
 \title{PIVOT Data Input, UI function from shinydashboard
 Modified for sidebar-mini}
 \usage{
-pivotboardHeader(..., title = NULL, titleWidth = NULL, disable = FALSE,
-  .list = NULL)
+pivotboardHeader(..., title = NULL, titleWidth = NULL,
+  disable = FALSE, .list = NULL)
 }
 \description{
 PIVOT Data Input, UI function from shinydashboard

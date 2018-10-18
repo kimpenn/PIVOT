@@ -4,8 +4,8 @@
 \alias{pivot_Plot3d}
 \title{a wrapper module for plot in 3D}
 \usage{
-pivot_Plot3d(input, output, session, type = NULL, obj = NULL, proj = NULL,
-  minfo = NULL)
+pivot_Plot3d(input, output, session, type = NULL, obj = NULL,
+  proj = NULL, minfo = NULL)
 }
 \description{
 This is the server part of the module.

@@ -79,9 +79,7 @@ if(input$hmap_package == 'gplots'){ # heatmap.2
     }
 
     # Sadly current version of heatmaply does not support column side coloring... advantage compared to d3heatmap is speed...
-    hmap<-heatmaply::heatmapr(as.matrix(hmList()$df), scale="none", Rowv = hm_ft_dend(), Colv = hm_sp_dend(), dendrogram=dend1,
-                              revC=T)
-    heatmaply::heatmaply(hmap, colors=get_heatmap_color(input$hmap_hmcolor))
+    hmap<-heatmaply::heatmaply(as.matrix(hmList()$df),colors=get_heatmap_color(input$hmap_hmcolor), scale="none", Rowv = hm_ft_dend(), Colv = hm_sp_dend(), dendrogram=dend1,revC=T)
 }
 
 

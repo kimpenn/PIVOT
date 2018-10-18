@@ -184,9 +184,11 @@ output$ft_hmap_plotly <- plotly::renderPlotly({
     }
 
     # Sadly current version of heatmaply does not support column side coloring... advantage compared to d3heatmap is speed...
-    hmap<-heatmaply::heatmapr(as.matrix(hmList()$df), scale="none", Rowv = hm_ft_dend(), Colv = hm_sp_dend(), dendrogram=dend1,
-                              revC=T)
-    heatmaply::heatmaply(hmap, colors=get_heatmap_color(input$hmap_hmcolor))
+    heatmaply::heatmaply(as.matrix(hmList()$df),
+              colors = get_heatmap_color(input$hmap_hmcolor),
+              Rowv = hm_ft_dend(), Colv = hm_sp_dend(),
+              dendrogram=dend1,
+              revC=T)
 })
 
 

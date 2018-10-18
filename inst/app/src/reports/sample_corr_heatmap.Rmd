@@ -35,9 +35,9 @@ if(input$cor_sp_package == 'gplots') {
     hclustfun1 = function(x, method=input$cor_sp_agglo_method, ...) hclust(x, method=method, ...)
 
     # Sadly current version of heatmaply does not support column side coloring... advantage compared to d3heatmap is speed...
-    hmap<-heatmaply::heatmapr(sample_cor, scale="none", Rowv = T, symm=TRUE, dendrogram="both", revC=T,
+    heatmaply::heatmaply(sample_cor, colors=get_heatmap_color(input$cor_sp_hmcolor),
+                               scale="none", Rowv = T, symm=TRUE, dendrogram="both", revC=T,
                               distfun=distfun1,hclustfun =hclustfun1)
-    heatmaply::heatmaply(hmap, colors=get_heatmap_color(input$cor_sp_hmcolor))
 }
         
 ```

@@ -35,6 +35,7 @@ biocLite("DESeq2")
 biocLite("SingleCellExperiment")
 biocLite("scater")
 biocLite("monocle")
+biocLite("GenomeInfoDb")
 
 # Install PIVOT
 install_github("qinzhu/PIVOT")
