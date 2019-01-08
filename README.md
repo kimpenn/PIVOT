@@ -57,7 +57,8 @@ pivot()
 
 ## User manual
 
-See here: https://rawgit.com/qinzhu/PIVOT/master/inst/app/www/manual_file.html or http://qinsr.com/wp-content/uploads/2017/11/manual_file.html
+See here: https://rawgit.com/qinzhu/PIVOT/master/inst/app/www/manual_file.html 
+Or download: https://kim.bio.upenn.edu/software/pivot/manual_file.html.zip
 
 ## Troubleshooting
 
