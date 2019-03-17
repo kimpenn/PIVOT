@@ -25,21 +25,21 @@ saved, loaded and shared.
 
 install.packages("devtools") 
 library("devtools")
-source("http://bioconductor.org/biocLite.R")  
-biocLite("BiocUpgrade") 
-biocLite("GO.db")
-biocLite("HSMMSingleCell")
-biocLite("org.Mm.eg.db")
-biocLite("org.Hs.eg.db")
-biocLite("DESeq2")
-biocLite("SingleCellExperiment")
-biocLite("scater")
-biocLite("monocle")
-biocLite("GenomeInfoDb")
+install.packages("BiocManager")
+BiocManager::install("BiocUpgrade") 
+BiocManager::install("GO.db")
+BiocManager::install("HSMMSingleCell")
+BiocManager::install("org.Mm.eg.db")
+BiocManager::install("org.Hs.eg.db")
+BiocManager::install("DESeq2")
+BiocManager::install("SingleCellExperiment")
+BiocManager::install("scater")
+BiocManager::install("monocle")
+BiocManager::install("GenomeInfoDb")
 
 # Install PIVOT
 install_github("qinzhu/PIVOT")
-biocLite("BiocGenerics") # You need the latest BiocGenerics >=0.23.3
+BiocManager::install("BiocGenerics") # You need the latest BiocGenerics >=0.23.3
 ```
  * (Optional but strongly recommended):
    * For report generation, you need Pandoc: http://pandoc.org/installing.html
@@ -74,12 +74,11 @@ Or download: https://kim.bio.upenn.edu/software/pivot/manual_file.html.zip
     * Please update your bioconductor to the latest version (>=3.6) and retry installation using the following command:
  
  ```
-source("http://bioconductor.org/biocLite.R")  
-biocLite("BiocUpgrade") 
-biocLite("SingleCellExperiment")
+BiocManager::install("BiocUpgrade") 
+BiocManager::install("SingleCellExperiment")
 ```
  
- * If you ran into any problems like 'SingleCellExperiment'，'SCESet' or 'pData', its likely that you have old scater installed. The new scater package changes all the grammar so you need to first remove the old package by calling `remove.packages("scater")` and reinstall the latest version by using `biocLite("scater")`.
+ * If you ran into any problems like 'SingleCellExperiment'，'SCESet' or 'pData', its likely that you have old scater installed. The new scater package changes all the grammar so you need to first remove the old package by calling `remove.packages("scater")` and reinstall the latest version by using `BiocManager::install("scater")`.
    
  * Dependency openssl configuration failed
    * Linux: Please install the latest libgdal-dev package (apt-get install libgdal-dev)
@@ -90,6 +89,8 @@ biocLite("SingleCellExperiment")
  To install, Open Terminal, and run the following:
 
 `xcode-select --install`
+
+ * If a dependency fails to install, try installing the package separately using `BiocManager::install` if it is from BioConductor or `install.packages()` if it is CRAN (if you are unsure, try one and if it fails, try the other). Some users found this was necessary for the BioConductor packages `GenomicAlignments` and `rtracklayer`. If the package still fails to install, you can try binaries from BioConductor/CRAN or package manager if on Linux. Some users found this was necessary for the CRAN package `nloptr`.
  
 ## Citation
 
