@@ -15,6 +15,10 @@ saved, loaded and shared.
 
 ## Installation
 
+PIVOT is installable as a regular R package or a (currently) community-developed Docker image
+
+### Regular installation
+
   * Main Program: Please copy and paste the following command to R console. 
   * Upgrading R and Rstudio to the latest version (R >= 3.4, Rstudio > 1.0.0) is strongly recommended. 
 
@@ -47,13 +51,21 @@ BiocManager::install("BiocGenerics") # You need the latest BiocGenerics >=0.23.3
    * If you have 10x data output from Cell Ranger, please install Cell Ranger R Kit from https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/rkit
    to allow PIVOT to directly read in the data.
 
-## Running PIVOT
+#### Running PIVOT from regular install
 
   * To run PIVOT, in Rstudio console, use command 
 ```
 library(PIVOT)
 pivot()
 ```
+
+### Docker installation
+
+PIVOT can be launched (and installed if needed) using a single command:
+```
+docker run -p 80:3838 eturkes/pivot-docker R -f start.R
+```
+After running, PIVOT can be visited in your browser at `localhost`.
 
 ## User manual
 
