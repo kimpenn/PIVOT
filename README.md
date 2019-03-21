@@ -63,7 +63,7 @@ pivot()
 
 PIVOT can be launched (and installed if needed) using a single command:
 ```
-docker run -p 80:3838 eturkes/pivot-docker R -f start.R
+docker run -p 80:3838 eturkes/pivot-docker
 ```
 After running, PIVOT can be visited in your browser at `localhost`.
 
