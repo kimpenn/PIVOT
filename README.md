@@ -12,6 +12,7 @@ just a few button clicks. All analysis reports can be exported, and the program 
 saved, loaded and shared.
 
   * See http://kim.bio.upenn.edu/software/pivot.shtml for more details.
+  * PIVOT welcomes community effort for continuous development. Special thanks to @eturkes and @foehnwind for contributing to this project.
 
 ## Installation
 
