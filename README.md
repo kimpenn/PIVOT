@@ -62,11 +62,13 @@ pivot()
 
 ### Docker installation
 
-PIVOT can be launched (and installed if needed) using a single command:
+PIVOT can be launched (and installed/updated if needed) using a single command:
 ```
-docker run -p 80:3838 eturkes/pivot-docker
+docker pull eturkes/pivot-docker && docker run -p 80:3838 eturkes/pivot-docker
 ```
-After running, PIVOT can be visited in your browser at `localhost`.
+* Confirmation that PIVOT is running is identified by the line `Listening on http://0.0.0.0:3838` in the terminal window.
+* Once running, PIVOT can be visited in a web brower browser at the address `localhost`.
+* When finished, the Docker instance can be closed by entering `Ctrl+C` into its terminal window. Note that the PIVOT state will **NOT** be saved, one must use the "Save State" feature within "System Control" (section 17 of the PIVOT manual) if they would like to do so.
 
 ## User manual
 
