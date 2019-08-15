@@ -35,7 +35,7 @@ body <- dashboardBody(
                                        fluidRow(
                                            column(4,
                                                   selectInput("file_format", label = "Input file type",
-                                                              choices = list("Counts Directory" = "dir", "Counts Table" = "single", "10x Directory" = "tenx", "PIVOT State" = "state"),
+                                                              choices = list("Counts Table" = "single", "10x Data" = "tenx", "PIVOT State" = "state"),
                                                               selected = "single")
                                            ),
                                            uiOutput("proc_method_ui"),
@@ -91,9 +91,12 @@ body <- dashboardBody(
                                            ),
                                            fluidRow(
                                                column(6,
-                                                      shinyFiles::shinyDirButton('tenx_folder', 'Select 10x Folder', 'Please select your 10x folder', FALSE, class = "btn-info")
-                                               ),
-                                               column(6, verbatimTextOutput("tenx_folder_show"))
+                                                      #shinyFiles::shinyFilesButton('tenx_folder', 'Select 10x Files', 'Please select your 10x folder', FALSE, class = "btn-info")
+                                                      fileInput("matrix_file", "Select your Matrix File"),
+                                                      fileInput("gene_file", "Select your Gene File"),
+                                                      fileInput("barcodes_file", "Select your Barcodes File"),
+                                                      fileInput("summary_file", "Select your Summary File (Option")
+                                               )
                                            )
                                        ),
 
