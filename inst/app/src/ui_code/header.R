@@ -30,7 +30,7 @@ dbHeader <- pivotboardHeader(
                  ),
                  systemItem(
                      title = "Technical Support",
-                     text = actionButton("bug_Sc","General qustions, bug reports.", class = "btn_no_border"),
+                     text = actionButton("bug_Sc","General questions, bug reports.", class = "btn_no_border"),
                      icon = icon("wrench"),
                      href = "mailto:qinzhu@outlook.com"
                  ),
