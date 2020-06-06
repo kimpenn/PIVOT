@@ -4,11 +4,23 @@
 \alias{enhanced_box}
 \title{PIVOT Data Input, UI function}
 \usage{
-enhanced_box(..., title = NULL, id = NULL, footer = NULL,
-  status = NULL, solidHeader = FALSE, background = NULL, width = 6,
-  height = NULL, collapsible = FALSE, reportable = FALSE,
-  get_pdf = FALSE, get_html = FALSE, register_analysis = FALSE,
-  collapsed = FALSE)
+enhanced_box(
+  ...,
+  title = NULL,
+  id = NULL,
+  footer = NULL,
+  status = NULL,
+  solidHeader = FALSE,
+  background = NULL,
+  width = 6,
+  height = NULL,
+  collapsible = FALSE,
+  reportable = FALSE,
+  get_pdf = FALSE,
+  get_html = FALSE,
+  register_analysis = FALSE,
+  collapsed = FALSE
+)
 }
 \description{
 PIVOT Data Input, UI function

@@ -4,9 +4,13 @@
 \alias{pivot_dataScaleRange_UI}
 \title{a wrapper module for scaling and range selection for heatmap}
 \usage{
-pivot_dataScaleRange_UI(id, bound = 500, value = 100,
+pivot_dataScaleRange_UI(
+  id,
+  bound = 500,
+  value = 100,
   include = c("Counts (raw)", "Counts (normalized)", "Log10 Counts",
-  "Standardized Counts", "Log10 & Standardized"))
+    "Standardized Counts", "Log10 & Standardized")
+)
 }
 \description{
 This is the UI part of the module.

@@ -4,8 +4,13 @@
 \alias{pivot_deGroupBy}
 \title{Choose the design model for DE analysis}
 \usage{
-pivot_deGroupBy(input, output, session, meta, reduced = c("no", "yes",
-  "maybe"))
+pivot_deGroupBy(
+  input,
+  output,
+  session,
+  meta,
+  reduced = c("no", "yes", "maybe")
+)
 }
 \description{
 This is the server part of the module

@@ -68,4 +68,4 @@ License: GPL-3
 Encoding: UTF-8
 LazyData: true
 biocViews: Software
-RoxygenNote: 6.1.0
+RoxygenNote: 7.1.0

@@ -4,8 +4,14 @@
 \alias{estimateSizeFactorsForMatrix_groupwise}
 \title{Groupwise modified DESeq script}
 \usage{
-estimateSizeFactorsForMatrix_groupwise(counts, group, locfunc = median,
-  geoMeans, controlGenes, threshold = 0.7)
+estimateSizeFactorsForMatrix_groupwise(
+  counts,
+  group,
+  locfunc = median,
+  geoMeans,
+  controlGenes,
+  threshold = 0.7
+)
 }
 \description{
 Groupwise modified DESeq script

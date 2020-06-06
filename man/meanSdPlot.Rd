@@ -4,8 +4,16 @@
 \alias{meanSdPlot}
 \title{meanSDplot}
 \usage{
-meanSdPlot(x, ranks = TRUE, xlab = ifelse(ranks, "rank(mean)", "mean"),
-  ylab = "sd", pch, plot = TRUE, bins = 50, ...)
+meanSdPlot(
+  x,
+  ranks = TRUE,
+  xlab = ifelse(ranks, "rank(mean)", "mean"),
+  ylab = "sd",
+  pch,
+  plot = TRUE,
+  bins = 50,
+  ...
+)
 }
 \description{
 meanSDplot function from VSN package

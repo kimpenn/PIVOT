@@ -4,8 +4,7 @@
 \alias{systemItem}
 \title{PIVOT Data Input, UI function}
 \usage{
-systemItem(title = NULL, text, icon = NULL, status = "success",
-  href = NULL)
+systemItem(title = NULL, text, icon = NULL, status = "success", href = NULL)
 }
 \description{
 PIVOT Data Input, UI function

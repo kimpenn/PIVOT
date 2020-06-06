@@ -4,8 +4,11 @@
 \alias{calibrate_per_cell_total_proposal}
 \title{Function from monocle: Calibrate_per_cell_total_proposal}
 \usage{
-calibrate_per_cell_total_proposal(relative_exprs_matrix, t_estimate,
-  expected_capture_rate)
+calibrate_per_cell_total_proposal(
+  relative_exprs_matrix,
+  t_estimate,
+  expected_capture_rate
+)
 }
 \arguments{
 \item{relative_exprs_matrix}{The matrix of relative TPM expression values}

@@ -4,8 +4,13 @@
 \alias{estimateSizeFactorsForMatrix_MK}
 \title{Mugdhak's modified DESeq script}
 \usage{
-estimateSizeFactorsForMatrix_MK(counts, locfunc = median, geoMeans,
-  controlGenes, threshold = 0.7)
+estimateSizeFactorsForMatrix_MK(
+  counts,
+  locfunc = median,
+  geoMeans,
+  controlGenes,
+  threshold = 0.7
+)
 }
 \description{
 Mugdhak's modified DESeq script

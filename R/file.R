@@ -84,7 +84,6 @@ pivot_fileInput <- function (input, output, session, reset = FALSE, return_df = 
             } else {
                 is_excel = F
             }
-
             error_I <- 0
             tryCatch({
                 if(is_excel) {

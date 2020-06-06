@@ -4,9 +4,18 @@
 \alias{feature_plot}
 \title{Plot feature expression with ggplot}
 \usage{
-feature_plot(df, selected_gene, plot_by = "sample", meta = NULL,
-  palette = "Set1", style = "box", log_scale = F,
-  legend_pos = "top", textSize = 15, pointSize = 3)
+feature_plot(
+  df,
+  selected_gene,
+  plot_by = "sample",
+  meta = NULL,
+  palette = "Set1",
+  style = "box",
+  log_scale = F,
+  legend_pos = "top",
+  textSize = 15,
+  pointSize = 3
+)
 }
 \description{
 Plot feature expression with ggplot

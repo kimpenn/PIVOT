@@ -4,8 +4,12 @@
 \alias{modalConfirmDialog}
 \title{PIVOT Data Input, UI function}
 \usage{
-modalConfirmDialog(id, header = "Confirmation", body = "Are you sure?",
-  footer = list(actionButton("confirmDlgOkBtn", "OK")))
+modalConfirmDialog(
+  id,
+  header = "Confirmation",
+  body = "Are you sure?",
+  footer = list(actionButton("confirmDlgOkBtn", "OK"))
+)
 }
 \description{
 Modal confirm button from Weicheng Zhu

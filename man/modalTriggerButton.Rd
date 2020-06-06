@@ -4,8 +4,13 @@
 \alias{modalTriggerButton}
 \title{PIVOT Data Input, UI function}
 \usage{
-modalTriggerButton(inputId, target, label, icon = NULL,
-  class = "btn action-button btn-danger btn_leftAlign")
+modalTriggerButton(
+  inputId,
+  target,
+  label,
+  icon = NULL,
+  class = "btn action-button btn-danger btn_leftAlign"
+)
 }
 \description{
 modal trigger button from Weicheng Zhu

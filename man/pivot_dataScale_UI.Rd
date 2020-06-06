@@ -4,10 +4,14 @@
 \alias{pivot_dataScale_UI}
 \title{PIVOT data scale module}
 \usage{
-pivot_dataScale_UI(id, include = c("Counts (raw)", "Counts (normalized)",
-  "Relative Frequency", "Log10 Counts", "Standardized Counts",
-  "Log10 & Standardized", "Projection Matrix"),
-  selected = "Counts (normalized)", width = 4, order = F)
+pivot_dataScale_UI(
+  id,
+  include = c("Counts (raw)", "Counts (normalized)", "Relative Frequency",
+    "Log10 Counts", "Standardized Counts", "Log10 & Standardized", "Projection Matrix"),
+  selected = "Counts (normalized)",
+  width = 4,
+  order = F
+)
 }
 \description{
 Controls which transformed data should be used as input for analysis modules, this is the UI part of the module.

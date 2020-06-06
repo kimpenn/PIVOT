@@ -4,13 +4,21 @@
 \alias{relative2abs_modified}
 \title{Function from monocle (modified): Transform relative expression values into absolute transcript counts.}
 \usage{
-relative2abs_modified(relative_expr_matrix,
+relative2abs_modified(
+  relative_expr_matrix,
   t_estimate = monocle_estimate_t(relative_expr_matrix),
-  modelFormulaStr = "~1", ERCC_controls = NULL,
-  ERCC_annotation = NULL, volume = 10, dilution = 40000,
-  mixture_type = 1, detection_threshold = 800,
-  expected_capture_rate = 0.25, verbose = FALSE, return_all = FALSE,
-  cores = 1)
+  modelFormulaStr = "~1",
+  ERCC_controls = NULL,
+  ERCC_annotation = NULL,
+  volume = 10,
+  dilution = 40000,
+  mixture_type = 1,
+  detection_threshold = 800,
+  expected_capture_rate = 0.25,
+  verbose = FALSE,
+  return_all = FALSE,
+  cores = 1
+)
 }
 \arguments{
 \item{relative_expr_matrix}{the expression matrix for single cell RNA-seq with each row and column representing genes/isoforms and cells. Row and column names should be included}

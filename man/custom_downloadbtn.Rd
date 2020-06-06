@@ -4,8 +4,7 @@
 \alias{custom_downloadbtn}
 \title{PIVOT Data Input, UI function}
 \usage{
-custom_downloadbtn(outputId, label = "Download", class = NULL,
-  style = NULL)
+custom_downloadbtn(outputId, label = "Download", class = NULL, style = NULL)
 }
 \description{
 PIVOT Data Input, UI function

@@ -4,8 +4,7 @@
 \alias{pivot_filePreview}
 \title{PIVOT file input preview module, server}
 \usage{
-pivot_filePreview(input, output, session, df, height = "350px",
-  search = FALSE)
+pivot_filePreview(input, output, session, df, height = "350px", search = FALSE)
 }
 \description{
 PIVOT file input preview module, server

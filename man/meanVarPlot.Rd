@@ -4,13 +4,30 @@
 \alias{meanVarPlot}
 \title{mean.var.plot function}
 \usage{
-meanVarPlot(df, fxn.x, fxn.y, do.plot = TRUE, set.var.genes = TRUE,
-  do.text = TRUE, x.low.cutoff = 4, x.high.cutoff = 8,
-  y.cutoff = 1, y.high.cutoff = 12, cex.use = 0.5,
-  cex.text.use = 0.5, do.spike = FALSE, pch.use = 16,
-  col.use = "black", spike.col.use = "red", plot.both = FALSE,
-  do.contour = TRUE, contour.lwd = 3, contour.col = "white",
-  contour.lty = 2, num.bin = 20)
+meanVarPlot(
+  df,
+  fxn.x,
+  fxn.y,
+  do.plot = TRUE,
+  set.var.genes = TRUE,
+  do.text = TRUE,
+  x.low.cutoff = 4,
+  x.high.cutoff = 8,
+  y.cutoff = 1,
+  y.high.cutoff = 12,
+  cex.use = 0.5,
+  cex.text.use = 0.5,
+  do.spike = FALSE,
+  pch.use = 16,
+  col.use = "black",
+  spike.col.use = "red",
+  plot.both = FALSE,
+  do.contour = TRUE,
+  contour.lwd = 3,
+  contour.col = "white",
+  contour.lty = 2,
+  num.bin = 20
+)
 }
 \description{
 From Seurat package, with modification

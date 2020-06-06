@@ -5,8 +5,15 @@
 \title{PIVOT Data Input, UI function
 custom numeric input based on shiny}
 \usage{
-numericInput_1(inputId, label, value, min = NA, max = NA, step = NA,
-  width = NULL)
+numericInput_1(
+  inputId,
+  label,
+  value,
+  min = NA,
+  max = NA,
+  step = NA,
+  width = NULL
+)
 }
 \description{
 PIVOT Data Input, UI function

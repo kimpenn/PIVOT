@@ -4,8 +4,15 @@
 \alias{update_history}
 \title{PIVOT data management function}
 \usage{
-update_history(r_data, parent, action_type, action, lists, norm_method,
-  norm_param)
+update_history(
+  r_data,
+  parent,
+  action_type,
+  action,
+  lists,
+  norm_method,
+  norm_param
+)
 }
 \description{
 Write new entries to data history

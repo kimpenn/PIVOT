@@ -4,8 +4,15 @@
 \alias{pivot_Plot1d}
 \title{a wrapper module for plot in 1D}
 \usage{
-pivot_Plot1d(input, output, session, type = NULL, obj = NULL,
-  proj = NULL, minfo = NULL)
+pivot_Plot1d(
+  input,
+  output,
+  session,
+  type = NULL,
+  obj = NULL,
+  proj = NULL,
+  minfo = NULL
+)
 }
 \description{
 This is the server part of the module.

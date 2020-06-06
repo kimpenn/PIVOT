@@ -4,9 +4,17 @@
 \alias{create_subset}
 \title{PIVOT Data Control}
 \usage{
-create_subset(r_data, input, flist, slist, keep_filter = F, renorm = F,
-  erccStds = NULL, actionType = c("Filter", "Subset"),
-  actionText = "")
+create_subset(
+  r_data,
+  input,
+  flist,
+  slist,
+  keep_filter = F,
+  renorm = F,
+  erccStds = NULL,
+  actionType = c("Filter", "Subset"),
+  actionText = ""
+)
 }
 \description{
 Create subset by filtering or subsetting
