@@ -24,7 +24,7 @@
 tmpSingle <- reactiveValues()
 
 observe({
-    inFile<-callModule(pivot_fileInput, "single", return_df = F)
+    inFile<-callModule(pivot_fileInput, "single_in", return_df = F)
     tmpSingle$inFile <- inFile
     callModule(pivot_filePreview, "single_preview", inFile$df, height = "500px", search = T)
     isolate({

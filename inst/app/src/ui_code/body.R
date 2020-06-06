@@ -108,7 +108,7 @@ body <- dashboardBody(
                                                pivot_help_UI("single", title = "How to input a count table"),
                                                class = "param_setting_title"
                                            ),
-                                           pivot_fileInput_UI("single", format="compact")
+                                           pivot_fileInput_UI("single_in", format="compact")
                                        ),
 
                                        # upload state

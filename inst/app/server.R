@@ -19,6 +19,8 @@
 
 
 shinyServer(function(input, output, session) {
+    lapply(list.files("src/server_code", pattern = "\\.(r|R)$", recursive = TRUE, full.names = TRUE), function(x){source(file = x, local = TRUE)})
+
     # load ERCC info (data files from ERCC product website)
     erccStds <- read.table("src/built_in_files/ercc_standard_mix_conc.txt", header=T, row.names=1)
     erccStds$ERCC_ID <- make.names(erccStds$ERCC_ID)
@@ -38,8 +40,6 @@ shinyServer(function(input, output, session) {
         r_state <- list()
         r_data <- init_state(reactiveValues())
     }
-
-    lapply(list.files("src/server_code", pattern = "\\.(r|R)$", recursive = TRUE, full.names = TRUE), function(x){source(file = x, local = TRUE)})
 
     if(!exists("r_module")) {
         r_module <- c('PIVOT.base')

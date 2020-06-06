@@ -27,18 +27,18 @@ GeneBCMatrix <- setClass("GeneBCMatrix",
                              molecule_info="data.table"
                          ),
                          prototype = prototype( new("VersionedBiobase",
-                                                    versions = c( classVersion("ExpressionSet"), GeneBCMatrix = "1.0.0" ) ))
+                                                    versions = c(Biobase::classVersion("ExpressionSet"), GeneBCMatrix = "1.0.0" ) ))
 )
 
 newGeneBCMatrix <- function(mat, fd, pd, template=NULL) {
     res <- new("GeneBCMatrix", assayData=assayDataNew( "environment", exprs=mat ), featureData=new("AnnotatedDataFrame", data=fd), phenoData=new("AnnotatedDataFrame", data=pd), molecule_info=data.table())
-    
+
     if (!is.null(template)) {
         for (slot_name in setdiff(slotNames(res), c('assayData', 'featureData', 'phenoData'))) {
             slot(res, slot_name) <- slot(template, slot_name)
         }
     }
-    
+
     res
 }
 
@@ -64,7 +64,7 @@ output$tenx_package_check_ui <- renderUI({
 ##### Single file data submission module #####
 
 parse10xFiles = reactive({
-    
+
     #load matrix file
     tryCatch({
         mat <- readMM(gzfile(input$matrix_file$datapath))
@@ -73,7 +73,7 @@ parse10xFiles = reactive({
     }, error = function(e){
         stop(sprintf("Could not load matrix file \n\t%s\n", input$matrix_file$name))
     })
-    
+
     #load gene file
     tryCatch({
         gene_info <- read.delim(gzfile(input$gene_file$datapath), stringsAsFactors=FALSE, sep="\t", header=FALSE)
@@ -89,7 +89,7 @@ parse10xFiles = reactive({
     }, error = function(e){
         stop(sprintf("Could not load gene file: \n\t %s\n",input$gene_file$name))
     })
-    
+
     #load barcode file
     tryCatch({
         barcodes <- read.delim(gzfile(input$barcode_file$datapath), stringsAsFactors=FALSE, sep="\t", header=FALSE)
@@ -104,7 +104,7 @@ parse10xFiles = reactive({
     }, error = function(e){
         stop(sprintf("Could not load barcode file: \n\t %s\n", input$barcode_file$name))
     })
-    
+
     #load matrix file
     tryCatch({
         summary <- read.csv(input$summary_file$datapath, as.is=TRUE, header=TRUE)
@@ -113,7 +113,7 @@ parse10xFiles = reactive({
     }, error = function(e){
         cat(sprintf("Could not find summary csv: \n\t %s.\nThis file is only necessary if you are performing depth-normalization (calling the equalize_gbms function) in R.\nIf this pipestance was produced by `cellranger aggr` with the default parameters, depth-normalization in R (via equalize_gbms) is not necessary.\n",input$summary_file$name))
     })
-    
+
     # Build GeneBCMatrix object
     res <- newGeneBCMatrix(mat=mat, fd=gene_symbols, pd=pd)
     res@subsampled <- FALSE
@@ -130,7 +130,7 @@ observeEvent(input$submit_tenx, {
         session$sendCustomMessage(type = "showalert", "Please specify all your 10x data files")
         return()
     }
-    
+
     if (is.null(input$summary_file)) {
         warning("No summary file provided. Some funcions may be disabled without the metrics in summary csv.\n")
     }
