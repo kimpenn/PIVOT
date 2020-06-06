@@ -76,6 +76,7 @@ pivot_fileInput <- function (input, output, session, reset = FALSE, return_df = 
 
         # The user's data, parsed into a data frame
         result <- reactive({
+            print(userFile()$name)
             if(is.null(userFile())) return()
             ext = tools::file_ext(userFile()$name)
             if(ext %in% c("xls", "xlsx")) {
