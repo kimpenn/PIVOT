@@ -45,6 +45,8 @@ BiocManager::install("GenomeInfoDb")
 # Install PIVOT
 install_github("qinzhu/PIVOT")
 BiocManager::install("BiocGenerics") # You need the latest BiocGenerics >=0.23.3
+
+devtools::install_version("shiny", version = "1.3.0", repos = "http://cran.us.r-project.org") # Latest shiny 1.4.0 has bug in module reactivity
 ```
  * (Optional but strongly recommended):
    * For report generation, you need Pandoc: http://pandoc.org/installing.html
