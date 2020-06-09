@@ -39,7 +39,7 @@ output$biomart_ui <- renderUI({
                          tags$p("Assume you have a list of HGNC gene symbol, and want to find corresponding entrez gene ids, then do the following:"),
                          tags$li("Select filter, hgnc_symbol in the filters table."),
                          tags$li("Upload HGNC gene symbol lists by clicking the hgnc_symbol button."),
-                         tags$li("Choose hgnc_symbol, entrezgene in the attribute table, and press the query button."),
+                         tags$li("Choose hgnc_symbol, entrezgene_id in the attribute table, and press the query button."),
                          tags$li("See https://bioconductor.org/packages/release/bioc/vignettes/biomaRt/inst/doc/biomaRt.html for more examples."),
                          tags$hr(),
                          fluidRow(

@@ -1,4 +1,4 @@
-ensembl_peptide_id,tf_gene,entrezgene
+ensembl_peptide_id,tf_gene,entrezgene_id
 ENSP00000000442,ESRRA,2101
 ENSP00000005082,ZNF195,7748
 ENSP00000006015,HOXA11,3207

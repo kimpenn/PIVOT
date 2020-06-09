@@ -187,17 +187,17 @@ observeEvent(input$run_gsea, {
             bmart_db = biomaRt::useMart("ensembl",dataset=input$gsea_species)
             flist <- unique(biomaRt::getBM(
                 filters = "external_gene_name",
-                attributes="entrezgene",
+                attributes="entrezgene_id",
                 values= flist,
                 mart= bmart_db))
-            flist <- flist$entrezgene
+            flist <- flist$entrezgene_id
             if(!is.null(bglist) && length(bglist)) {
                 bglist <- unique(biomaRt::getBM(
                     filters = "external_gene_name",
-                    attributes="entrezgene",
+                    attributes="entrezgene_id",
                     values= bglist,
                     mart= bmart_db))
-                bglist <- bglist$entrezgene
+                bglist <- bglist$entrezgene_id
             } else {
                 bglist <- NULL
             }
