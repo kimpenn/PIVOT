@@ -1,4 +1,4 @@
-ensembl_peptide_id,tf_gene,entrezgene
+ensembl_peptide_id,tf_gene,entrezgene_id
 ENSMUSP00000000010,Hoxb9,15417
 ENSMUSP00000000080,Klf6,23849
 ENSMUSP00000000095,Tbx2,21385

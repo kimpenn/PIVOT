@@ -18,4 +18,4 @@
 "refseq_peptide","RefSeq peptide ID(s) [e.g. NP_000005]"
 "pdb","PDB ID(s) [e.g. 10GS]"
 "protein_id","INSDC protein ID(s) [e.g. AAA02487]"
-"entrezgene","NCBI gene ID(s) [e.g. 1]"
+"entrezgene_id","NCBI gene ID(s) [e.g. 1]"

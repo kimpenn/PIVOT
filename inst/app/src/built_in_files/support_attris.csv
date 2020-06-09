@@ -18,4 +18,4 @@
 "refseq_peptide","RefSeq peptide ID (refseq_peptide)"
 "pdb","PDB ID (pdb)"
 "protein_id","INSDC protein ID (protein_id)"
-"entrezgene","NCBI gene ID (entrezgene)"
+"entrezgene_id","NCBI gene ID (entrezgene_id)"
